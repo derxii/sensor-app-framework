@@ -1,0 +1,121 @@
+Backend
+
+Global variables 
+Device device 
+chartObjects = []
+inSession <boolean> (default is false)
+
+Functions 
+def scanForDevices()
+-Description: Scans for all available bluetooth devices and serial communication devices 
+-Parameters: None
+-Return: a list of tuples that include the device name (string) and addresses of available BLE devices (string) if the available device is a serial device then the device name (string) and connected com port will be returned (string)
+
+def connectToDevice(deviceName, deviceAddress)
+-Description: Creates the appropriate client object depending on whether the address is a COM port or bluetooth address (note that regex can be used to ensure valid bluetooth device or com port)
+-Parameters: bluetooth device name (string), device address (string) which includes either the COM port or bluetooth address 
+-Return: a boolean value indicating the status of the connection: true = successful, false = unsuccessful
+
+def listSensorNames()
+-Description: gets sensor names from client by invoking 'get_sensor_names()' from device object
+-Parameters: None
+-Return: a list of strings including the sensor names of the device 
+
+def createChartObject(chartTitle, xlabel, ylabel, sensorNames)
+-Description: creates a chart object id, calls chart constructor, appends chart object to chartObject list
+-Parameters: chartTitle <string>, xlabel <string>, ylabel <string>, sensorNames <list of strings>
+-Return: None
+
+def getChartObjects()
+-Description: gets all chart objects
+-Parameters: None
+-Return: list of type Chart 
+ 
+def getChart(id)
+-Description: get a specific chart object by id 
+-Parameters: chart id <int> 
+-Return: chart object 
+
+def startSession()
+-Description: starts data collection session by initiating a thread process/event/subprocess with kill that changes the "inSession" variable, runs run() and another process that listens to stop the session by changing the "inSession" variable 
+-Parameters: None
+-Return: None 
+
+def runSession():*
+-Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
+-Parameters: None
+-Return: None 
+
+def endSession():*
+-Description: ends a session
+-Parameters: None 
+-Return: None 
+
+def saveData(filename, filePath):
+-Description: saves data into a csv file 
+-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
+-Return: boolean indicating if saving the file was successful 
+
+def restartSession():
+-Description: start a new session by clearing the current data in the chart 
+-Parameters: None
+-Return: None 
+
+def restartProgram():
+-Description: clears all charts and disconnects PC from bluetooth device 
+-Parameters: None
+-Return: None 
+
+Chart class 
+Attributes: id <int>, title <string>, xlabel <string>, ylabel <string>, sensorNames <list of strings>, data <dictionary where key = string indicating sensor name, val = list of data >
+Methods:
+def Chart(id, title, xlabel, ylabel, sensorNames)
+-Description: creates a chart object and constructs data object 
+-Parameters: id <int>, title <string>, xlabel <string>, ylabel <string>, sensorNames <list of strings>
+-Return: None
+
+def getData()
+-Description: returns sensor data for the chart object
+-Parameters: None
+-Return: data <dictionary where key = string indicating sensor name, val = list of data >
+
+def getLastDataPoint(sensorName) 
+-Description: returns the last data point of the specified sensor
+-Parameters: sensor name <string>
+-Return: data value <double/float>
+
+def getid() 
+
+def getTitle()
+
+def getxLabel()
+
+def getyLabel()
+
+
+
+Device class  (backend use only)
+Attributes: Name <string>, Address <string>, sensors <list of strings>
+Methods: 
+def Device(Name, Address, sensors)
+-Description: Device constructor
+
+def connect() <virtual> 
+-Description: connects to device 
+
+def getData() <virtual>
+-Description: returns sensor data from connected device as a string 
+-Parameters: None 
+-Return: a string in the format "<sensor1Name>: dataVal, <sensor2Name>: dataVal"
+
+def setSensorNames() 
+
+def getSensorNames()
+
+Bluetooth class (inherits device)
+def connect(): implement connect using bleak library 
+def getData(): implement getData using bleak library
+
+Serial class (inherits device)
+def connect(): implement connect using pyserial library 
+def getData(): implement getData using pySerial library
