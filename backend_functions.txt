@@ -3,7 +3,7 @@ Backend
 Global variables 
 Device device 
 chartObjects = []
-inSession <boolean> (default is false)
+stopSession <boolean> (default is false)
 
 Functions 
 def scanForDevices()
