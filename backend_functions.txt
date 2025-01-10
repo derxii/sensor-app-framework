@@ -84,6 +84,11 @@ def getLastDataPoint(sensorName)
 -Parameters: sensor name <string>
 -Return: data value <double/float>
 
+def addData(dataDict)
+-Description: adds relevant sensor from input dictionary to chart data
+-Parameters: dictionary of sensor data
+-Return: None
+
 def getId() 
 
 def getTitle()
