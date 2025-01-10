@@ -84,7 +84,7 @@ def getLastDataPoint(sensorName)
 -Parameters: sensor name <string>
 -Return: data value <double/float>
 
-def getid() 
+def getId() 
 
 def getTitle()
 
