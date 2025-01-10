@@ -1,8 +1,8 @@
 Backend
 
 Global variables 
-Device device 
-chartObjects = []
+connectedDevice <Device> 
+chartObjects = [] <list of chart objects>
 stopSession <boolean> (default is false)
 
 Functions 
