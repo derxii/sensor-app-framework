@@ -12,6 +12,7 @@ class Chart(object):
         self.SensorNames = sensorNames
         self.SensorData = {}
         self.Type = type
+
         
         for sensor in sensorNames:
             self.SensorData[sensor] = []
@@ -22,7 +23,10 @@ class Chart(object):
     def addData(self, dataDict):
         for (sensor, dataVal) in dataDict.items():
             if sensor in self.SensorNames:
-                self.SensorData[sensor].append(dataVal)
+                #self.SensorData[sensor].append(dataVal)
+                #self.SensorData[sensor] = dataVal
+                for val in dataVal:
+                    self.SensorData[sensor].append(val)
 
     def getLastDataPoint(self, sensorName):
         return self.SensorData[sensorName][-1] #check that no error occurs
@@ -43,12 +47,40 @@ class Chart(object):
         return self.Type
     
     # Function for testing the backend (ignore)
+    
     def plotChart(self):
-        allDataVals = []
-        xMax = 0
+
+        plt.title(self.Title)
+        plt.xlabel(self.xLabel)
+        plt.ylabel(self.yLabel)
+        format = 'g.'
+        if self.Type == 'line':
+            format = 'b-'
         for (key,val) in self.SensorData.items():
-            allDataVals.append(val)
-            xMax = len(val)
-        plt.axis([0, xMax, min(allDataVals), max(allDataVals)])
+            xAxis = np.arange(0, len(val))
+            plt.plot(xAxis, val, format, label=key)
+        plt.show()
+    
+
+
+    '''
+    def plotChart(self, chartData):
+
+        plt.title(self.Title)
+        plt.xlabel(self.xLabel)
+        plt.ylabel(self.yLabel)
+        format = 'g.'
+        if self.Type == 'line':
+            format = 'b-'
+        for (key,val) in chartData.items():
+            xAxis = np.arange(0, len(val))
+            plt.plot(xAxis, val, format, label=key)
+        plt.show()
+    '''
+    
+   
+        
+        
+
 
         
