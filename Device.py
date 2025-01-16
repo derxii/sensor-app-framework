@@ -5,13 +5,7 @@ import asyncio
 import re
 import serial.tools.list_ports
 import serial
-
-'''
-def callback(sender, data):
-        #stringData = data.decode('utf-8')
-        print(f"recieved: {data} from {sender}")
-        return data
-'''
+import threading 
 
 
 class Device(object):
@@ -24,6 +18,26 @@ class Device(object):
         self.DataBuffer = ""
         self.DataStruct = {} # Separated into sensor data
         self.Type = type # Type is either "Bluetooth" or "Serial"
+        self.Lock = threading.Lock()
+        self.TerminateSession = threading.Event()
+
+    def clearTerminateSession(self):
+        self.TerminateSession.clear()
+
+    def setTerminateSession(self):
+         self.TerminateSession.set()
+
+    def isSetTerminateSession(self):
+        return self.TerminateSession.is_set()
+
+    def setDataBuffer(self, dataString):
+        with self.Lock:
+            self.DataBuffer = dataString
+
+    def getDataBuffer(self):
+        with self.Lock:
+            dataString = self.DataBuffer
+        return dataString
 
     def formatDataStruct(self):
         for sensor in self.Sensors:
@@ -39,15 +53,72 @@ class Device(object):
         # strip white spaces 
         # create capture groups for sensor names and then data values 
         # Add data values into dictionary and return the parsed data as a dictionary
-        print('Parsing data')
-        dataString = re.sub('\s', '', self.DataBuffer)
-        dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataString)
-        returnDict = {}
-        for (sensor, dataVal) in dataGroups:
-            if sensor in self.DataStruct.keys():
-                self.DataStruct[sensor].append(dataVal)
-                returnDict[sensor] = dataVal
+        
+        
+        # This code enters empty data values if no value is given for a sensor
+        returnDict = None
+        string = self.getDataBuffer()
+        if string != "":
+            returnDict = {}
+            allSensors = self.Sensors
+            if string != "":
+                #self.setDataBuffer("")
+                dataSegments = re.split(r'\n', string) #string.splitlines() #
+                for dataSegment in dataSegments:
+                    dataSegment = re.sub('\s', '', dataSegment)
+                    
+                    dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataSegment)
+                    foundSensors = set()
+                    for (sensor, dataVal) in dataGroups:
+                        self.DataStruct[sensor].append(dataVal)
+                        if sensor not in returnDict.keys():
+                            returnDict[sensor] = []
+                        returnDict[sensor].append(dataVal)
+                        foundSensors.add(sensor)
+                    unfoundSensors = allSensors - foundSensors
+                    for sensor in unfoundSensors:
+                        self.DataStruct[sensor].append("")
+                        if sensor not in returnDict.keys():
+                            returnDict[sensor] = []
+                        returnDict[sensor].append("")
         return returnDict
+        
+        '''
+        
+        buffer = self.getDataBuffer()
+        if buffer != "":
+            self.setDataBuffer("")
+            dataString = re.sub('\s', '', buffer)
+            dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataString)
+            returnDict = {}
+            for (sensor, dataVal) in dataGroups:
+                if sensor in self.DataStruct.keys():
+                    self.DataStruct[sensor].append(dataVal)
+                    if sensor not in returnDict.keys():
+                        returnDict[sensor] = []
+                    returnDict[sensor].append(dataVal)
+            return returnDict
+        return None
+        
+        '''
+        
+         
+        '''
+        if self.DataBuffer != "":
+            dataString = self.DataBuffer
+            self.DataBuffer = ""
+            dataString = re.sub('\s', '', dataString)
+            dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataString)
+            returnDict = {}
+            for (sensor, dataVal) in dataGroups:
+                if sensor in self.DataStruct.keys():
+                    self.DataStruct[sensor].append(dataVal)
+                    returnDict[sensor] = dataVal
+            return returnDict
+        return None 
+        '''
+
+        
 
 class BluetoothDevice(Device):
     def __init__(self, name, address):
@@ -60,8 +131,7 @@ class BluetoothDevice(Device):
 
 
     def callback(self, sender, data):
-        #stringData = data.decode('utf-8')
-        print(f"recieved: {data} from {sender}")
+        
         try:
 
             self.NotificationBuffer += data.decode('utf-8')
@@ -83,25 +153,18 @@ class BluetoothDevice(Device):
                 services = await client.get_services()
 
                 for service in services:
-                    print(f"Service UUID: {service.uuid}")
                     for characteristic in service.characteristics:
-                        print(f"  Characteristic UUID: {characteristic.uuid}")
-                        print(f"characteristic UUID properties: {characteristic.properties}")
                         if "notify" in characteristic.properties or "read" in characteristic.properties: #and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", client.read_gatt_char(characteristic.uuid)):
                             if "notify" in characteristic.properties: 
                                 await client.start_notify(characteristic.uuid, self.callback)
+                                asyncio.sleep(0.05)
                                 print("subscribing to notifications")
                             # Find out if the read or notify method should be used to receive data 
                             try: 
                                 print(f"connection status: {client.is_connected}")
                                 data = None
                                 while data is None:
-                                    data = await client.read_gatt_char(characteristic.uuid)
-                                #print(f"data: {data}")
-                                #data = await client.start_notify(characteristic.uuid, self.callback)
-                                print(f"notification data: {self.NotificationBuffer}")
-                                print(f"Read data: {data}")
-                                
+                                    data = await client.read_gatt_char(characteristic.uuid)                                
                                 try: 
                                     notificationDataString = self.NotificationBuffer #.decode('utf-8')
                                     print(notificationDataString)
@@ -112,12 +175,11 @@ class BluetoothDevice(Device):
                                         print("found characteristic")
                                         success = True
                                         self.Method = "notify"
+                                        print("Method is notify")
                                         await client.stop_notify(characteristic.uuid)
                                 except:
                                     print("invalid notification string")    
                                 if not success:
-                                    # try read data 
-                                    
                                     try: 
                                         readDataString = data.decode('utf-8')
                                         if re.search("\s*<(\w+)>:\s*[0-9\.\-]*\s*,?\s*", readDataString):
@@ -127,7 +189,7 @@ class BluetoothDevice(Device):
                                             print("found characteristic")
                                             success = True
                                             self.Method = "read"
-                                    
+                                            print("Method is notify")
                                     except:
                                         print("invalid read string")  
 
@@ -135,25 +197,11 @@ class BluetoothDevice(Device):
                                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.\-]*\s*,?\s*", dataString)
                                     for sensorName in sensorNames:
                                         self.Sensors.add(sensorName)
-                                '''
-                                if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.\-]*\s*,?\s*", dataString): # ensure the data string is not empty
-                                    correctFormat = True
-                                    self.characteristicUUID = characteristic.uuid
-                                    sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.\-]*\s*,?\s*", dataString)
-                                    for sensorName in sensorNames:
-                                        self.Sensors.add(sensorName)
-                                    #self.Sensors = sensorNames
-                                    self.characteristicProp = characteristic.properties
-                                    print("found characteristic")
-                                    success = True
-                                '''    
-                                
                                     
                                 if "notify" in characteristic.properties and not success:
                                     await client.stop_notify(characteristic.uuid)
                                     print("unsubscribing from notifications")
                                 if success and client.is_connected:
-                                    #await client.disconnect()
                                     return success
                             except: 
                                 print("error occurred")
@@ -161,18 +209,16 @@ class BluetoothDevice(Device):
                     await client.disconnect()              
             except:
                 print("Unable to connect")
-        
+        print(f"Method: {self.Method}")
         return success
         
     # Changes data buffer if data is read in 
     # Returns true if data was successfully received and false otherwise 
     # data should be added to the objects data buffer in the form "<sensor1>: data_val, <sensor2>: data_val\n" 
     async def disconnect(self):
-        await self.client.stop_notify(self.characteristicUUID)
-        await self.client.disconnect()
+        #await self.client.stop_notify(self.characteristicUUID)
+        #await self.client.disconnect()
         print("unsubscribing from notifications")
-
-
 
     async def getData(self):
         success = False 
@@ -180,6 +226,38 @@ class BluetoothDevice(Device):
         # Note that when the method is "notify" the program does not get past the following line
         #if await BleakScanner.find_device_by_address(self.Address): #and await BleakScanner.find_device_by_address(self.Name): #note that the MAC address may change so find another way to connect to device 
             #print("found address")
+        while not self.TerminateSession.is_set():
+            print(self.Method)
+            try:
+                if self.Method == "notify": 
+                    #Clear previous notifications 
+                    self.NotificationBuffer = ""
+                    print("starting notifications")
+                    await self.client.start_notify(self.characteristicUUID, self.callback)
+                    #await asyncio.sleep(0.5)
+                    print("Receiving notifications")
+                    await self.client.stop_notify(self.characteristicUUID)
+                    print(self.NotificationBuffer)
+                    if  re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", self.NotificationBuffer):
+                        self.setDataBuffer(self.NotificationBuffer)
+                        #self.DataBuffer = self.NotificationBuffer
+                        #success = True
+                            
+                else:
+                    data = None
+                    while data is None:
+                        data = await self.client.read_gatt_char(self.characteristicUUID) # Check that full string is read in 
+                    dataString = data.decode("utf-8")
+                    print(dataString)
+                    if  re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", dataString):
+                        self.setDataBuffer(dataString)
+                        #self.DataBuffer = dataString
+                        #success = True    
+            except:
+                print("unable to connect to device")
+                    
+            #return success
+        '''
         try:
             if self.Method == "notify": 
                 #Clear previous notifications 
@@ -187,7 +265,6 @@ class BluetoothDevice(Device):
                 print("starting notifications")
                 await self.client.start_notify(self.characteristicUUID, self.callback)
                 print("Receiving notifications")
-                    #asyncio.sleep(0.5)
                 await self.client.stop_notify(self.characteristicUUID)
                 print(self.NotificationBuffer)
                 if  re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", self.NotificationBuffer):
@@ -207,10 +284,8 @@ class BluetoothDevice(Device):
             print("unable to connect to device")
                 
         return success
-    #def findCharacteristicUUID(self.address):
-        
-       
-
+        '''
+ 
 class SerialDevice(Device):
     # for devices that use serial port profile (SPP)
     def __init__(self, name, address):
@@ -219,29 +294,22 @@ class SerialDevice(Device):
     def connect(self ):
         
         try:
-            self.serialObject = serial.Serial(self.Address) #serial.Serial(self.Address, 9600, timeout=10, parity=serial.PARITY_NONE)
+            self.serialObject = serial.Serial(self.Address, timeout=None) #serial.Serial(self.Address, 9600, timeout=10, parity=serial.PARITY_NONE)
             print(self.serialObject.name)
             #self.serialObject.open()
             print(f"Serial port open: {self.serialObject.is_open}")
             if not self.serialObject.is_open:
                 print("Unable to open serial port") 
             else:
-                # Note that TextIOWrapper may be needed 
-                
                 dataString = self.serialObject.readline()
-                #while dataString is None:
-                #    dataString = self.serialObject.readline()
                 dataString += self.serialObject.readline()
                 dataString = dataString.decode("utf-8")
-                print(dataString)
-    
                 if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString):  # Check that full string is read in 
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
-                    #print(f"sensor names: {sensorNames}")
-                    #self.Sensors = sensorNames 
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
-                    #self.serialObject.close()
+                        #self.serialObject.close()
+                    self.serialObject.close()
                     return True 
                 self.serialObject.close()
         except:
@@ -254,28 +322,54 @@ class SerialDevice(Device):
     # Returns true if data was successfully received and false otherwise 
     # data should be added to the objects data buffer in the form "<sensor1>: data_val, <sensor2>: data_val\n" 
     def getData(self):
-        try:
-            #self.serialObject = serial.serial(self.Address, 9600, timeout=10, parity=serial.PARITY_NONE)
+        self.serialObject = serial.Serial(self.Address, timeout=None) 
+        while not self.TerminateSession.is_set():
+            try:
             #self.serialObject.open()
+            #self.serialObject = serial.Serial(self.Address, timeout=None) 
+                if not self.serialObject.is_open:
+                    print("Unable to open serial port") 
+                else:
+                    dataString = None
+                    while dataString is None:
+                        dataString = self.serialObject.readline()
+                    try:
+                        dataString = dataString.decode('utf-8')
+                        print(dataString)
+                        if dataString is not None and re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", dataString):  # Check that full string is read in 
+                            #self.DataBuffer = dataString
+                            self.setDataBuffer(dataString)
+                           
+                    except:
+                        print("invalid string") 
+                    #self.serialObject.close()
+            except:
+                print("an error occurred")
+        self.serialObject.close()
+        '''
+        try:
+            #self.serialObject.open()
+            #self.serialObject = serial.Serial(self.Address, timeout=None) 
             if not self.serialObject.is_open:
                 print("Unable to open serial port") 
             else:
-            # Note that TextIOWrapper may be needed 
-            
-                dataString = self.serialObject.readline()
-                
-                dataString = dataString.decode('utf-8')
-                print(dataString)
-                if dataString is not None and re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", dataString):  # Check that full string is read in 
-                    #sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)  
-                    self.DataBuffer = dataString
-                    #self.serialObject.close()
-                    return True 
+                dataString = None
+                while dataString is None:
+                    dataString = self.serialObject.readline()
+                try:
+                    dataString = dataString.decode('utf-8')
+                    print(dataString)
+                    if dataString is not None and re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", dataString):  # Check that full string is read in 
+                        #self.DataBuffer = dataString
+                        self.setDataBuffer(dataString)
+                        return True
+                except:
+                    print("invalid string") 
                 #self.serialObject.close()
         except:
             print("an error occurred")
         return False 
-            
+        '''    
             
 
 
