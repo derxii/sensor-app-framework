@@ -18,6 +18,9 @@ import csv
 # -Update backend.txt on laptop and in git repo
 
 
+# fix issue where data buffer doesn't store over 408-440 data points when charts are used 
+# I think the issue is that the serial port disconnects because it times out after processing chart data so the display data is the data in the buffer 
+
 class Backend(object):
     def __init__(self):
         self.chartObjects = []
@@ -32,7 +35,7 @@ class Backend(object):
 
         allSerialDevices = self.scanForSerialDevices()
         for device in allSerialDevices:
-            print(f"description: {device[0]}, port: {device[1]}")
+            print(f"Name: {device[0]}, port: {device[1]}")
             allDevices.append(device)
 
         return allDevices
@@ -60,11 +63,36 @@ class Backend(object):
 
     def getChart(self,id):
         return self.chartObjects[id]
+    
+    '''
+    def getChartData(self,id):
+        sensorNames = self.getChart(id).SensorNames
+        chartData = {}
+        for sensor in sensorNames:
+            chartData[sensor] = self.connectedDevice.DataStruct[sensor]
+        return chartData
+    '''
+    
+
 
     def startSession(self):
         #-Description: starts data collection session by initiating a thread process/event/subprocess with kill that changes the "inSession" variable, runs run() and another process that listens to stop the session by changing the "inSession" variable 
         #-Parameters: None
         #-Return: None
+        self.connectedDevice.formatDataStruct()
+        if not self.connectedDevice.isSetTerminateSession():
+            self.connectedDevice.clearTerminateSession()
+
+            #thread = threading.Thread(target=self.runSession, daemon=True)
+            if self.connectedDevice.Type == "Bluetooth":
+                self.getDataThread = threading.Thread(target=asyncio.run, args=(self.connectedDevice.getData(),), daemon=True)
+                
+            else:
+                self.getDataThread = threading.Thread(target=self.connectedDevice.getData, daemon=True)
+            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            self.getDataThread.start()
+            self.runSessionThread.start()
+        '''
         self.connectedDevice.formatDataStruct()
         if not self.stopSession.is_set():
             #stopSession.set()
@@ -74,11 +102,11 @@ class Backend(object):
             #else:
             thread = threading.Thread(target=self.runSession, daemon=True)
             thread.start()
+        '''
+        
 
         
         
-
-
 
     def runSession(self):
         #-Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
@@ -86,19 +114,24 @@ class Backend(object):
         #-Return: None 
         print("session started")
         while not self.stopSession.is_set():
-            if self.connectedDevice.Type == "Bluetooth":
+            #print('in session\n')
+            '''
+             if self.connectedDevice.Type == "Bluetooth":
                 print("bluetooth")
                 asyncio.run(self.connectedDevice.getData())
                 #connectedDevice.getData()
             else:
                 self.connectedDevice.getData()
             print("finished receiving data")
+            '''
             dataDict = self.connectedDevice.parseData()
-
+            if dataDict is None:
+                continue
             # Add data to charts 
             for chart in self.chartObjects:
                 chart.addData(dataDict)
-            print('in session\n')
+                print("finished adding data to chart")
+            
 
 
 
@@ -107,9 +140,14 @@ class Backend(object):
         #-Parameters: None 
         #-Return: None 
         self.stopSession.set()
+        self.connectedDevice.setTerminateSession()
+        self.getDataThread.join()
+        self.runSessionThread.join()
         print("session ended")
         if self.connectedDevice.Type == "Bluetooth":
             asyncio.run(self.connectedDevice.disconnect())
+        for chart in self.chartObjects:
+                chart.plotChart()
 
     def saveData(self, filename, filePath):
         #-Description: saves data into a csv file 
@@ -197,61 +235,9 @@ class Backend(object):
     ############################################## TESTING CODE ########################################################
 
 
-    async def scanAndConnectBluetoothDevices():
-        availableDevices = []
-        devices = await BleakScanner.discover()
-        for d in devices:
-            name = d.name
-            if name is None:
-                name = "unknown"
-            availableDevices.append((name, d.address, d.rssi))
-            print(f"Name: {name}, Address: {d.address}")
-            if name == "Esther's A33":
-                deviceOb = BluetoothDevice(name, d.address)
-                await deviceOb.connect()
-                print("finished connecting")
-                deviceOb.formatDataStruct()
-                print("finished formatting data")
-                
-                for i in range(0, 40):
-                    await deviceOb.getData()
-                    print("finished receiving data")
-                    deviceOb.parseData()
-                for (key, value) in deviceOb.DataStruct.items():
-                    print(f"{key}: {value}")
+    
 
-    '''
-    async def main():
-        availableDevices = []
-        devices = await BleakScanner.discover()
-        for d in devices:
-            name = d.name
-            if name is None:
-                name = "unknown"
-            availableDevices.append((name, d.address, d.rssi))
-            print(f"Name: {name}, Address: {d.address}")
-            if name == "Esther's A33":
-                deviceOb = BluetoothDevice(name, d.address)
-                await deviceOb.connect()
-                print("finished connecting")
-                deviceOb.formatDataStruct()
-                print("finished formatting data")
-                userInput = input()
-                if userInput == "1":
-                    startSession()
-                if userInput == "2":
-                    endSession()
-                    
 
-                userInput = input()
-                if userInput == "1":
-                    startSession()
-                if userInput == "2":
-                    endSession()
-                restartProgram()
-
-                restartProgram()
-    '''
 
 
 def main():
@@ -269,17 +255,14 @@ def main():
     
 
     numCharts = int(input("How many charts do you want?: "))
-    print(numCharts)
-
     for _ in range(0, numCharts):
         chartTitle = input("Enter the chart title: ")
         xlabel = input("Enter x label: ")
         ylabel = input("Enter y label: ")
         sensorNameStr = input("Enter the sensors you want to use (enter in the format: sensor1 sensor2): ")
         sensorNames = re.split(' ', sensorNameStr)
+        print(f"The following sensors were chosen: {sensorNames}")
         chartType = input("Enter the chart type: ")
-        print(sensorNames)
-
         backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
     userInput = input("Press 1 to start session: ")
     if userInput == "1":
@@ -289,7 +272,7 @@ def main():
 
     if userInput == "2":
         backend.endSession()
-    backend.printAllData()
+    #backend.printAllData()
 
     userInput = input("Would you like to save the data to a csv file? (y/n): ")
     if userInput == "y":
@@ -300,15 +283,5 @@ def main():
 
 
 if __name__ == "__main__":
-    #allBluetoothDevices = asyncio.run(scanAndConnectBluetoothDevices())
-    
-    '''
-    allSerialDevices = scanForSerialDevices()
-    for device in allSerialDevices:
-        print(f"Name: {device[0]}, port: {device[1]}")
-        if device[1] == "COM9":
-            print(connectToDevice(device[0], device[1]))
-    '''
-   # asyncio.run(main())
     main()
     
