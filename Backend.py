@@ -148,6 +148,8 @@ class Backend(object):
             asyncio.run(self.connectedDevice.disconnect())
         for chart in self.chartObjects:
                 chart.plotChart()
+        print("Printing all data")
+        print(self.connectedDevice.DataBuffer)
 
     def saveData(self, filename, filePath):
         #-Description: saves data into a csv file 
