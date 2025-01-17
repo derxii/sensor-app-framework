@@ -1,15 +1,17 @@
 from pathlib import Path
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QCoreApplication, Qt
 
 import sys
 
+from .widgets.MainWindow import MainWindow
+
 def main():
     app = QApplication([])
 
     init_ui(app)
-    w = QMainWindow()
+    w = MainWindow(960, 576, app.primaryScreen().availableGeometry().center())
 
     w.show()
     sys.exit(app.exec())
