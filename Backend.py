@@ -130,7 +130,7 @@ class Backend(object):
             # Add data to charts 
             for chart in self.chartObjects:
                 chart.addData(dataDict)
-                print("finished adding data to chart")
+                #print("finished adding data to chart")
             
 
 
@@ -157,12 +157,17 @@ class Backend(object):
         
         data = []
         fields = list(self.connectedDevice.DataStruct.keys())
-        data.append(fields)
-        numRows = len(self.connectedDevice.DataStruct[fields[0]])    
-        for i in range(0, numRows):
+        data.append(fields) # first row of the csv include the fields 
+        allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
+        maxNumRows = max(allRowLengths)
+        #numRows = len(self.connectedDevice.DataStruct[fields[0]])    
+        for i in range(0, maxNumRows):
             currentRow = []
             for field in fields:
-                currentRow.append(self.connectedDevice.DataStruct[field][i])
+                if i < len(self.connectedDevice.DataStruct[field]):
+                    currentRow.append(self.connectedDevice.DataStruct[field][i])
+                else:
+                    currentRow.append("")
             data.append(currentRow)
 
         # Save to a specific file location
