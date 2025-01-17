@@ -13,9 +13,9 @@ class Welcome(ScrollableWindow):
         super().__init__(switch_window)
 
         self.title = QLabel("Sensor Data Visualiser")
+        self.logo = QLabel()
         self.description = QLabel("Visualise your sensor data in real time using " + 
                                   "custom charts via a Bluetooth connection.")
-        self.logo = QLabel()
         self.connect_button = QPushButton()
         self.connect_button_label = QLabel("Scan Bluetooth Devices")
 
@@ -40,7 +40,7 @@ class Welcome(ScrollableWindow):
         layout.addWidget(self.logo)
 
         description_font = QFont()
-        description_font.setPointSize(18)
+        description_font.setPointSize(20)
 
         self.description.setFont(description_font)
         self.description.setWordWrap(True)
@@ -59,6 +59,7 @@ class Welcome(ScrollableWindow):
         self.connect_button_label.setObjectName("connect-text")
         font = QFont()
         font.setPointSize(20)
+        font.setWeight(QFont.Weight.Medium)
         self.connect_button_label.setFont(font)
 
         button_layout.addWidget(self.connect_button_label)
