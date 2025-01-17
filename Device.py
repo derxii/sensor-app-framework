@@ -20,6 +20,7 @@ class Device(object):
         self.Type = type # Type is either "Bluetooth" or "Serial"
         self.Lock = threading.Lock()
         self.TerminateSession = threading.Event()
+        self.ParsedData = ""
 
     def clearTerminateSession(self):
         self.TerminateSession.clear()
@@ -29,6 +30,10 @@ class Device(object):
 
     def isSetTerminateSession(self):
         return self.TerminateSession.is_set()
+
+    def addToDataBuffer(self,dataString):
+        with self.Lock:
+            self.DataBuffer += dataString
 
     def setDataBuffer(self, dataString):
         with self.Lock:
@@ -122,19 +127,38 @@ class Device(object):
 
         
     def parseData(self):
-        
-        buffer = self.getDataBuffer()
-        if buffer != "":
-            self.setDataBuffer("")
-            dataString = re.sub('\s', '', buffer)
-            dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataString)
+        try:
+            buffer = re.sub('\s', '', self.getDataBuffer()) 
+            parsedData = re.sub('\s', '', self.ParsedData) 
+            dataToParse = re.sub(parsedData,"", buffer)
+        except:
+            dataToParse = ""
+
+        if dataToParse != "" :
+
+            #dataToParse = re.sub(parsedData,"", buffer) #buffer.replace(self.ParsedData, "")
+            #print("printing data to parse")
+            #print(dataToParse)
+            #self.setDataBuffer("")
+            #dataString = re.sub('\s', '', dataToParse)
+            #dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataString)
             returnDict = {}
+
+            dataSegments = re.split(',', dataToParse)
+            
+            items  = dataSegments[:-1]
+            #print(items)
+            dataToParse = ",".join(items)
+            #print(dataToParse)
+            dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataToParse)
+            #print(dataGroups)
             for (sensor, dataVal) in dataGroups:
                 if sensor in self.DataStruct.keys():
                     self.DataStruct[sensor].append(dataVal)
                     if sensor not in returnDict.keys():
                         returnDict[sensor] = []
                     returnDict[sensor].append(dataVal)
+            self.ParsedData += dataToParse    
             return returnDict
         return None
         
@@ -163,7 +187,7 @@ class BluetoothDevice(Device):
         self.characteristicUUID = ""
         self.characteristicProp = []
         self.client = None
-        self.NotificationBuffer = ""
+        #self.NotificationBuffer = ""
         self.Method = "" # This indicates if the main data is received via notifications or the GATT read command
         super().__init__(name, address, "Bluetooth")
 
@@ -171,8 +195,10 @@ class BluetoothDevice(Device):
     def callback(self, sender, data):
         
         try:
-
-            self.NotificationBuffer += data.decode('utf-8')
+            dataString = data.decode('utf-8')
+            #print(dataString)
+            self.addToDataBuffer(dataString)
+            #self.NotificationBuffer += data.decode('utf-8')
         except:
             print("cannot convert notification to utf-8")
         return data
@@ -192,6 +218,7 @@ class BluetoothDevice(Device):
 
                 for service in services:
                     for characteristic in service.characteristics:
+                        self.setDataBuffer("")
                         if "notify" in characteristic.properties or "read" in characteristic.properties: #and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", client.read_gatt_char(characteristic.uuid)):
                             if "notify" in characteristic.properties: 
                                 await client.start_notify(characteristic.uuid, self.callback)
@@ -204,7 +231,7 @@ class BluetoothDevice(Device):
                                 while data is None:
                                     data = await client.read_gatt_char(characteristic.uuid)                                
                                 try: 
-                                    notificationDataString = self.NotificationBuffer #.decode('utf-8')
+                                    notificationDataString = self.getDataBuffer() #self.DataBuffer #self.NotificationBuffer #.decode('utf-8')
                                     print(notificationDataString)
                                     if re.search("\s*<(\w+)>:\s*[0-9\.\-]*\s*,?\s*", notificationDataString):
                                         self.characteristicUUID = characteristic.uuid
@@ -215,11 +242,12 @@ class BluetoothDevice(Device):
                                         self.Method = "notify"
                                         print("Method is notify")
                                         # read string until 2 '\n' are detected 
-                                        while self.NotificationBuffer.count('\n') < 2:
+                                        while self.getDataBuffer().count('\n') < 2:
                                             await asyncio.sleep(0.05)
                                         await client.stop_notify(characteristic.uuid)
                                 except:
-                                    print("invalid notification string")    
+                                    print("invalid notification string")
+                                        
                                 if not success:
                                     try: 
                                         readDataString = data.decode('utf-8')
@@ -243,6 +271,8 @@ class BluetoothDevice(Device):
                                     await client.stop_notify(characteristic.uuid)
                                     print("unsubscribing from notifications")
                                 if success and client.is_connected:
+                                    #self.DataBuffer = ""
+                                    self.setDataBuffer("")
                                     return success
                             except: 
                                 print("error occurred")
@@ -261,9 +291,28 @@ class BluetoothDevice(Device):
         #await self.client.disconnect()
         print("unsubscribing from notifications")
 
-    async def getData(self):
+    async def getData(self): 
+        #self.DataBuffer = ""
+        self.setDataBuffer("")
+        if self.Method == "notify":
+            await self.client.start_notify(self.characteristicUUID, self.callback)
+            while not self.TerminateSession.is_set():
+                await asyncio.sleep(0.05)
+            await self.client.stop_notify(self.characteristicUUID)
+        else:
+            while not self.TerminateSession.is_set():
+                while data is None:
+                    data = await self.client.read_gatt_char(self.characteristicUUID) # Check that full string is read in 
+                try:
+                    dataString = data.decode("utf-8")
+                finally:
+                    #self.DataBuffer += dataString
+                    self.addToDataBuffer(dataString)
+
+        '''
         success = False 
         print(self.Method)
+        
         # Note that when the method is "notify" the program does not get past the following line
         #if await BleakScanner.find_device_by_address(self.Address): #and await BleakScanner.find_device_by_address(self.Name): #note that the MAC address may change so find another way to connect to device 
             #print("found address")
@@ -299,36 +348,8 @@ class BluetoothDevice(Device):
                         #success = True    
             except:
                 print("unable to connect to device")
-                    
-            #return success
-        '''
-        try:
-            if self.Method == "notify": 
-                #Clear previous notifications 
-                self.NotificationBuffer = ""
-                print("starting notifications")
-                await self.client.start_notify(self.characteristicUUID, self.callback)
-                print("Receiving notifications")
-                await self.client.stop_notify(self.characteristicUUID)
-                print(self.NotificationBuffer)
-                if  re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", self.NotificationBuffer):
-                    self.DataBuffer = self.NotificationBuffer
-                    success = True
-                        
-            else:
-                data = None
-                while data is None:
-                    data = await self.client.read_gatt_char(self.characteristicUUID) # Check that full string is read in 
-                dataString = data.decode("utf-8")
-                print(dataString)
-                if  re.search("\s*<\w+>:\s*[0-9\.\-]*\s*,?\s*", dataString):
-                    self.DataBuffer = dataString
-                    success = True    
-        except:
-            print("unable to connect to device")
-                
-        return success
-        '''
+        '''            
+
  
 class SerialDevice(Device):
     # for devices that use serial port profile (SPP)
@@ -369,6 +390,18 @@ class SerialDevice(Device):
         self.serialObject = serial.Serial(self.Address, timeout=None) 
         while not self.TerminateSession.is_set():
             try:
+                dataString = None 
+                while dataString is None:
+                    dataString = self.serialObject.readline()
+                dataString = dataString.decode('utf-8')
+                #print(dataString)
+                self.addToDataBuffer(dataString)
+                       
+            except:
+                print("an error occurred") 
+        '''
+        while not self.TerminateSession.is_set():
+            try:
             #self.serialObject.open()
             #self.serialObject = serial.Serial(self.Address, timeout=None) 
                 if not self.serialObject.is_open:
@@ -390,6 +423,8 @@ class SerialDevice(Device):
             except:
                 print("an error occurred")
         self.serialObject.close()
+        '''
+        
         '''
         try:
             #self.serialObject.open()
