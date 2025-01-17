@@ -4,7 +4,8 @@ from PySide6.QtCore import QSize, QTimer
 from typing import Callable
 
 from frontend.helper import get_image_path
-from frontend.widgets.ScrollableWindow import ScrollableWindow
+from frontend.windows.Devices import Devices
+from frontend.windows.ScrollableWindow import ScrollableWindow
 
 class ScanDevice(ScrollableWindow):
 
@@ -49,3 +50,6 @@ class ScanDevice(ScrollableWindow):
 
     def on_scan_end(self):
         self.movie.stop()
+        self.movie.deleteLater()
+        dummy_data = [("Arduino HC-06", "M9SK1K31-252D-43E3-A986-DCF3CB63D08", -50) for _ in range(25)]
+        self.switch_window(Devices(self.switch_window, dummy_data))

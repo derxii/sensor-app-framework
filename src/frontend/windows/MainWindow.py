@@ -4,7 +4,7 @@ from PySide6.QtCore import QPoint
 
 
 from frontend.helper import get_image_path
-from frontend.widgets.Welcome import Welcome
+from frontend.windows.Welcome import Welcome
 
 class MainWindow(QMainWindow):
     def __init__(self, width: int, height: int, center: QPoint):
