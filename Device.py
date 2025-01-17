@@ -49,6 +49,7 @@ class Device(object):
     def setSensorNames(self, sensors):
         self.Sensors = sensors
 
+    '''
     def parseData(self):
         # strip white spaces 
         # create capture groups for sensor names and then data values 
@@ -66,7 +67,8 @@ class Device(object):
                 dataSegments = re.split(r'\n', string) #string.splitlines() #
                 for dataSegment in dataSegments:
                     dataSegment = re.sub('\s', '', dataSegment)
-                    
+                    if dataSegment == "":
+                        continue
                     dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataSegment)
                     foundSensors = set()
                     for (sensor, dataVal) in dataGroups:
@@ -82,8 +84,44 @@ class Device(object):
                             returnDict[sensor] = []
                         returnDict[sensor].append("")
         return returnDict
+    '''
+    '''
+    def parseData(self):
+        # strip white spaces 
+        # create capture groups for sensor names and then data values 
+        # Add data values into dictionary and return the parsed data as a dictionary
         
-        '''
+        
+        # This code enters empty data values if no value is given for a sensor
+        returnDict = None
+        string = self.getDataBuffer()
+        returnDict = {}
+        allSensors = self.Sensors
+        if string != "":
+            #self.setDataBuffer("")
+            for sensor in allSensors:
+                returnDict[sensor] = []
+            dataSegments = re.split(r'\n', string) #string.splitlines() #
+            for dataSegment in dataSegments:
+                dataSegment = re.sub('\s', '', dataSegment)
+                
+                dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataSegment)
+                foundSensors = set()
+                for (sensor, dataVal) in dataGroups:
+                    if sensor in allSensors:
+                        returnDict[sensor].append(dataVal)
+                        self.DataStruct[sensor].append(dataVal)
+                        foundSensors.add(sensor)
+                unfoundSensors = allSensors - foundSensors
+                for sensor in unfoundSensors:
+                    self.DataStruct[sensor].append("")
+                    returnDict[sensor].append("")
+                    
+        return returnDict
+    '''
+
+        
+    def parseData(self):
         
         buffer = self.getDataBuffer()
         if buffer != "":
@@ -100,10 +138,10 @@ class Device(object):
             return returnDict
         return None
         
-        '''
+    
         
          
-        '''
+    '''
         if self.DataBuffer != "":
             dataString = self.DataBuffer
             self.DataBuffer = ""
@@ -116,7 +154,7 @@ class Device(object):
                     returnDict[sensor] = dataVal
             return returnDict
         return None 
-        '''
+    '''
 
         
 
@@ -157,7 +195,7 @@ class BluetoothDevice(Device):
                         if "notify" in characteristic.properties or "read" in characteristic.properties: #and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", client.read_gatt_char(characteristic.uuid)):
                             if "notify" in characteristic.properties: 
                                 await client.start_notify(characteristic.uuid, self.callback)
-                                asyncio.sleep(0.05)
+                                await asyncio.sleep(1)
                                 print("subscribing to notifications")
                             # Find out if the read or notify method should be used to receive data 
                             try: 
@@ -176,6 +214,9 @@ class BluetoothDevice(Device):
                                         success = True
                                         self.Method = "notify"
                                         print("Method is notify")
+                                        # read string until 2 '\n' are detected 
+                                        while self.NotificationBuffer.count('\n') < 2:
+                                            await asyncio.sleep(0.05)
                                         await client.stop_notify(characteristic.uuid)
                                 except:
                                     print("invalid notification string")    
@@ -189,7 +230,7 @@ class BluetoothDevice(Device):
                                             print("found characteristic")
                                             success = True
                                             self.Method = "read"
-                                            print("Method is notify")
+                                            print("Method is read")
                                     except:
                                         print("invalid read string")  
 
@@ -205,8 +246,8 @@ class BluetoothDevice(Device):
                                     return success
                             except: 
                                 print("error occurred")
-                if client.is_connected:
-                    await client.disconnect()              
+                #if client.is_connected: # temporarily comment out this line 
+                #    await client.disconnect()              
             except:
                 print("Unable to connect")
         print(f"Method: {self.Method}")
@@ -230,7 +271,10 @@ class BluetoothDevice(Device):
             print(self.Method)
             try:
                 if self.Method == "notify": 
-                    #Clear previous notifications 
+                    #Clear previous notifications up to the last '\n'
+                    #notificationSegments = re.split('\n', self.NotificationBuffer)
+                    #lastSegment = notificationSegments[-1]
+                    #self.NotificationBuffer = lastSegment
                     self.NotificationBuffer = ""
                     print("starting notifications")
                     await self.client.start_notify(self.characteristicUUID, self.callback)
