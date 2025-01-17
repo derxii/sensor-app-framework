@@ -58,7 +58,8 @@ class Chart(object):
             format = 'b-'
         for (key,val) in self.SensorData.items():
             xAxis = np.arange(0, len(val))
-            plt.plot(xAxis, val, format, label=key)
+            #plt.plot(xAxis, val, format, label=key)
+            plt.plot(xAxis, val, label=key)
         plt.show()
     
 
