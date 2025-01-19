@@ -3,7 +3,7 @@ from PySide6.QtGui import Qt, QFont, QIcon
 from PySide6.QtCore import QSize
 from typing import Callable
 
-from frontend.helper import get_image_path
+from frontend.config import get_image_path
 from frontend.windows.ScanDevice import ScanDevice
 from frontend.windows.ScrollableWindow import ScrollableWindow
 

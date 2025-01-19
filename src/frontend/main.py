@@ -6,12 +6,13 @@ from PySide6.QtCore import QCoreApplication, Qt
 import sys
 
 from .windows.MainWindow import MainWindow
+from frontend.config import default_width, default_height
 
 def main():
     app = QApplication([])
 
     init_ui(app)
-    w = MainWindow(960, 576, app.primaryScreen().availableGeometry().center())
+    w = MainWindow(default_width, default_height, app.primaryScreen().availableGeometry().center())
 
     w.show()
     sys.exit(app.exec())

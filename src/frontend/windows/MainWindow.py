@@ -3,7 +3,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import QPoint
 
 
-from frontend.helper import get_image_path
+from frontend.config import get_image_path
 from frontend.windows.Welcome import Welcome
 
 class MainWindow(QMainWindow):
