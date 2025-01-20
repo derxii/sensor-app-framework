@@ -32,7 +32,3 @@ class MainWindow(QMainWindow):
     def switch_central_widget(self, widget: QWidget):
         self.central_widget = widget
         self.setCentralWidget(self.central_widget)
-
-
-    def show_notification(self):
-        self.tray_icon.showMessage("title", "message", QIcon(get_image_path("icon.svg")), 3000)
