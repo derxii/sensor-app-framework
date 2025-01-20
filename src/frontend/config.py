@@ -16,6 +16,12 @@ def enable_custom_styling(widget: QWidget):
     painter = QPainter(widget)
     widget.style().drawPrimitive(QStyle.PE_Widget, opt, painter, widget)
 
+def dynamically_repaint_widget(*widgets: QWidget):
+    for widget in widgets:
+        widget.style().polish(widget)
+        widget.style().unpolish(widget)
+        widget.update()
+
 def load_custom_font():
     font_path = str(resources_dir.joinpath("Roboto.ttf"))
     return QFontDatabase.addApplicationFont(font_path)
