@@ -23,8 +23,6 @@ class Chart(object):
     def addData(self, dataDict):
         for (sensor, dataVal) in dataDict.items():
             if sensor in self.SensorNames:
-                #self.SensorData[sensor].append(dataVal)
-                #self.SensorData[sensor] = dataVal
                 for val in dataVal:
                     self.SensorData[sensor].append(val)
 
@@ -46,8 +44,7 @@ class Chart(object):
     def getType(self):
         return self.Type
     
-    # Function for testing the backend (ignore)
-    
+    # Function for testing the backend (ignore for frontend)
     def plotChart(self):
 
         plt.title(self.Title)
@@ -58,28 +55,9 @@ class Chart(object):
             format = 'b-'
         for (key,val) in self.SensorData.items():
             xAxis = np.arange(0, len(val))
-            #plt.plot(xAxis, val, format, label=key)
             plt.plot(xAxis, val, label=key)
         plt.show()
     
-
-
-    '''
-    def plotChart(self, chartData):
-
-        plt.title(self.Title)
-        plt.xlabel(self.xLabel)
-        plt.ylabel(self.yLabel)
-        format = 'g.'
-        if self.Type == 'line':
-            format = 'b-'
-        for (key,val) in chartData.items():
-            xAxis = np.arange(0, len(val))
-            plt.plot(xAxis, val, format, label=key)
-        plt.show()
-    '''
-    
-   
         
         
 
