@@ -9,24 +9,21 @@ import csv
 import os 
 
 # TO DO: 
-# -Fix the two errors outlined below
-# -Save the data to the specified file location
-# -Test the saveData function
-# -Add data to the charts 
-# -Test chart output and if they are created correctly
-# -Add chart type in Chart.py
-# -Add chart type getter function
+# -Implement restartSession
+# -Implement restartProgram
+# -Test restartSession
+# -Test restartProgram
+# -Fix the two errors outlined in backend.txt
 # -Update backend.txt on laptop and in git repo
-
-
-# fix issue where data buffer doesn't store over 408-440 data points when charts are used 
-# I think the issue is that the serial port disconnects because it times out after processing chart data so the display data is the data in the buffer 
+# -Test the case where the MAC address of the bluetooth device changes 
+# -Fix issue where read method is checked for when conditions for notify method are satisfied
+# -Check that device is subscribing to notifications correctly
+# -Check if read method needs device to subscribe to notification (check ble documentation)
 
 class Backend(object):
     def __init__(self):
         self.chartObjects = []
         self.stopSession = threading.Event()
-    #connectedDevice = Device(None,None,None)
     def scanForDevices(self):
         allDevices = []
         allBluetoothDevices = asyncio.run(self.scanForBluetoothDevices())
@@ -43,13 +40,12 @@ class Backend(object):
 
     def connectToDevice(self, deviceName, deviceAddress): 
         if re.search("COM|com", deviceAddress):
-            # create serial device
             self.connectedDevice = SerialDevice(deviceName, deviceAddress)
             success = self.connectedDevice.connect()
         else:
             self.connectedDevice = BluetoothDevice(deviceName, deviceAddress)
             success = asyncio.run(self.connectedDevice.connect())
-        return  success #connectedDevice.connect()
+        return  success 
 
     def listSensorNames(self):
         return self.connectedDevice.getSensorNames()
@@ -77,14 +73,13 @@ class Backend(object):
 
 
     def startSession(self):
-        #-Description: starts data collection session by initiating a thread process/event/subprocess with kill that changes the "inSession" variable, runs run() and another process that listens to stop the session by changing the "inSession" variable 
+        #-Description: starts data collection session by initiating a thread processes and initialising kill variable 
         #-Parameters: None
         #-Return: None
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
 
-            #thread = threading.Thread(target=self.runSession, daemon=True)
             if self.connectedDevice.Type == "Bluetooth":
                 self.getDataThread = threading.Thread(target=asyncio.run, args=(self.connectedDevice.getData(),), daemon=True)
                 
@@ -93,21 +88,6 @@ class Backend(object):
             self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
             self.getDataThread.start()
             self.runSessionThread.start()
-        '''
-        self.connectedDevice.formatDataStruct()
-        if not self.stopSession.is_set():
-            #stopSession.set()
-            self.stopSession.clear()
-            #if connectedDevice.Type == "Bluetooth":
-            #    thread = threading.Thread(target=asyncio.run, args=(runSession()), daemon=True)
-            #else:
-            thread = threading.Thread(target=self.runSession, daemon=True)
-            thread.start()
-        '''
-        
-
-        
-        
 
     def runSession(self):
         #-Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
@@ -115,23 +95,13 @@ class Backend(object):
         #-Return: None 
         print("session started")
         while not self.stopSession.is_set():
-            #print('in session\n')
-            '''
-             if self.connectedDevice.Type == "Bluetooth":
-                print("bluetooth")
-                asyncio.run(self.connectedDevice.getData())
-                #connectedDevice.getData()
-            else:
-                self.connectedDevice.getData()
-            print("finished receiving data")
-            '''
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
             # Add data to charts 
             for chart in self.chartObjects:
                 chart.addData(dataDict)
-                #print("finished adding data to chart")
+                
             
 
 
@@ -149,23 +119,11 @@ class Backend(object):
             asyncio.run(self.connectedDevice.disconnect())
         for chart in self.chartObjects:
                 chart.plotChart()
-        #print("Printing all data")
-        #print(self.connectedDevice.DataBuffer)
 
     def saveData(self, filename, filePath):
-        #-Description: saves data into a csv file 
+        #-Description: saves data into a csv file in the specified location
         #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
         #-Return: boolean indicating if saving the file was successful 
-
-        
-        # Save to a specific file location
-        # Check if the directory exists
-
-        # Create the directory if it does not exst by using os.makedirs()
-        # Append filename to filepath 
-
-        # Check that the file path is in the correct format (eg. check that there is another slash at the end of the )
-        #if not re.search('', filePath):
 
         if not os.path.isdir(filePath):
             #os.makedirs(filePath)
@@ -183,8 +141,7 @@ class Backend(object):
         fields = list(self.connectedDevice.DataStruct.keys())
         data.append(fields) # first row of the csv include the fields 
         allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
-        maxNumRows = max(allRowLengths)
-        #numRows = len(self.connectedDevice.DataStruct[fields[0]])    
+        maxNumRows = max(allRowLengths) 
         for i in range(0, maxNumRows):
             currentRow = []
             for field in fields:
@@ -193,14 +150,6 @@ class Backend(object):
                 else:
                     currentRow.append("")
             data.append(currentRow)
-
-        # Save to a specific file location
-        # Check if the directory exists
-
-        # Create the directory if it does not exst by using os.makedirs()
-        # Append filename to filepath 
-        # Add .csv to the end of the file name 
-        #filename = filename + ".csv"
         try:
             with open(fullPath, 'w', newline='', encoding='utf-8') as csvFile:
                 writer = csv.writer(csvFile)
@@ -211,11 +160,6 @@ class Backend(object):
 
         return True  
             
-                
-            
-
-
-        # Save the file into the specifies file location
 
     def restartSession(self):
         #-Description: start a new session by clearing the current data in the chart 
@@ -231,7 +175,7 @@ class Backend(object):
         
         
 
-    ########################### Helper functions ###############################
+    ########################### Backend class helper functions ###############################
     # Helper for scanForDevices()    
     async def scanForBluetoothDevices(self):
         availableDevices = []
@@ -249,7 +193,6 @@ class Backend(object):
         availablePorts = []
         ports = serial.tools.list_ports.comports()
         for port in ports:
-            #availablePorts.append((port.name, port.device))
             availablePorts.append((port.name, port.device))
         return availablePorts
 
@@ -267,11 +210,6 @@ class Backend(object):
                 print(f"{key}: {value}")
 
     ############################################## TESTING CODE ########################################################
-
-
-    
-
-
 
 
 def main():
