@@ -300,6 +300,7 @@ class BluetoothDevice(Device):
                 await asyncio.sleep(0.05)
             await self.client.stop_notify(self.characteristicUUID)
         else:
+            data = None 
             while not self.TerminateSession.is_set():
                 while data is None:
                     data = await self.client.read_gatt_char(self.characteristicUUID) # Check that full string is read in 
@@ -366,9 +367,12 @@ class SerialDevice(Device):
             if not self.serialObject.is_open:
                 print("Unable to open serial port") 
             else:
+                self.serialObject.reset_input_buffer()
                 dataString = self.serialObject.readline()
                 dataString += self.serialObject.readline()
+
                 dataString = dataString.decode("utf-8")
+                print(dataString)
                 if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString):  # Check that full string is read in 
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
@@ -388,12 +392,16 @@ class SerialDevice(Device):
     # data should be added to the objects data buffer in the form "<sensor1>: data_val, <sensor2>: data_val\n" 
     def getData(self):
         self.serialObject = serial.Serial(self.Address, timeout=None) 
+        self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
             try:
                 dataString = None 
                 while dataString is None:
-                    dataString = self.serialObject.readline()
+                    #dataString = self.serialObject.readline()
+                    numWaitingBytes = self.serialObject.in_waiting
+                    dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
+                #print(dataString)
                 #print(dataString)
                 self.addToDataBuffer(dataString)
                        
