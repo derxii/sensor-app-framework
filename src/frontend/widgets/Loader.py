@@ -16,7 +16,12 @@ class Loader(QWidget):
         layout = QVBoxLayout()
         self.movie.setScaledSize(QSize(size, size))
         self.loading_animation.setMovie(self.movie)
+        self.loading_animation.setMinimumSize(size, size)
         self.loading_animation.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        size_policy = self.loading_animation.sizePolicy()
+        size_policy.setRetainSizeWhenHidden(True)
+        self.loading_animation.setSizePolicy(size_policy)
 
         layout.addWidget(self.loading_animation)
         self.setLayout(layout)
