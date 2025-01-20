@@ -6,6 +6,7 @@ from Device import Device, BluetoothDevice, SerialDevice
 from Chart import Chart
 import threading 
 import csv
+import os 
 
 # TO DO: 
 # -Fix the two errors outlined below
@@ -148,15 +149,36 @@ class Backend(object):
             asyncio.run(self.connectedDevice.disconnect())
         for chart in self.chartObjects:
                 chart.plotChart()
-        print("Printing all data")
-        print(self.connectedDevice.DataBuffer)
+        #print("Printing all data")
+        #print(self.connectedDevice.DataBuffer)
 
     def saveData(self, filename, filePath):
         #-Description: saves data into a csv file 
         #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
         #-Return: boolean indicating if saving the file was successful 
-        success = False 
+
         
+        # Save to a specific file location
+        # Check if the directory exists
+
+        # Create the directory if it does not exst by using os.makedirs()
+        # Append filename to filepath 
+
+        # Check that the file path is in the correct format (eg. check that there is another slash at the end of the )
+        #if not re.search('', filePath):
+
+        if not os.path.isdir(filePath):
+            #os.makedirs(filePath)
+            print("Error: directory not found")
+            return False
+
+        #check if the full filepath already exists 
+        fullPath = filePath + filename + ".csv"
+        print(fullPath)
+        if os.path.exists(fullPath):
+            print("Error: file already exists in the specified directory")
+            return False 
+
         data = []
         fields = list(self.connectedDevice.DataStruct.keys())
         data.append(fields) # first row of the csv include the fields 
@@ -174,15 +196,20 @@ class Backend(object):
 
         # Save to a specific file location
         # Check if the directory exists
+
         # Create the directory if it does not exst by using os.makedirs()
         # Append filename to filepath 
         # Add .csv to the end of the file name 
-        filename = filename + ".csv"
-        with open(filename, 'w', newline='', encoding='utf-8') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerows(data)
+        #filename = filename + ".csv"
+        try:
+            with open(fullPath, 'w', newline='', encoding='utf-8') as csvFile:
+                writer = csv.writer(csvFile)
+                writer.writerows(data)
+        except:
+            print("Error: unable to create csv file")
+            return False
 
-        
+        return True  
             
                 
             
