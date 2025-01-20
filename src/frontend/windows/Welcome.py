@@ -27,7 +27,7 @@ class Welcome(ScrollableWindow):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         title_font = QFont()
-        title_font.setWeight(QFont.Weight.Medium)
+        title_font.setWeight(QFont.Weight.DemiBold)
         title_font.setPointSize(40)
 
         self.title.setFont(title_font)
@@ -49,17 +49,17 @@ class Welcome(ScrollableWindow):
 
         layout.addSpacing(20)
 
-        self.connect_button.setObjectName("connect-button")
+        self.connect_button.setObjectName("scan-button")
         self.connect_button.setMinimumHeight(40)
         self.connect_button.setIcon(QIcon(get_image_path("bluetooth.svg")))
         self.connect_button.setIconSize(QSize(24, 24))
 
         button_layout = QHBoxLayout()
         self.connect_button_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.connect_button_label.setObjectName("connect-text")
+        self.connect_button_label.setObjectName("scan-text")
         font = QFont()
         font.setPointSize(20)
-        font.setWeight(QFont.Weight.Medium)
+        font.setWeight(QFont.Weight.DemiBold)
         self.connect_button_label.setFont(font)
 
         button_layout.addWidget(self.connect_button_label)
