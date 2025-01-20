@@ -1,12 +1,12 @@
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtCore import QCoreApplication, Qt
 
 import sys
 
 from .windows.MainWindow import MainWindow
-from frontend.config import default_width, default_height
+from frontend.config import default_width, default_height, load_custom_font
 
 def main():
     app = QApplication([])
@@ -18,12 +18,13 @@ def main():
     sys.exit(app.exec())
 
 def init_ui(app: QApplication):
-    font = QFont()
-    font.setFamily("Times")
-    font.setHintingPreference(QFont.HintingPreference.PreferNoHinting)
-    font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
+    font_id = load_custom_font()
 
-    app.setFont(font)
+    custom_font = QFont(QFontDatabase.applicationFontFamilies(font_id)[0])
+    custom_font.setHintingPreference(QFont.HintingPreference.PreferDefaultHinting)
+    custom_font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
+
+    app.setFont(custom_font)
 
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
