@@ -30,8 +30,7 @@ class ResetButton(QWidget):
         self.setLayout(self.layout)
 
         font = QFont()
-        font.setBold(True)
-        font.setPointSizeF(14)
+        font.setWeight(QFont.Weight.DemiBold)
         self.button.setFont(font)
 
 

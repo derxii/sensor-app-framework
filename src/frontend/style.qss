@@ -61,7 +61,7 @@ QPushButton#connect-button {
 }
 
 QPushButton#connect-button::pressed {
-    background:rgb(67, 158, 254);
+    background:rgb(0, 103, 214);
 }
 
 QPushButton#disabled {

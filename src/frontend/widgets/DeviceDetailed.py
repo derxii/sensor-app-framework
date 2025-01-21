@@ -70,9 +70,9 @@ class DeviceDetailed(ScrollableWindow):
         bottom_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
 
         self.connect_button.setObjectName("connect-button")
-        bold_font = QFont()
-        bold_font.setBold(True)
-        self.connect_button.setFont(bold_font)
+        connect_font = QFont()
+        connect_font.setWeight(QFont.Weight.DemiBold)
+        self.connect_button.setFont(connect_font)
         self.connect_button.setMinimumWidth(150)
 
         bottom_layout.addWidget(self.restart_button)
