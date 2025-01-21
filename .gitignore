@@ -1,0 +1,6 @@
+venv
+build
+dist
+*.spec
+.DS_STORE
+__pycache__
