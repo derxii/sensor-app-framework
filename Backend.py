@@ -9,16 +9,13 @@ import csv
 import os 
 
 # TO DO: 
-# -Implement restartSession
-# -Implement restartProgram
-# -Test restartSession
-# -Test restartProgram
-# -Fix the two errors outlined in backend.txt
+# -Fix issue where error occurs when read characteristic changes (when using phone)
 # -Update backend.txt on laptop and in git repo
-# -Test the case where the MAC address of the bluetooth device changes 
 # -Fix issue where read method is checked for when conditions for notify method are satisfied
-# -Check that device is subscribing to notifications correctly
 # -Check if read method needs device to subscribe to notification (check ble documentation)
+# -Consider storing data in a .json file 
+# -Re implement Chart.getData()
+# -Complete getChartData()
 
 class Backend(object):
     def __init__(self):
