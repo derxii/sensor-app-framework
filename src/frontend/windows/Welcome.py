@@ -7,19 +7,23 @@ from frontend.config import get_image_path
 from frontend.windows.ScanDevice import ScanDevice
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
-class Welcome(ScrollableWindow):
 
+class Welcome(ScrollableWindow):
     def __init__(self, switch_window: Callable[[QWidget], None]):
         super().__init__(switch_window)
 
         self.title = QLabel("Sensor Data Visualiser")
         self.logo = QLabel()
-        self.description = QLabel("Visualise your sensor data in real time using " + 
-                                  "custom charts via a Bluetooth connection.")
+        self.description = QLabel(
+            "Visualise your sensor data in real time using "
+            + "custom charts via a Bluetooth connection."
+        )
         self.connect_button = QPushButton()
         self.connect_button_label = QLabel("Scan Bluetooth Devices")
 
-        self.connect_button.clicked.connect(lambda: self.switch_window(ScanDevice(self.switch_window)))
+        self.connect_button.clicked.connect(
+            lambda: self.switch_window(ScanDevice(self.switch_window))
+        )
         self.init_ui()
 
     def init_ui(self):

@@ -9,14 +9,18 @@ import sys
 from .windows.MainWindow import MainWindow
 from frontend.config import default_width, default_height, load_custom_font
 
+
 def main():
     app = QApplication([])
 
     init_ui(app)
-    w = MainWindow(default_width, default_height, app.primaryScreen().availableGeometry().center())
+    w = MainWindow(
+        default_width, default_height, app.primaryScreen().availableGeometry().center()
+    )
 
     w.show()
-    sys.exit(QtAsyncio.run(handle_sigint = True))
+    sys.exit(QtAsyncio.run(handle_sigint=True))
+
 
 def init_ui(app: QApplication):
     font_id = load_custom_font()

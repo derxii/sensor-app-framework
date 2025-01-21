@@ -1,18 +1,27 @@
 from typing import Callable
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QFrame, QSizePolicy, QHBoxLayout
+from PySide6.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QFrame,
+    QSizePolicy,
+    QHBoxLayout,
+)
 from PySide6.QtGui import QFont, Qt, QMouseEvent
 
 from frontend.config import dynamically_repaint_widget, enable_custom_styling
 from frontend.widgets.DeviceDetailed import DeviceDetailed
 
-class DeviceSimple(QWidget):
-    def __init__(self, 
-                 name: str, 
-                 address: str, 
-                 rssi: int, 
-                 set_current_selected_device_index: Callable[[int], None], 
-                 index: int):
 
+class DeviceSimple(QWidget):
+    def __init__(
+        self,
+        name: str,
+        address: str,
+        rssi: int,
+        set_current_selected_device_index: Callable[[int], None],
+        index: int,
+    ):
         super().__init__()
         self.name = QLabel(name)
         self.address = QLabel(address)
@@ -38,7 +47,9 @@ class DeviceSimple(QWidget):
         self.name.setFont(name_font)
 
         self.name.setWordWrap(True)
-        self.name.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        self.name.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding
+        )
         container_layout.addWidget(self.name)
 
         address_font = QFont()
@@ -69,7 +80,6 @@ class DeviceSimple(QWidget):
             self.select()
         super().mousePressEvent(event)
 
-
     def select(self):
         if self.set_current_selected_device_index(self.index):
             self.setObjectName("selected")
@@ -89,4 +99,6 @@ class DeviceSimple(QWidget):
         enable_custom_styling(self)
 
     def generate_detailed_view(self, switch_window: Callable[[QWidget], None]):
-        return DeviceDetailed(self.name.text(), self.address.text(), self.rssi, switch_window)
+        return DeviceDetailed(
+            self.name.text(), self.address.text(), self.rssi, switch_window
+        )

@@ -7,7 +7,6 @@ from frontend.widgets.ResetButton import ResetButton
 
 class NoDeviceHint(QWidget):
     def __init__(self, switch_window: Callable[[QWidget], None]):
-
         super().__init__()
         self.hint = QLabel("Select a Bluetooth device to show more information.")
         self.reset_button = ResetButton(True, switch_window)
@@ -40,7 +39,9 @@ class NoDeviceHint(QWidget):
         bottom_container.setLayout(bottom_layout)
 
         bottom_layout.addWidget(self.reset_button)
-        bottom_layout.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
+        bottom_layout.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom
+        )
 
         layout.addWidget(bottom_container, 1)
         self.setLayout(layout)

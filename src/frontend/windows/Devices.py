@@ -9,12 +9,13 @@ from frontend.config import default_width
 
 left_container_width = 300
 
+
 class Devices(ScrollableWindow):
-
-    def __init__(self, 
-                 switch_window: Callable[[QWidget], None],
-                 name_address_rssi_list: list[tuple[str, str, int]]):
-
+    def __init__(
+        self,
+        switch_window: Callable[[QWidget], None],
+        name_address_rssi_list: list[tuple[str, str, int]],
+    ):
         super().__init__(switch_window)
 
         self.selected_device_index = None
@@ -23,11 +24,7 @@ class Devices(ScrollableWindow):
         for i, (name, address, rssi) in enumerate(name_address_rssi_list):
             self.device_simple_view_list.append(
                 DeviceSimple(
-                    name, 
-                    address,
-                    rssi, 
-                    self.set_current_selected_device_index,
-                    i
+                    name, address, rssi, self.set_current_selected_device_index, i
                 )
             )
 
@@ -70,7 +67,9 @@ class Devices(ScrollableWindow):
         self.separator.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.separator)
 
-        self.right_container_detailed.setMinimumWidth(default_width - left_container_width - 100)
+        self.right_container_detailed.setMinimumWidth(
+            default_width - left_container_width - 100
+        )
         self.right_container_detailed.setLayout(self.right_container_layout)
 
         self.right_container_layout.addWidget(NoDeviceHint(self.switch_window))
@@ -82,12 +81,14 @@ class Devices(ScrollableWindow):
     def set_current_selected_device_index(self, device_index: int):
         if self.selected_device_index != device_index:
             if self.selected_device_index is not None:
-                removed_device = self.device_simple_view_list[self.selected_device_index]
+                removed_device = self.device_simple_view_list[
+                    self.selected_device_index
+                ]
                 removed_device.reset_select()
             self.selected_device_index = device_index
 
             selected_device = self.device_simple_view_list[device_index]
-            
+
             self.right_container_layout.itemAt(0).widget().setParent(None)
             self.right_container_layout.addWidget(
                 selected_device.generate_detailed_view(self.switch_window)

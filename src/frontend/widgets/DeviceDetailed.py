@@ -1,5 +1,14 @@
 from typing import Callable
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QSizePolicy, QHBoxLayout, QPushButton, QSystemTrayIcon, QMessageBox
+from PySide6.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QSizePolicy,
+    QHBoxLayout,
+    QPushButton,
+    QSystemTrayIcon,
+    QMessageBox,
+)
 from PySide6.QtGui import QFont, Qt, QIcon
 from PySide6.QtCore import QSize, QTimer
 
@@ -8,14 +17,15 @@ from frontend.widgets.Loader import Loader
 from frontend.widgets.ResetButton import ResetButton
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
-class DeviceDetailed(ScrollableWindow):
-    def __init__(self, 
-                 name: str, 
-                 address: str, 
-                 rssi: int,
-                 switch_window: Callable[[QWidget], None]
-                ):
 
+class DeviceDetailed(ScrollableWindow):
+    def __init__(
+        self,
+        name: str,
+        address: str,
+        rssi: int,
+        switch_window: Callable[[QWidget], None],
+    ):
         super().__init__(switch_window)
         self.name = QLabel(name)
         self.address = QLabel(address)
@@ -59,15 +69,21 @@ class DeviceDetailed(ScrollableWindow):
 
         root_layout.addSpacing(10)
 
-        root_layout.addWidget(self.create_left_right_aligned_text(self.address, "Address"))
+        root_layout.addWidget(
+            self.create_left_right_aligned_text(self.address, "Address")
+        )
         root_layout.addWidget(self.create_left_right_aligned_text(self.rssi, "RSSI"))
-        root_layout.addWidget(self.create_left_right_aligned_text(self.signal_strength, "Signal Strength"))
+        root_layout.addWidget(
+            self.create_left_right_aligned_text(self.signal_strength, "Signal Strength")
+        )
 
         root_layout.addWidget(self.loader, 3)
 
         bottom_container = QWidget()
         bottom_layout = QHBoxLayout()
-        bottom_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        bottom_layout.setAlignment(
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
+        )
 
         self.connect_button.setObjectName("connect-button")
         connect_font = QFont()
@@ -105,7 +121,7 @@ class DeviceDetailed(ScrollableWindow):
 
         container.setLayout(layout)
         return container
-    
+
     def connect(self):
         self.loader.start_animation()
         self.connect_button.setDisabled(True)
@@ -116,15 +132,14 @@ class DeviceDetailed(ScrollableWindow):
 
         QTimer.singleShot(2000, self.on_connect_fail)
 
-    
     def on_connect_success(self):
         self.loader.stop_animation()
         tray_icon = QSystemTrayIcon()
         tray_icon.showMessage(
-            f"{self.name.text()} Connected", 
-            "Your device has now established a connection via Bluetooth.", 
-            QIcon(get_image_path("icon.svg")), 
-            3000
+            f"{self.name.text()} Connected",
+            "Your device has now established a connection via Bluetooth.",
+            QIcon(get_image_path("icon.svg")),
+            3000,
         )
 
     def on_connect_fail(self):
@@ -133,11 +148,14 @@ class DeviceDetailed(ScrollableWindow):
         message_box = QMessageBox()
         message_box.setWindowTitle("Connection Status")
         message_box.setText(f"{self.name.text()} Connection Failed")
-        message_box.setInformativeText("Please try connecting again or use " + 
-                                       "another Bluetooth device.")
+        message_box.setInformativeText(
+            "Please try connecting again or use " + "another Bluetooth device."
+        )
         message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         message_box.setDefaultButton(QMessageBox.StandardButton.Ok)
-        message_box.setIconPixmap(QIcon(get_image_path("icon.svg")).pixmap(QSize(64, 64)))
+        message_box.setIconPixmap(
+            QIcon(get_image_path("icon.svg")).pixmap(QSize(64, 64))
+        )
         message_box.exec()
 
         self.connect_button.setDisabled(False)

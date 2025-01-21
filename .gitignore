@@ -4,3 +4,4 @@ dist
 *.spec
 .DS_STORE
 __pycache__
+.ruff_cache

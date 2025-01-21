@@ -4,8 +4,8 @@ from PySide6.QtCore import QSize
 
 from frontend.config import get_image_path
 
-class Loader(QWidget):
 
+class Loader(QWidget):
     def __init__(self, size: int):
         super().__init__()
         self.loading_animation = QLabel()

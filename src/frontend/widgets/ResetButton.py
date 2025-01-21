@@ -1,12 +1,16 @@
 from typing import Callable
-from PySide6.QtWidgets import QPushButton, QGraphicsDropShadowEffect, QWidget, QHBoxLayout
+from PySide6.QtWidgets import (
+    QPushButton,
+    QGraphicsDropShadowEffect,
+    QWidget,
+    QHBoxLayout,
+)
 from PySide6.QtGui import QFont
 
 from frontend.config import dynamically_repaint_widget, enable_custom_styling
 
 
 class ResetButton(QWidget):
-
     def __init__(self, is_simple: bool, switch_window: Callable[[QWidget], None]):
         super().__init__()
         self.is_simple = is_simple
@@ -33,7 +37,6 @@ class ResetButton(QWidget):
         font.setWeight(QFont.Weight.DemiBold)
         self.button.setFont(font)
 
-
     def init_ui_simple(self):
         self.set_shadow()
         self.button.setObjectName("reset-button-simple")
@@ -55,6 +58,7 @@ class ResetButton(QWidget):
 
     def on_click(self):
         from frontend.windows.Welcome import Welcome
+
         self.switch_window(Welcome(self.switch_window))
 
     def disable_button(self):
