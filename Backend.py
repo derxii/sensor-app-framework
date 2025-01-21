@@ -1,3 +1,5 @@
+# Filename: Backend.py
+# Description: This file contains the backend functions that should be accessed by the frontend
 import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner, BleakClient
@@ -87,16 +89,7 @@ class Backend(object):
                 #if self.connectedDevice.Method == "read":
                 print("Attempting to create thread")
                 loop = asyncio.new_event_loop()
-                self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True) # threading.Thread(target=asyncio.run, args=(self.connectedDevice.getData(),), daemon=True) #
-                #self.getDataThread.start()
-                #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
-                #else:
-                #    loop = asyncio.new_event_loop()
-                #    self.runSessionThread = threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
-                #self.runSessionThread.start()
-                #else:
-                #    await self.connectedDevice.client.start_notify(self.connectedDevice.characteristicUUID, self.connectedDevice.callback)
-
+                self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True)
             else:
                 self.getDataThread = threading.Thread(target=self.connectedDevice.getData, daemon=True)
             
@@ -119,30 +112,17 @@ class Backend(object):
                 chart.addData(dataDict)
                 
             
-
-
-
     async def endSession(self):
         #-Description: ends a session
         #-Parameters: None 
         #-Return: None 
-        
-        #if self.connectedDevice.Type == "Bluetooth": 
-        #    await self.connectedDevice.disconnect()
-    
         self.connectedDevice.setTerminateSession()
         self.stopSession.set()
         self.getDataThread.join()
-        
         self.runSessionThread.join()
-
-
-        
         print("session ended")
         self.connectedDevice.clearTerminateSession()
         self.stopSession.clear()
-        #if self.connectedDevice.Type == "Bluetooth":
-        #    asyncio.run(self.connectedDevice.disconnect())
         for chart in self.chartObjects:
                 chart.plotChart()
 
@@ -150,19 +130,15 @@ class Backend(object):
         #-Description: saves data into a csv file in the specified location
         #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
         #-Return: boolean indicating if saving the file was successful 
-
         if not os.path.isdir(filePath):
-            #os.makedirs(filePath)
             print("Error: directory not found")
             return False
-
         #check if the full filepath already exists 
         fullPath = filePath + filename + ".csv"
         print(fullPath)
         if os.path.exists(fullPath):
             print("Error: file already exists in the specified directory")
             return False 
-
         data = []
         fields = list(self.connectedDevice.DataStruct.keys())
         data.append(fields) # first row of the csv include the fields 
@@ -183,7 +159,6 @@ class Backend(object):
         except:
             print("Error: unable to create csv file")
             return False
-
         return True  
             
 
@@ -212,10 +187,7 @@ class Backend(object):
         #-Description: clears all charts and disconnects PC from bluetooth device 
         #-Parameters: None
         #-Return: None
-        if self.connectedDevice.Type == "Bluetooth":
-            #asyncio.run(self.connectedDevice.disconnect())
-            #await self.connectedDevice.disconnect()
-            
+        if self.connectedDevice.Type == "Bluetooth":       
             if self.connectedDevice.client.is_connected:
                 try:
                     print("disconnecting")
@@ -230,9 +202,6 @@ class Backend(object):
             self.connectedDevice.disconnect()
         self.chartObjects = []
         
-        
-        
-
     ########################### Backend class helper functions ###############################
     # Helper for scanForDevices()    
     async def scanForBluetoothDevices(self):
@@ -269,44 +238,6 @@ class Backend(object):
 
     ############################################## TESTING CODE ########################################################
 
-async def runProgram(backend):
-    allDevices = await backend.scanForDevices()
-    deviceName = input("Enter the name of the device you want to connect to: ")
-    deviceAddress = input("Enter the address of the device you want to connect to: ")
-    returnVal = await backend.connectToDevice(deviceName, deviceAddress)
-    print(f"Success: {returnVal}")
-    if not returnVal:
-        return
-    print("Found the following sensors:")
-    for sensor in backend.listSensorNames():
-        print(sensor)
-    
-
-    numCharts = int(input("How many charts do you want?: "))
-    for _ in range(0, numCharts):
-        chartTitle = input("Enter the chart title: ")
-        xlabel = input("Enter x label: ")
-        ylabel = input("Enter y label: ")
-        sensorNameStr = input("Enter the sensors you want to use (enter in the format: sensor1 sensor2): ")
-        sensorNames = re.split(' ', sensorNameStr)
-        print(f"The following sensors were chosen: {sensorNames}")
-        chartType = input("Enter the chart type: ")
-        backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
-
-
-
-    userInput = input("Press 1 to start session: ")
-    if userInput == "1":
-        await backend.startSession()
-
-    userInput = input("Press 2 to end session: ")
-
-    if userInput == "2":
-        await backend.endSession()
-    #backend.printAllData()
-
-
-
 # Main shows the order and usage of backend functions
 async def main():
     backend = Backend()         
@@ -319,7 +250,6 @@ async def main():
         elif userInput == "1":
             if count != 0:
                 await backend.restartProgram()
-            #await runProgram(backend)
             allDevices = await backend.scanForDevices()
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
