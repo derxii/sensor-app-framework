@@ -1,8 +1,10 @@
+# Filename: Chart.py
+# Description: This file contains the Chart class 
 import numpy as np
 import matplotlib.pyplot as plt
 
 # TO DO: 
-# - Complete plotChart()
+# - change getData()
 class Chart(object):
     def __init__(self, chartId, chartTitle, xlabel, ylabel, sensorNames, type):
         self.Id = chartId
@@ -11,9 +13,7 @@ class Chart(object):
         self.yLabel = ylabel
         self.SensorNames = sensorNames
         self.SensorData = {}
-        self.Type = type
-
-        
+        self.Type = type    
         for sensor in sensorNames:
             self.SensorData[sensor] = []
 
