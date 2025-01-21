@@ -57,6 +57,10 @@ class Chart(object):
             xAxis = np.arange(0, len(val))
             plt.plot(xAxis, val, label=key)
         plt.show()
+
+    def clearData(self):
+        for key in self.SensorData.keys():
+            self.SensorData[key] = []
     
         
         
