@@ -1,8 +1,10 @@
+import asyncio
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import Qt, QFont
 from PySide6.QtCore import QTimer
 from typing import Callable
 
+from frontend.config import get_backend, get_debug_scan_devices, is_debug
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -16,7 +18,8 @@ class ScanDevice(ScrollableWindow):
         self.description = QLabel("Please wait for up to 5 seconds...")
         self.init_ui()
 
-        self.trigger_bluetooth_scan()
+        # Delay to ensure button is responsive
+        QTimer.singleShot(50, self.trigger_bluetooth_scan)
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -41,14 +44,20 @@ class ScanDevice(ScrollableWindow):
         self.bind_scroll(layout)
 
     def trigger_bluetooth_scan(self):
-        QTimer.singleShot(1000, self.on_scan_end)
+        if is_debug():
+            QTimer.singleShot(0, lambda: self.on_scan_end([]))
+        else:
+            asyncio.ensure_future(self.process_scan_response())
 
-    def on_scan_end(self):
+    async def process_scan_response(self):
+        scan_response = await get_backend().scanForDevices()
+        self.on_scan_end(scan_response)
+
+    def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()
-        dummy_data = [
-            ("Arduino HC-06", "M9SK1K31-252D-43E3-A986-DCF3CB63D08", -50)
-            for _ in range(33)
-        ]
-        dummy_data += [("long device name", "NDKA92N-24124-1241", -80)]
+        if is_debug():
+            data = get_debug_scan_devices()
 
-        self.switch_window(Devices(self.switch_window, dummy_data))
+        self.switch_window(
+            Devices(self.switch_window, sorted(data, key=lambda d: (d[2], d[0])))
+        )

@@ -2,8 +2,8 @@ import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner, BleakClient
 import re
-from Device import Device, BluetoothDevice, SerialDevice
-from Chart import Chart
+from .Device import Device, BluetoothDevice, SerialDevice
+from .Chart import Chart
 import threading 
 import csv
 import os 
@@ -251,7 +251,7 @@ class Backend(object):
         availablePorts = []
         ports = serial.tools.list_ports.comports()
         for port in ports:
-            availablePorts.append((port.name, port.device))
+            availablePorts.append((port.name, port.device, float('inf')))
         return availablePorts
 
     def printAllData(self):

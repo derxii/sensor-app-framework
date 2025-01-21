@@ -1,3 +1,4 @@
+import math
 from typing import Callable
 from PySide6.QtWidgets import (
     QVBoxLayout,
@@ -29,9 +30,11 @@ class DeviceDetailed(ScrollableWindow):
         super().__init__(switch_window)
         self.name = QLabel(name)
         self.address = QLabel(address)
-        self.rssi = QLabel(f"{rssi}dBm")
+        self.rssi = QLabel(f"{'Unknown ' if math.isinf(rssi) else rssi}dBm")
 
-        if rssi < -95:
+        if math.isinf(rssi):
+            strength = "Unknown"
+        elif rssi < -95:
             strength = "No Signal"
         elif rssi < -85:
             strength = "Poor"

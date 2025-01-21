@@ -7,7 +7,12 @@ import PySide6.QtAsyncio as QtAsyncio
 import sys
 
 from .windows.MainWindow import MainWindow
-from frontend.config import default_width, default_height, load_custom_font
+from frontend.config import (
+    default_width,
+    default_height,
+    load_custom_font,
+    set_backend,
+)
 
 
 def main():
@@ -19,6 +24,7 @@ def main():
     )
 
     w.show()
+    set_backend()
     sys.exit(QtAsyncio.run(handle_sigint=True))
 
 
