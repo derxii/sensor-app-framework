@@ -195,6 +195,8 @@ class Backend(object):
         #-Parameters: None
         #-Return: None 
         self.connectedDevice.clearDataStructValues()
+        self.connectedDevice.setDataBuffer("")
+        self.connectedDevice.ParsedData = ""
         for chart in self.chartObjects:
             chart.clearData()
         # Confirm connection and attempt to reconnect maximum 5 times if not connected
@@ -229,6 +231,7 @@ class Backend(object):
             
         else:
             self.connectedDevice.disconnect()
+        self.chartObjects = []
         
         
         
@@ -269,9 +272,7 @@ class Backend(object):
 
     ############################################## TESTING CODE ########################################################
 
-
-async def main():
-    backend = Backend()
+async def runProgram(backend):
     allDevices = await backend.scanForDevices()
     deviceName = input("Enter the name of the device you want to connect to: ")
     deviceAddress = input("Enter the address of the device you want to connect to: ")
@@ -294,6 +295,9 @@ async def main():
         print(f"The following sensors were chosen: {sensorNames}")
         chartType = input("Enter the chart type: ")
         backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
+
+
+
     userInput = input("Press 1 to start session: ")
     if userInput == "1":
         await backend.startSession()
@@ -304,30 +308,62 @@ async def main():
         await backend.endSession()
     #backend.printAllData()
 
-    userInput = input("Would you like to save the data to a csv file? (y/n): ")
-    if userInput == "y":
-        filename = input("What would you like to save the filename as?: ")
-        fileLocation = input("where would you like to save the file?: ")
-        backend.saveData(filename, fileLocation)
-            
-    
-    while True:
-        userInput = input("Would you like to restart the session (1) or exit the program (2)?: ")
-        if userInput == "1":
-            print("Automatically restarting session")
-            userInput = input("Press 1 to start session: ")
-            if userInput == "1":
-                backend.clearSession()
-                backend.startSession()
-            userInput = input("Press 2 to end session: ")
 
-            if userInput == "2":
-                backend.endSession()
-        if userInput == "2":
-            #backend.restartProgram()
-           # asyncio.run(backend.restartProgram())
+
+
+async def main():
+    backend = Backend()         
+    count = 0
+    while True:
+        userInput = input("Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: ")
+        if userInput == "3":
             await backend.restartProgram()
             break
+        elif userInput == "1":
+            if count != 0:
+                await backend.restartProgram()
+            #await runProgram(backend)
+            allDevices = await backend.scanForDevices()
+            deviceName = input("Enter the name of the device you want to connect to: ")
+            deviceAddress = input("Enter the address of the device you want to connect to: ")
+            returnVal = await backend.connectToDevice(deviceName, deviceAddress)
+            print(f"Success: {returnVal}")
+            if not returnVal:
+                return
+            print("Found the following sensors:")
+            for sensor in backend.listSensorNames():
+                print(sensor)
+            numCharts = int(input("How many charts do you want?: "))
+            for _ in range(0, numCharts):
+                chartTitle = input("Enter the chart title: ")
+                xlabel = input("Enter x label: ")
+                ylabel = input("Enter y label: ")
+                sensorNameStr = input("Enter the sensors you want to use (enter in the format: sensor1 sensor2): ")
+                sensorNames = re.split(' ', sensorNameStr)
+                print(f"The following sensors were chosen: {sensorNames}")
+                chartType = input("Enter the chart type: ")
+                backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
+
+        elif userInput == "2":
+            print("Automatically restarting session")
+            backend.clearSession()
+            
+        userInput = input("Press 1 to start session: ")
+        if userInput == "1":
+            backend.clearSession()
+            await backend.startSession()
+        userInput = input("Press 2 to end session: ")
+
+        if userInput == "2":
+            await backend.endSession()
+        
+
+        userInput = input("Would you like to save the data to a csv file? (y/n): ")
+        if userInput == "y":
+            filename = input("What would you like to save the filename as?: ")
+            fileLocation = input("where would you like to save the file?: ")
+            backend.saveData(filename, fileLocation)
+        count += 1
 
 
 if __name__ == "__main__":
