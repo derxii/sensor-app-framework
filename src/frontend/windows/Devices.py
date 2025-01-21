@@ -7,7 +7,7 @@ from frontend.widgets.NoDeviceHint import NoDeviceHint
 from frontend.windows.ScrollableWindow import ScrollableWindow
 from frontend.config import default_width
 
-left_container_width = 280
+left_container_width = 300
 
 class Devices(ScrollableWindow):
 
