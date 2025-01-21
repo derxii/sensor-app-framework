@@ -268,7 +268,7 @@ class SerialDevice(Device):
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
-                    self.serialObject.close()
+                    #self.serialObject.close()
                     return True 
                 self.serialObject.close()
         except:
@@ -281,7 +281,8 @@ class SerialDevice(Device):
     # Returns true if data was successfully received and false otherwise 
     # data should be added to the objects data buffer in the form "<sensor1>: data_val, <sensor2>: data_val\n" 
     def getData(self):
-        self.serialObject = serial.Serial(self.Address, timeout=None) 
+        if not self.reconnect():
+            self.serialObject = serial.Serial(self.Address, timeout=None) 
         self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
 
@@ -303,7 +304,10 @@ class SerialDevice(Device):
                 return self.serialObject.is_open
             except:
                 print("Error: could not reconnect")
-        return False
+        
+            return False
+        else:
+            return True
         
     def isConnected(self):
         # returns true if connected to the device 
