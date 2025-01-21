@@ -57,7 +57,8 @@ class Device(object):
     def clearDataStructValues(self):
         for key in self.DataStruct.keys():
             self.DataStruct[key] = [] 
-
+    
+    
     def parseData(self):
         try:
             buffer = re.sub('\s', '', self.getDataBuffer()) 
