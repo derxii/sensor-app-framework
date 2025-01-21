@@ -1,0 +1,72 @@
+QScrollArea {
+    border: none;
+}
+
+QMainWindow {
+    background: white;
+}
+
+QPushButton#scan-button {
+    text-align: right;
+    padding-right: 20px;
+    background: #007AFF;
+    border: none;
+    border-radius: 5px;
+}
+
+QPushButton#scan-button::pressed {
+    background-color:rgb(0, 103, 214);
+}
+
+QLabel#scan-text {
+    color: white;
+}
+
+
+QWidget#scrollable-window {
+    background: white;
+}
+
+QPushButton#reset-button-simple {
+    background: white;
+    border: 0.5px solid rgb(159, 159, 159);
+    border-radius: 7px;
+    color: red;
+    padding: 5px;
+}
+
+QPushButton#reset-button-simple::pressed {
+    background: rgb(216, 216, 216);
+}
+
+DeviceSimple {
+    border-radius: 7px;
+}
+
+DeviceSimple#selected {
+    background: #007AFF;
+}
+
+QLabel#selected {
+    color: white;
+}
+
+
+QPushButton#connect-button {
+    background: #007AFF;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 6px 14px 6px 14px;
+}
+
+QPushButton#connect-button::pressed {
+    background:rgb(0, 103, 214);
+}
+
+QPushButton#disabled {
+    border: 0.5px solid rgb(220, 220, 220);
+    border-radius: 5px;
+    padding: 6px 14px 6px 14px;
+    opacity: 30%;
+}
