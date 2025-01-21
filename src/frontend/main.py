@@ -12,6 +12,7 @@ from frontend.config import (
     default_height,
     load_custom_font,
     set_backend,
+    set_switch_window,
 )
 
 
@@ -22,6 +23,7 @@ def main():
     w = MainWindow(
         default_width, default_height, app.primaryScreen().availableGeometry().center()
     )
+    set_switch_window(w.switch_central_widget)
 
     w.show()
     set_backend()

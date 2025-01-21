@@ -4,7 +4,12 @@ from PySide6.QtGui import Qt, QFont
 from PySide6.QtCore import QTimer
 from typing import Callable
 
-from frontend.config import get_backend, get_debug_scan_devices, is_debug
+from frontend.config import (
+    get_backend,
+    get_debug_scan_devices,
+    handle_exception,
+    is_debug,
+)
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -50,8 +55,11 @@ class ScanDevice(ScrollableWindow):
             asyncio.ensure_future(self.process_scan_response())
 
     async def process_scan_response(self):
-        scan_response = await get_backend().scanForDevices()
-        self.on_scan_end(scan_response)
+        try:
+            scan_response = await get_backend().scanForDevices()
+            self.on_scan_end(scan_response)
+        except Exception as e:
+            handle_exception(e)
 
     def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()
