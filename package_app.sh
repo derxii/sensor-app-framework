@@ -7,12 +7,12 @@ STYLE_DATA_FLAG=""
 case "$(uname -sr)" in
 
    Darwin*|Linux*)
-     DATA_FLAG='--add-data=src/images:images'
+     DATA_FLAG='--add-data=src/resources:resources'
      STYLE_DATA_FLAG='--add-data=src/frontend/style.qss:frontend'
      ;;
 
    CYGWIN*|MINGW*|MSYS*)
-     DATA_FLAG='--add-data=src/images;images'
+     DATA_FLAG='--add-data=src/resources;resources'
      STYLE_DATA_FLAG='--add-data=src/frontend/style.qss;frontend'
      ;;
 

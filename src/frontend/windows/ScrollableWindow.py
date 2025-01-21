@@ -1,6 +1,7 @@
 from typing import Callable
 from PySide6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLayout
 
+
 class ScrollableWindow(QWidget):
     def __init__(self, switch_window: Callable[[QWidget], None]):
         super().__init__()
