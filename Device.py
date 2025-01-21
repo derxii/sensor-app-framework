@@ -83,9 +83,7 @@ class Device(object):
             self.ParsedData += dataToParse    
             return returnDict
         return None
-        
-
-        
+              
 
 class BluetoothDevice(Device):
     def __init__(self, name, address):
@@ -99,14 +97,10 @@ class BluetoothDevice(Device):
     def callback(self, sender, data):
         try:
             dataString = data.decode('utf-8')
-            #with open("data.txt", "w") as file:
-            #    print(f"{time.localtime()}: {dataString}", flush=True, file=file)
-            #print(f"{time.localtime()}: {dataString}", flush=True)
             self.addToDataBuffer(dataString)
         except:
             print("cannot convert notification to utf-8", flush=True)
-        #return data
-    
+        
     # Finds any necessary information needed about connecting to the device, finds sensor names and may create relevant client object
     async def connect(self):
         success = False 
@@ -176,9 +170,7 @@ class BluetoothDevice(Device):
                                     self.setDataBuffer("")
                                     return success
                             except: 
-                                print("error occurred")
-                #if client.is_connected: # temporarily comment out this line 
-                #    await client.disconnect()              
+                                print("error occurred")            
             except:
                 print("Unable to connect")
         print(f"Method: {self.Method}")
@@ -199,12 +191,9 @@ class BluetoothDevice(Device):
         return False
 
     def isConnected(self):
-        # returns true if connected to the device 
         return self.client.is_connected
 
     async def disconnect(self):
-        #await self.client.stop_notify(self.characteristicUUID)
-        #await self.client.disconnect()
         if self.client.is_connected:
             try:
                 print("disconnecting")
@@ -221,40 +210,31 @@ class BluetoothDevice(Device):
         if self.Method == "notify":
             await self.client.start_notify(self.characteristicUUID, self.callback)
             while not self.TerminateSession.is_set():
-                await asyncio.sleep(0.5)
-                #pass
-                
+                await asyncio.sleep(0.5)   
             await self.client.stop_notify(self.characteristicUUID)
             await asyncio.sleep(0.5)
             print("unsubscribing to notifications")
-            #if self.client.is_connected:
-            #    await self.client.disconnect()
-            
         else:
             data = None 
             while not self.TerminateSession.is_set():
                 while data is None:
-                    data = await self.client.read_gatt_char(self.characteristicUUID) # Check that full string is read in 
+                    data = await self.client.read_gatt_char(self.characteristicUUID) 
                 try:
                     dataString = data.decode("utf-8")
                 finally:
 
                     self.addToDataBuffer(dataString)
         
-       
-
- 
 
 # This class if for devices that use serial port profile (SPP) 
 class SerialDevice(Device):
     def __init__(self, name, address):
         super().__init__(name, address, "Serial")
-    # Finds any necessary information needed about connecting to the device, finds sensor names and may create relevant client object    
+    # Finds any necessary information needed about connecting to the device, finds sensor names and creates relevant client object    
     def connect(self ):
         try:
             self.serialObject = serial.Serial(self.Address, timeout=None) 
             print(self.serialObject.name)
-            #self.serialObject.open()
             print(f"Serial port open: {self.serialObject.is_open}")
             if not self.serialObject.is_open:
                 print("Unable to open serial port") 
@@ -268,7 +248,6 @@ class SerialDevice(Device):
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
-                    #self.serialObject.close()
                     return True 
                 self.serialObject.close()
         except:
