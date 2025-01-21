@@ -25,3 +25,16 @@ def dynamically_repaint_widget(*widgets: QWidget):
 def load_custom_font():
     font_path = str(resources_dir.joinpath("Roboto.ttf"))
     return QFontDatabase.addApplicationFont(font_path)
+
+def is_debug():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-debug", "-d", action='store_true', help="Use mock data")
+
+    args = parser.parse_args()
+    return args.debug
+
+def get_debug_scan_devices():
+    data = [("Arduino HC-06", "M9SK1K31-252D-43E3-A986-DCF3CB63D08", -50) for _ in range(33)]
+    data += [("long device name", "NDKA92N-24124-1241", -80)]
+    return data

@@ -2,6 +2,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtCore import QCoreApplication, Qt
+import PySide6.QtAsyncio as QtAsyncio
 
 import sys
 
@@ -15,7 +16,7 @@ def main():
     w = MainWindow(default_width, default_height, app.primaryScreen().availableGeometry().center())
 
     w.show()
-    sys.exit(app.exec())
+    sys.exit(QtAsyncio.run(handle_sigint = True))
 
 def init_ui(app: QApplication):
     font_id = load_custom_font()
