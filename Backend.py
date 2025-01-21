@@ -24,9 +24,9 @@ class Backend(object):
     def __init__(self):
         self.chartObjects = []
         self.stopSession = threading.Event()
-    def scanForDevices(self):
+    async def scanForDevices(self):
         allDevices = []
-        allBluetoothDevices = asyncio.run(self.scanForBluetoothDevices())
+        allBluetoothDevices = await self.scanForBluetoothDevices() #asyncio.run(self.scanForBluetoothDevices())
         for device in allBluetoothDevices:
             print(f"name: {device[0]}, address: {device[1]}, rssi: {device[2]}")
             allDevices.append(device)
@@ -38,13 +38,13 @@ class Backend(object):
 
         return allDevices
 
-    def connectToDevice(self, deviceName, deviceAddress): 
+    async def connectToDevice(self, deviceName, deviceAddress): 
         if re.search("COM|com", deviceAddress):
             self.connectedDevice = SerialDevice(deviceName, deviceAddress)
             success = self.connectedDevice.connect()
         else:
             self.connectedDevice = BluetoothDevice(deviceName, deviceAddress)
-            success = asyncio.run(self.connectedDevice.connect())
+            success = await self.connectedDevice.connect() #asyncio.run(self.connectedDevice.connect())
         return  success 
 
     def listSensorNames(self):
@@ -70,23 +70,41 @@ class Backend(object):
         return chartData
     '''
     
+    def runInLoop(self, loop):
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.connectedDevice.getData())
 
+    def runSessionInLoop(self, loop):
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.runSession())
 
-    def startSession(self):
+    async def startSession(self):
         #-Description: starts data collection session by initiating a thread processes and initialising kill variable 
         #-Parameters: None
         #-Return: None
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
-
+            self.stopSession.clear()
             if self.connectedDevice.Type == "Bluetooth":
-                self.getDataThread = threading.Thread(target=asyncio.run, args=(self.connectedDevice.getData(),), daemon=True)
-                
+                #if self.connectedDevice.Method == "read":
+                print("Attempting to create thread")
+                loop = asyncio.new_event_loop()
+                self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True) # threading.Thread(target=asyncio.run, args=(self.connectedDevice.getData(),), daemon=True) #
+                #self.getDataThread.start()
+                #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+                #else:
+                #    loop = asyncio.new_event_loop()
+                #    self.runSessionThread = threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
+                #self.runSessionThread.start()
+                #else:
+                #    await self.connectedDevice.client.start_notify(self.connectedDevice.characteristicUUID, self.connectedDevice.callback)
+
             else:
                 self.getDataThread = threading.Thread(target=self.connectedDevice.getData, daemon=True)
-            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            
             self.getDataThread.start()
+            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
             self.runSessionThread.start()
 
     def runSession(self):
@@ -94,6 +112,7 @@ class Backend(object):
         #-Parameters: None
         #-Return: None 
         print("session started")
+        
         while not self.stopSession.is_set():
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
@@ -106,17 +125,27 @@ class Backend(object):
 
 
 
-    def endSession(self):
+    async def endSession(self):
         #-Description: ends a session
         #-Parameters: None 
         #-Return: None 
-        self.stopSession.set()
+        
+        #if self.connectedDevice.Type == "Bluetooth": 
+        #    await self.connectedDevice.disconnect()
+    
         self.connectedDevice.setTerminateSession()
+        self.stopSession.set()
         self.getDataThread.join()
+        
         self.runSessionThread.join()
+
+
+        
         print("session ended")
-        if self.connectedDevice.Type == "Bluetooth":
-            asyncio.run(self.connectedDevice.disconnect())
+        self.connectedDevice.clearTerminateSession()
+        self.stopSession.clear()
+        #if self.connectedDevice.Type == "Bluetooth":
+        #    asyncio.run(self.connectedDevice.disconnect())
         for chart in self.chartObjects:
                 chart.plotChart()
 
@@ -161,17 +190,46 @@ class Backend(object):
         return True  
             
 
-    def restartSession(self):
+    def clearSession(self):
         #-Description: start a new session by clearing the current data in the chart 
         #-Parameters: None
         #-Return: None 
-        pass
+        self.connectedDevice.clearDataStructValues()
+        for chart in self.chartObjects:
+            chart.clearData()
+        # Confirm connection and attempt to reconnect maximum 5 times if not connected
+        reconnectCount = 0
+        reconnectSuccess = self.connectedDevice.isConnected()
+        while not reconnectSuccess and reconnectCount < 5:
+            reconnectSuccess = self.connectedDevice.reconnect()
+            reconnectCount += 1
+        if not reconnectSuccess:
+            print("Error: failed to reconnect")
+            return 
+     
 
-    def restartProgram(self):
+
+    async def restartProgram(self):
         #-Description: clears all charts and disconnects PC from bluetooth device 
         #-Parameters: None
-        #-Return: None 
-        pass
+        #-Return: None
+        if self.connectedDevice.Type == "Bluetooth":
+            #asyncio.run(self.connectedDevice.disconnect())
+            #await self.connectedDevice.disconnect()
+            
+            if self.connectedDevice.client.is_connected:
+                try:
+                    print("disconnecting")
+                    await self.connectedDevice.client.disconnect()
+                    print("disconnected")
+                    return not self.connectedDevice.client.is_connected
+                except:
+                    print("Error: could not disconnect")
+            return False
+            
+        else:
+            self.connectedDevice.disconnect()
+        
         
         
 
@@ -212,12 +270,12 @@ class Backend(object):
     ############################################## TESTING CODE ########################################################
 
 
-def main():
+async def main():
     backend = Backend()
-    allDevices = backend.scanForDevices()
+    allDevices = await backend.scanForDevices()
     deviceName = input("Enter the name of the device you want to connect to: ")
     deviceAddress = input("Enter the address of the device you want to connect to: ")
-    returnVal = backend.connectToDevice(deviceName, deviceAddress)
+    returnVal = await backend.connectToDevice(deviceName, deviceAddress)
     print(f"Success: {returnVal}")
     if not returnVal:
         return
@@ -238,12 +296,12 @@ def main():
         backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
     userInput = input("Press 1 to start session: ")
     if userInput == "1":
-        backend.startSession()
+        await backend.startSession()
 
     userInput = input("Press 2 to end session: ")
 
     if userInput == "2":
-        backend.endSession()
+        await backend.endSession()
     #backend.printAllData()
 
     userInput = input("Would you like to save the data to a csv file? (y/n): ")
@@ -252,8 +310,26 @@ def main():
         fileLocation = input("where would you like to save the file?: ")
         backend.saveData(filename, fileLocation)
             
+    
+    while True:
+        userInput = input("Would you like to restart the session (1) or exit the program (2)?: ")
+        if userInput == "1":
+            print("Automatically restarting session")
+            userInput = input("Press 1 to start session: ")
+            if userInput == "1":
+                backend.clearSession()
+                backend.startSession()
+            userInput = input("Press 2 to end session: ")
+
+            if userInput == "2":
+                backend.endSession()
+        if userInput == "2":
+            #backend.restartProgram()
+           # asyncio.run(backend.restartProgram())
+            await backend.restartProgram()
+            break
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
     
