@@ -6,7 +6,7 @@ import re
 import serial.tools.list_ports
 import serial
 import threading 
-
+import time
 
 class Device(object):
 
@@ -54,7 +54,10 @@ class Device(object):
     def setSensorNames(self, sensors):
         self.Sensors = sensors
 
-        
+    def clearDataStructValues(self):
+        for key in self.DataStruct.keys():
+            self.DataStruct[key] = [] 
+
     def parseData(self):
         try:
             buffer = re.sub('\s', '', self.getDataBuffer()) 
@@ -64,6 +67,7 @@ class Device(object):
             dataToParse = ""
 
         if dataToParse != "" :
+            print(dataToParse)
             returnDict = {}
             dataSegments = re.split(',', dataToParse)
             items  = dataSegments[:-1]
@@ -94,10 +98,13 @@ class BluetoothDevice(Device):
     def callback(self, sender, data):
         try:
             dataString = data.decode('utf-8')
+            #with open("data.txt", "w") as file:
+            #    print(f"{time.localtime()}: {dataString}", flush=True, file=file)
+            #print(f"{time.localtime()}: {dataString}", flush=True)
             self.addToDataBuffer(dataString)
         except:
-            print("cannot convert notification to utf-8")
-        return data
+            print("cannot convert notification to utf-8", flush=True)
+        #return data
     
     # Finds any necessary information needed about connecting to the device, finds sensor names and may create relevant client object
     async def connect(self):
@@ -176,19 +183,52 @@ class BluetoothDevice(Device):
         print(f"Method: {self.Method}")
         return success
         
+    async def reconnect(self):
+        # This function aims to reconnect to the connected device (no information needs to be found just establish the connection again)
+        if await BleakScanner.find_device_by_address(self.Address): 
+            try:
+                client = BleakClient(self.Address)
+                self.client = client
+                await self.client.connect()
+                return self.client.is_connected
+            except:
+                print("Error: could not connect to device")
+        else:
+            print("Error: device address not found")
+        return False
+
+    def isConnected(self):
+        # returns true if connected to the device 
+        return self.client.is_connected
 
     async def disconnect(self):
         #await self.client.stop_notify(self.characteristicUUID)
         #await self.client.disconnect()
-        print("unsubscribing from notifications")
+        if self.client.is_connected:
+            try:
+                print("disconnecting")
+                await self.client.disconnect()
+                print("disconnected")
+                return not self.client.is_connected
+            except:
+                print("Error: could not disconnect")
+        return False
+        
 
     async def getData(self): 
         self.setDataBuffer("")
         if self.Method == "notify":
             await self.client.start_notify(self.characteristicUUID, self.callback)
             while not self.TerminateSession.is_set():
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.5)
+                #pass
+                
             await self.client.stop_notify(self.characteristicUUID)
+            await asyncio.sleep(0.5)
+            print("unsubscribing to notifications")
+            #if self.client.is_connected:
+            #    await self.client.disconnect()
+            
         else:
             data = None 
             while not self.TerminateSession.is_set():
@@ -199,6 +239,8 @@ class BluetoothDevice(Device):
                 finally:
 
                     self.addToDataBuffer(dataString)
+        
+       
 
  
 
@@ -241,15 +283,37 @@ class SerialDevice(Device):
         self.serialObject = serial.Serial(self.Address, timeout=None) 
         self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
+
             try:
                 dataString = None 
                 while dataString is None:
                     numWaitingBytes = self.serialObject.in_waiting
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
-                self.addToDataBuffer(dataString)
-                       
+                self.addToDataBuffer(dataString)       
             except:
                 print("an error occurred") 
-      
 
+    def reconnect(self):
+        # This function aims to reconnect to the connected device (no information needs to be found just establish the connection again)
+        if not self.serialObject.is_open:
+            try:
+                self.serialObject.open()
+                return self.serialObject.is_open
+            except:
+                print("Error: could not reconnect")
+        return False
+        
+    def isConnected(self):
+        # returns true if connected to the device 
+        return self.serialObject.is_open
+    
+    def disconnect(self):
+        print("disconnecting...")
+        if self.serialObject.is_open:
+            try:
+                self.serialObject.close()
+                print("disconnected")
+            except:
+                print("Error: could not disconnect")
+        return not self.serialObject.is_open
