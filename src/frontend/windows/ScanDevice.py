@@ -59,5 +59,5 @@ class ScanDevice(ScrollableWindow):
             data = get_debug_scan_devices()
 
         self.switch_window(
-            Devices(self.switch_window, sorted(data, key=lambda d: (d[2], d[0])))
+            Devices(self.switch_window, sorted(data, key=lambda d: (-d[2], d[0])))
         )
