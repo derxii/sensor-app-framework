@@ -1,7 +1,6 @@
-import asyncio
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import Qt, QFont
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread
 from typing import Callable
 
 from frontend.config import (
@@ -10,6 +9,8 @@ from frontend.config import (
     handle_exception,
     is_debug,
 )
+
+from frontend.thread.Worker import Worker
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -20,11 +21,11 @@ class ScanDevice(ScrollableWindow):
         super().__init__(switch_window)
         self.title = QLabel("Scanning for Bluetooth Devices")
         self.loader = Loader(256)
-        self.description = QLabel("Please wait for up to 5 seconds...")
+        self.description = QLabel("Please wait for up to 10 seconds...")
         self.init_ui()
 
-        # Delay to ensure button is responsive
-        QTimer.singleShot(50, self.trigger_bluetooth_scan)
+        self.thread = QThread()
+        self.trigger_bluetooth_scan()
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -52,14 +53,14 @@ class ScanDevice(ScrollableWindow):
         if is_debug():
             QTimer.singleShot(0, lambda: self.on_scan_end([]))
         else:
-            asyncio.ensure_future(self.process_scan_response())
-
-    async def process_scan_response(self):
-        try:
-            scan_response = await get_backend().scanForDevices()
-            self.on_scan_end(scan_response)
-        except Exception as e:
-            handle_exception(e)
+            self.worker = Worker(
+                self.thread,
+                get_backend().scanForDevices,
+                lambda e: handle_exception(e, None, True),
+            )
+            self.worker.cancel_thread_on_timeout(10)
+            self.worker.func_done.connect(self.on_scan_end)
+            self.thread.start()
 
     def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()

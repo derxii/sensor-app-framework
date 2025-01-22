@@ -69,18 +69,20 @@ def get_switch_window() -> Callable[[QWidget], None]:
     return QCoreApplication.instance().property("switch_window")
 
 
-def handle_exception(e: Exception, message: Optional[str] = None):
-    print(e)
+def handle_exception(
+    e: Exception, message: Optional[str] = None, critical_error: Optional[bool] = False
+):
+    print("ERROR: " + str(e))
 
     message_box = QMessageBox()
     message_box.setWindowTitle("Error")
-    message_box.setText("Something went wrong!")
-    message_box.setInformativeText(message if message else str(e))
+    message_box.setText(f"Error: {message if message else str(e)}")
     message_box.setIconPixmap(QIcon(get_image_path("icon.svg")).pixmap(QSize(64, 64)))
     message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
     message_box.setDefaultButton(QMessageBox.StandardButton.Ok)
     message_box.exec()
 
-    from frontend.windows.Welcome import Welcome
+    if critical_error:
+        from frontend.windows.Welcome import Welcome
 
-    get_switch_window()(Welcome(get_switch_window()))
+        get_switch_window()(Welcome(get_switch_window()))

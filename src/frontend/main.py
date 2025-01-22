@@ -2,7 +2,6 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtCore import QCoreApplication, Qt
-import PySide6.QtAsyncio as QtAsyncio
 
 import sys
 
@@ -27,7 +26,7 @@ def main():
 
     w.show()
     set_backend()
-    sys.exit(QtAsyncio.run(handle_sigint=True))
+    sys.exit(app.exec())
 
 
 def init_ui(app: QApplication):
