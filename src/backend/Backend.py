@@ -68,7 +68,12 @@ class Backend(object):
             chartData[sensor] = self.connectedDevice.DataStruct[sensor]
         return chartData
     '''
+    def getAllChartData(self, id):
+        return self.getChart(id).getAllData()
     
+    def getRecentChartData(self, id):
+        return self.getChart(id).getRecentData()
+        
     def runInLoop(self, loop):
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.connectedDevice.getData())
