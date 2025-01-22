@@ -9,15 +9,17 @@ from Chart import Chart
 import threading 
 import csv
 import os 
+import json
 
 # TO DO: 
-# -Fix issue where error occurs when read characteristic changes (when using phone)
+# -change json files to temporary json files and store in a temporary directory
+# -Simulate chart plotting 
 # -Update backend.txt on laptop and in git repo
 # -Fix issue where read method is checked for when conditions for notify method are satisfied
-# -Check if read method needs device to subscribe to notification (check ble documentation)
 # -Consider storing data in a .json file 
 # -Re implement Chart.getData()
 # -Complete getChartData()
+
 
 class Backend(object):
     def __init__(self):
@@ -60,6 +62,15 @@ class Backend(object):
     def getChart(self,id):
         return self.chartObjects[id]
     
+    def getChartInfo(self, id):
+        chart = self.getChart(id)
+        chartInfo = {}
+        chartInfo["id"] = chart.getId()
+        chartInfo["Title"] = chart.getTitle()
+        chartInfo["xLabel"] = chart.getxLabel()
+        chartInfo["yLabel"] = chart.getyLabel()
+        chartInfo["Type"] = chart.getType()
+        chartInfo["Sensors"] = chart.getSensors()
     '''
     def getChartData(self,id):
         sensorNames = self.getChart(id).SensorNames
@@ -144,16 +155,25 @@ class Backend(object):
         if os.path.exists(fullPath):
             print("Error: file already exists in the specified directory")
             return False 
+        dataFilename = self.connectedDevice.getDataFileName()
+        with open(dataFilename, "r") as file:
+            deviceData = json.load(file)
+        DataStruct = deviceData["DataStruct"]
+
         data = []
-        fields = list(self.connectedDevice.DataStruct.keys())
+        fields = list(DataStruct.keys())
         data.append(fields) # first row of the csv include the fields 
-        allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
+        
+        #allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
+        allRowLengths = [len(DataStruct[sensor]) for sensor in fields]
         maxNumRows = max(allRowLengths) 
         for i in range(0, maxNumRows):
             currentRow = []
             for field in fields:
-                if i < len(self.connectedDevice.DataStruct[field]):
-                    currentRow.append(self.connectedDevice.DataStruct[field][i])
+                #if i < len(self.connectedDevice.DataStruct[field]):
+                #    currentRow.append(self.connectedDevice.DataStruct[field][i])
+                if i < len(DataStruct[field]):
+                    currentRow.append(DataStruct[field][i])
                 else:
                     currentRow.append("")
             data.append(currentRow)
@@ -173,7 +193,7 @@ class Backend(object):
         #-Return: None 
         self.connectedDevice.clearDataStructValues()
         self.connectedDevice.setDataBuffer("")
-        self.connectedDevice.ParsedData = ""
+        #self.connectedDevice.ParsedData = ""
         for chart in self.chartObjects:
             chart.clearData()
         # Confirm connection and attempt to reconnect maximum 5 times if not connected
@@ -206,6 +226,7 @@ class Backend(object):
         else:
             self.connectedDevice.disconnect()
         self.chartObjects = []
+
         
     ########################### Backend class helper functions ###############################
     # Helper for scanForDevices()    
@@ -229,8 +250,8 @@ class Backend(object):
         return availablePorts
 
     def printAllData(self):
-        for (key, value) in self.connectedDevice.DataStruct.items():
-            print(f"{key}: {value}")
+        #for (key, value) in self.connectedDevice.DataStruct.items():
+        #    print(f"{key}: {value}")
 
         for chart in self.chartObjects:
             print(f"Chart id: {chart.getId()}")
