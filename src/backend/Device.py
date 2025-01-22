@@ -68,7 +68,7 @@ class Device(object):
             dataToParse = ""
 
         if dataToParse != "" :
-            print(dataToParse)
+            #print(dataToParse)
             returnDict = {}
             dataSegments = re.split(',', dataToParse)
             items  = dataSegments[:-1]
@@ -98,6 +98,7 @@ class BluetoothDevice(Device):
         try:
             dataString = data.decode('utf-8')
             self.addToDataBuffer(dataString)
+            print(f"New notification: {dataString}")
         except:
             print("cannot convert notification to utf-8", flush=True)
         
@@ -207,23 +208,27 @@ class BluetoothDevice(Device):
 
     async def getData(self): 
         self.setDataBuffer("")
-        if self.Method == "notify":
+        #if self.Method == "notify":
+        await self.client.start_notify(self.characteristicUUID, self.callback)
+        while not self.TerminateSession.is_set():
+            await asyncio.sleep(0.5)   
+        await self.client.stop_notify(self.characteristicUUID)
+        await asyncio.sleep(0.5)
+        print("unsubscribing to notifications")
+        '''else:
+            data = None
             await self.client.start_notify(self.characteristicUUID, self.callback)
-            while not self.TerminateSession.is_set():
-                await asyncio.sleep(0.5)   
-            await self.client.stop_notify(self.characteristicUUID)
-            await asyncio.sleep(0.5)
-            print("unsubscribing to notifications")
-        else:
-            data = None 
             while not self.TerminateSession.is_set():
                 while data is None:
                     data = await self.client.read_gatt_char(self.characteristicUUID) 
                 try:
                     dataString = data.decode("utf-8")
+                    #print(dataString)
                 finally:
 
-                    self.addToDataBuffer(dataString)
+                    #self.addToDataBuffer(dataString)
+                    await asyncio.sleep(0.5)
+            await self.client.stop_notify(self.characteristicUUID)'''
         
 
 # This class if for devices that use serial port profile (SPP) 
@@ -271,7 +276,10 @@ class SerialDevice(Device):
                     numWaitingBytes = self.serialObject.in_waiting
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
-                self.addToDataBuffer(dataString)       
+                self.addToDataBuffer(dataString)
+                print(dataString)
+
+    
             except:
                 print("an error occurred") 
 
