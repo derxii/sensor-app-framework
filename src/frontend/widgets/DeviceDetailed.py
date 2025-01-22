@@ -1,3 +1,4 @@
+import math
 from typing import Callable
 from PySide6.QtWidgets import (
     QVBoxLayout,
@@ -10,9 +11,16 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtGui import QFont, Qt, QIcon
-from PySide6.QtCore import QSize, QTimer
+from PySide6.QtCore import QSize, QTimer, QThread
 
-from frontend.config import dynamically_repaint_widget, get_image_path
+from frontend.config import (
+    dynamically_repaint_widget,
+    get_backend,
+    get_image_path,
+    handle_exception,
+    is_debug,
+)
+from frontend.thread.Worker import Worker
 from frontend.widgets.Loader import Loader
 from frontend.widgets.ResetButton import ResetButton
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -29,9 +37,13 @@ class DeviceDetailed(ScrollableWindow):
         super().__init__(switch_window)
         self.name = QLabel(name)
         self.address = QLabel(address)
-        self.rssi = QLabel(f"{rssi}dBm")
+        self.rssi = QLabel(f"{'Unknown ' if math.isinf(rssi) else rssi}dBm")
 
-        if rssi < -95:
+        self.thread = QThread()
+
+        if math.isinf(rssi):
+            strength = "Unknown"
+        elif rssi < -95:
             strength = "No Signal"
         elif rssi < -85:
             strength = "Poor"
@@ -130,7 +142,29 @@ class DeviceDetailed(ScrollableWindow):
         self.restart_button.disable_button()
         dynamically_repaint_widget(self.connect_button)
 
-        QTimer.singleShot(2000, self.on_connect_fail)
+        if is_debug():
+            QTimer.singleShot(0, lambda: self.on_connect_success())
+        else:
+            self.worker = Worker(
+                self.thread,
+                get_backend().connectToDevice,
+                self.handle_exceptions,
+                self.name.text(),
+                self.address.text(),
+            )
+            self.worker.cancel_thread_on_timeout(15)
+            self.worker.func_done.connect(self.handle_done_connect)
+            self.thread.start()
+
+    def handle_exceptions(self, e: Exception):
+        handle_exception(e)
+        self.reset_ui()
+
+    def handle_done_connect(self, success: bool):
+        if success:
+            self.on_connect_success()
+        else:
+            self.on_connect_fail()
 
     def on_connect_success(self):
         self.loader.stop_animation()
@@ -143,8 +177,6 @@ class DeviceDetailed(ScrollableWindow):
         )
 
     def on_connect_fail(self):
-        self.loader.stop_animation()
-
         message_box = QMessageBox()
         message_box.setWindowTitle("Connection Status")
         message_box.setText(f"{self.name.text()} Connection Failed")
@@ -158,6 +190,10 @@ class DeviceDetailed(ScrollableWindow):
         )
         message_box.exec()
 
+        self.reset_ui()
+
+    def reset_ui(self):
+        self.loader.stop_animation()
         self.connect_button.setDisabled(False)
         self.restart_button.setDisabled(False)
         self.connect_button.setObjectName("connect-button")
