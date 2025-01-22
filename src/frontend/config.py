@@ -76,7 +76,8 @@ def handle_exception(
 
     message_box = QMessageBox()
     message_box.setWindowTitle("Error")
-    message_box.setText(f"Error: {message if message else str(e)}")
+    message_box.setText(f"{'Fatal ' if critical_error else ''}Error: {message if message else str(e)}")
+    message_box.setInformativeText("Please try again.")
     message_box.setIconPixmap(QIcon(get_image_path("icon.svg")).pixmap(QSize(64, 64)))
     message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
     message_box.setDefaultButton(QMessageBox.StandardButton.Ok)

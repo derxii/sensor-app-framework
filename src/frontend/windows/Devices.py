@@ -68,7 +68,7 @@ class Devices(ScrollableWindow):
         layout.addWidget(self.separator)
 
         self.right_container_detailed.setMinimumWidth(
-            default_width - left_container_width - 100
+            default_width - left_container_width - 200
         )
         self.right_container_detailed.setLayout(self.right_container_layout)
 
