@@ -19,7 +19,8 @@ import json
 # -Consider storing data in a .json file 
 # -Re implement Chart.getData()
 # -Complete getChartData()
-
+# data should be sent to the program in the following format: <sensor1>: dataval, <sensor2>: dataval, <sensor3>: dataval, \n
+# note that the last comma is needed 
 
 class Backend(object):
     def __init__(self):
