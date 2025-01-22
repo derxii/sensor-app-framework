@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Coroutine
+from typing import Any, Callable, Coroutine
 from PySide6.QtCore import QObject, Signal, QTimer, QThread
 
 
@@ -11,7 +11,7 @@ class Worker(QObject):
         self,
         thread: QThread,
         func: Coroutine[Any, Any, Any],
-        exception_handlder,
+        exception_handlder: Callable[[Exception], any],
         *args: any,
         **kwargs: any,
     ):
