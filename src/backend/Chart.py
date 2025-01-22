@@ -13,11 +13,22 @@ class Chart(object):
         self.yLabel = ylabel
         self.SensorNames = sensorNames
         self.SensorData = {}
+        self.CurrentSensorData = {}
         self.Type = type    
         for sensor in sensorNames:
             self.SensorData[sensor] = []
+        for sensor in sensorNames:
+            self.CurrentSensorData[sensor] = []
 
-    def getData(self):
+    # returns data received since the last time getCurrentData was called. This function should be used when plotting live data 
+    def getRecentData(self):
+        returnData = self.CurrentSensorData
+        for sensor in self.CurrentSensorData.keys():
+            for sensor in self.SensorNames:
+                self.CurrentSensorData[sensor] = []
+        return returnData
+
+    def getAllData(self):
         return self.SensorData
     
     def addData(self, dataDict):
@@ -25,6 +36,7 @@ class Chart(object):
             if sensor in self.SensorNames:
                 for val in dataVal:
                     self.SensorData[sensor].append(val)
+                    self.CurrentSensorData[sensor].append(val)
 
     def getLastDataPoint(self, sensorName):
         return self.SensorData[sensorName][-1] #check that no error occurs
