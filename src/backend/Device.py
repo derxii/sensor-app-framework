@@ -7,7 +7,9 @@ import serial.tools.list_ports
 import serial
 import threading 
 import time
-
+import json 
+import os 
+import tempfile
 class Device(object):
 
     def __init__(self, name, address, type):
@@ -16,11 +18,15 @@ class Device(object):
         self.Sensors = set()  #[] # sensors # List of strings 
         self.ConnectedDevice = None
         self.DataBuffer = ""
-        self.DataStruct = {} # Separated into sensor data
+        #self.DataStruct = {} # Separated into sensor data
         self.Type = type # Type is either "Bluetooth" or "Serial"
         self.Lock = threading.Lock()
         self.TerminateSession = threading.Event()
-        self.ParsedData = ""
+        #self.ParsedData = ""
+        self.TempDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
+        self.DataFilename = self.TempDataFile.name #"deviceData.json"
+        self.TempRawDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
+        self.RawDataFilename = self.TempRawDataFile.name#"rawData.json"
 
     def clearTerminateSession(self):
         self.TerminateSession.clear()
@@ -33,20 +39,48 @@ class Device(object):
 
     def addToDataBuffer(self,dataString):
         with self.Lock:
+            with open(self.RawDataFilename, "r") as file:
+                rawData = json.load(file)
+                #dataBuffer = rawData["DataBuffer"]
+            rawData["DataBuffer"] += dataString
+            with open(self.RawDataFilename, "w") as file:
+                json.dump(rawData, file, indent=4)
             self.DataBuffer += dataString
 
     def setDataBuffer(self, dataString):
+        rawData = {}
+        rawData["DataBuffer"] = dataString
         with self.Lock:
             self.DataBuffer = dataString
+            with open(self.RawDataFilename, "w") as file:
+                json.dump(rawData, file, indent=4)
 
     def getDataBuffer(self):
         with self.Lock:
             dataString = self.DataBuffer
-        return dataString
+            with open(self.RawDataFilename, "r") as file:
+                rawData = json.load(file)
+        return rawData["DataBuffer"]
 
+    def getDataFileName(self):
+        return self.DataFilename 
+    
     def formatDataStruct(self):
+        deviceData = {}
+        dataStruct = {}
         for sensor in self.Sensors:
-            self.DataStruct[sensor] = []
+            dataStruct[sensor] = []
+        deviceData["DataStruct"] = dataStruct
+        deviceData["ParsedData"] = ""
+        
+        with open(self.DataFilename, "w") as file:
+            json.dump(deviceData, file, indent=4)
+
+        with open(self.RawDataFilename, "w") as file:
+            rawDataStruct = {}
+            rawDataStruct["DataBuffer"] = ""
+            json.dump(rawDataStruct, file, indent=4)
+
 
     def getSensorNames(self):
         return self.Sensors
@@ -55,14 +89,31 @@ class Device(object):
         self.Sensors = sensors
 
     def clearDataStructValues(self):
-        for key in self.DataStruct.keys():
-            self.DataStruct[key] = [] 
-    
+        #for key in self.DataStruct.keys():
+        #    self.DataStruct[key] = [] 
+        pass
+
+    def deleteJSONFiles(self):
+        if os.path.isfile(self.DataFilename):
+            try:
+                os.remove(self.DataFilename)
+            except:
+                print(f"Error: could not delete {self.DataFilename}")
+        if os.path.isfile(self.RawDataFilename):
+            try:
+                os.remove(self.RawDataFilename)
+            except:
+                print(f"Error: could not delete {self.RawDataFilename}")
     
     def parseData(self):
         try:
             buffer = re.sub('\s', '', self.getDataBuffer()) 
-            parsedData = re.sub('\s', '', self.ParsedData) 
+            with open(self.DataFilename, "r") as file:
+                jsonData = json.load(file)
+            DataStruct = jsonData["DataStruct"] 
+            jsonParsedData = jsonData["ParsedData"] 
+            parsedData = re.sub('\s', '', jsonParsedData) 
+            
             dataToParse = re.sub(parsedData,"", buffer)
         except:
             dataToParse = ""
@@ -74,13 +125,21 @@ class Device(object):
             items  = dataSegments[:-1]
             dataToParse = ",".join(items)
             dataGroups = re.findall("<(\w+)>:([0-9\.\-]*)", dataToParse)
+
+            
             for (sensor, dataVal) in dataGroups:
-                if sensor in self.DataStruct.keys():
-                    self.DataStruct[sensor].append(dataVal)
+                if sensor in DataStruct.keys():
+                    DataStruct[sensor].append(dataVal)
                     if sensor not in returnDict.keys():
                         returnDict[sensor] = []
                     returnDict[sensor].append(dataVal)
-            self.ParsedData += dataToParse    
+            jsonParsedData += dataToParse    
+
+            deviceData = {}
+            deviceData["DataStruct"] = DataStruct
+            deviceData["ParsedData"] = jsonParsedData
+            with open(self.DataFilename, "w") as file:
+                json.dump(deviceData, file, indent=4)
             return returnDict
         return None
               
