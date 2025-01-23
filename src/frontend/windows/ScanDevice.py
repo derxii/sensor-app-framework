@@ -5,11 +5,11 @@ from typing import Callable
 
 from frontend.config import (
     get_backend,
-    get_debug_scan_devices,
     handle_exception,
     is_debug,
 )
 
+from frontend.DebugData import get_debug_scan_devices
 from frontend.thread.Worker import Worker
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
