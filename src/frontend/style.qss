@@ -66,3 +66,8 @@ Button#connect-button {
 Button#connect-button::pressed {
     background:rgb(0, 103, 214);
 }
+
+Button#reset-button-icon {
+    border: 2px solid red;
+    background: white;
+}

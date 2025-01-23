@@ -20,7 +20,12 @@ class Welcome(ScrollableWindow):
             + "custom charts via a Bluetooth connection."
         )
 
-        self.connect_button = Button("Scan Bluetooth Devices", QIcon(get_image_path("bluetooth.svg")), "scan-button", "scan-text")
+        self.connect_button = Button(
+            "Scan Bluetooth Devices",
+            QIcon(get_image_path("bluetooth.svg")),
+            "scan-button",
+            "scan-text",
+        )
 
         self.connect_button.clicked.connect(
             lambda: self.switch_window(ScanDevice(self.switch_window))

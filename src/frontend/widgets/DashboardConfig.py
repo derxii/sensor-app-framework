@@ -1,3 +1,4 @@
+from typing import Callable
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QFrame
 from PySide6.QtGui import QFont
 
@@ -6,10 +7,12 @@ from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
 class DashboardConfig(QWidget):
-    def __init__(self, sensor_names: set[str]):
+    def __init__(
+        self, sensor_names: set[str], switch_window: Callable[[QWidget], None]
+    ):
         super().__init__()
 
-        self.sensor_scroll = ScrollableWindow(None)
+        self.sensor_scroll = ScrollableWindow(switch_window)
 
         self.sensor_title = QLabel("Detected Sensors")
         self.sensor_labels: list[QLabel] = []
@@ -18,7 +21,7 @@ class DashboardConfig(QWidget):
 
         self.horizontal_separator = QFrame()
 
-        self.dashboard_button_group = DashboardButtonGroup()
+        self.dashboard_button_group = DashboardButtonGroup(switch_window)
 
         self.init_ui()
 

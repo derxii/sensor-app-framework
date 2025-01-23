@@ -16,7 +16,7 @@ class Dashboard(ScrollableWindow):
         else:
             self.sensor_names: set[str] = get_backend().listSensorNames()
 
-        self.left_container = DashboardConfig(self.sensor_names)
+        self.left_container = DashboardConfig(self.sensor_names, switch_window)
         self.vertical_separator = QFrame()
         self.right_container = QWidget()
 
