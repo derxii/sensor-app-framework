@@ -44,6 +44,7 @@ def is_debug():
     args = parser.parse_args()
     return args.debug
 
+
 def set_backend():
     QCoreApplication.instance().setProperty("backend", Backend())
 
