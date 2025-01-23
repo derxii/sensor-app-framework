@@ -4,3 +4,9 @@ def get_debug_scan_devices():
     ]
     data += [("long device name", "NDKA92N-24124-1241", 9)]
     return data
+
+
+def get_debug_sensor_names():
+    data = {f"Sensor {i}" for i in range(1)}
+    data.add("very long sensor name" * 2)
+    return data

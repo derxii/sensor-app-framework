@@ -24,6 +24,7 @@ class Button(QPushButton):
             self.setIcon(self.icon)
 
         button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
         self.button_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.button_label.setObjectName(self.text_name)
         button_layout.addWidget(self.button_label)
