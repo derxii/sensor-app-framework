@@ -10,13 +10,23 @@ import threading
 import csv
 import os 
 import json
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
+# Plotting libraries 
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
+import sys
+import random
+from PyQt6.QtCore import QTimer
+from queue import Queue
 # TO DO: 
-# -change json files to temporary json files and store in a temporary directory
+# -Add timestamp for data where t=0 is when the data was received 
+# -deal with frontend timeout
 # -Simulate chart plotting 
 # -Update backend.txt on laptop and in git repo
 # -Fix issue where read method is checked for when conditions for notify method are satisfied
-# -Consider storing data in a .json file 
 # -Re implement Chart.getData()
 # -Complete getChartData()
 # data should be sent to the program in the following format: <sensor1>: dataval, <sensor2>: dataval, <sensor3>: dataval, \n
@@ -24,6 +34,7 @@ import json
 
 class Backend(object):
     def __init__(self):
+        self.figures = []
         self.chartObjects = []
         self.stopSession = threading.Event()
     async def scanForDevices(self):
@@ -57,6 +68,12 @@ class Backend(object):
         chartOb = Chart(id, chartTitle, xlabel, ylabel, sensorNames, type)
         self.chartObjects.append(chartOb)
 
+        #figureTuple = self.createFigure()
+        #self.figures.append(figureTuple)
+
+    # The following code is to simulate plotting 
+    
+
     def getChartObjects(self):
         return self.chartObjects
 
@@ -72,14 +89,7 @@ class Backend(object):
         chartInfo["yLabel"] = chart.getyLabel()
         chartInfo["Type"] = chart.getType()
         chartInfo["Sensors"] = chart.getSensors()
-    '''
-    def getChartData(self,id):
-        sensorNames = self.getChart(id).SensorNames
-        chartData = {}
-        for sensor in sensorNames:
-            chartData[sensor] = self.connectedDevice.DataStruct[sensor]
-        return chartData
-    '''
+    
     def getAllChartData(self, id):
         return self.getChart(id).getAllData()
     
@@ -127,8 +137,7 @@ class Backend(object):
             # Add data to charts 
             for chart in self.chartObjects:
                 chart.addData(dataDict)
-                
-            
+           
     async def endSession(self):
         #-Description: ends a session
         #-Parameters: None 
@@ -263,7 +272,86 @@ class Backend(object):
             for (key, value) in chart.getData().items():
                 print(f"{key}: {value}")
 
+def updateChart(frame):
+    pass
+
     ############################################## TESTING CODE ########################################################
+class LiveDataPlot(QMainWindow):
+    def __init__(self, backend):
+        super().__init__()
+        self.Backend = backend
+        # Set up the main window
+        self.setWindowTitle("Live Data Plotting with PyQt6")
+        self.setGeometry(100, 100, 800, 600)
+
+        # Set up the central widget and layout
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        layout = QVBoxLayout()
+        self.central_widget.setLayout(layout)
+
+        # Create a pyqtgraph PlotWidget
+        self.plot_widget = PlotWidget()
+        layout.addWidget(self.plot_widget)
+
+        # Set up the plot
+        self.plot_widget.setBackground('w')  # Set background to white
+        self.plot_widget.setTitle("Live Data Plot", color="b", size="20pt")
+        self.plot_widget.setLabel("left", "Value", color="r", size="14pt")
+        self.plot_widget.setLabel("bottom", "Time", color="r", size="14pt")
+        self.plot_widget.addLegend()
+
+        # Add a plot line
+        self.plot_line = self.plot_widget.plot(pen=pg.mkPen(color='b', width=2), name="Random Data")
+
+        # Initialize data
+        self.x_data = []
+        self.y_data = []
+
+        # Set up a QTimer for live updates
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_plot)
+        self.timer.start(100)  # Update every 100 ms
+
+        # Counter for x-axis
+        self.counter = 0
+
+    def update_plot(self):
+        """Updates the plot with new random data."""
+        #self.counter += 1
+        #self.x_data.append(self.counter)  # Increment x-axis data
+        #chart = self.Backend.getChart(0)
+        dataDict = self.Backend.getRecentChartData(0)#chart.getRecentData()
+        
+        data = []
+        for key in dataDict.keys():
+            data = dataDict[key]
+            print(key)
+            
+        #self.x_data.append(len(data))
+        dataSize = data.qsize()
+        #self.x_data.append(dataSize)
+        #print(data)
+        for i in range(dataSize):
+           val = float(data.get())
+           self.y_data.append(val) 
+           self.counter += 1
+           self.x_data.append(self.counter)
+           #print(f"{val} ", end="")
+           #print("")
+        #chartData = []
+
+        #for val in data:
+        #    self.y_data.append(float(val))
+        #if len(data) != 0:
+            #self.y_data.append(chartData)  # Add random y-axis data
+
+            # Limit the data to keep the plot from growing indefinitely
+        #self.x_data = self.x_data[-100:]  # Keep only the last 100 points
+        #self.y_data = self.y_data[-100:]
+
+            # Update the plot
+        self.plot_line.setData(self.x_data, self.y_data)
 
 # Main shows the order and usage of backend functions
 async def main():
@@ -306,12 +394,19 @@ async def main():
         if userInput == "1":
             backend.clearSession()
             await backend.startSession()
-        userInput = input("Press 2 to end session: ")
 
-        if userInput == "2":
+        # Comment out the following lines of code to run the program like normal
+        app = QApplication(sys.argv)
+        main_window = LiveDataPlot(backend)
+        main_window.show()
+        sys.exit(app.exec())
+        # End of comment section
+
+        userInput = input("Press 2 to end session: ")
+        if userInput == "2":    
             await backend.endSession()
         
-
+    
         userInput = input("Would you like to save the data to a csv file? (y/n): ")
         if userInput == "y":
             filename = input("What would you like to save the filename as?: ")
