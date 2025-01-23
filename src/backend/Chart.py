@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tempfile
 import json
+import threading
+from queue import Queue
 # TO DO: 
 # - change getData()
 # - Change the chart class so that it only stores recent data and stores the rest of the data in a json file
@@ -14,11 +16,12 @@ class Chart(object):
         self.xLabel = xlabel
         self.yLabel = ylabel
         self.SensorNames = sensorNames
+        self.chartLock = threading.Lock()
         #self.SensorData = {}
         self.CurrentSensorData = {}
         self.Type = type
-        self.TempChartFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False) # This file contains all the chart data 
-        self.ChartFilename = self.TempChartFile.name 
+        #self.TempChartFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False) # This file contains all the chart data 
+        self.ChartFilename = "chart.json" #self.TempChartFile.name 
 
         SensorData = {}   
         for sensor in sensorNames:
@@ -26,14 +29,14 @@ class Chart(object):
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
         for sensor in sensorNames:
-            self.CurrentSensorData[sensor] = []
+            self.CurrentSensorData[sensor] = Queue()  #[] #[]
 
     # returns data received since the last time getCurrentData was called. This function should be used when plotting live data 
     def getRecentData(self):
+        #with self.chartLock:
         returnData = self.CurrentSensorData
-        for sensor in self.CurrentSensorData.keys():
-            for sensor in self.SensorNames:
-                self.CurrentSensorData[sensor] = []
+        #for sensor in self.CurrentSensorData.keys():
+            #self.CurrentSensorData[sensor] = []
         return returnData
 
     def getAllData(self):
@@ -46,10 +49,12 @@ class Chart(object):
             SensorData = json.load(file)
         for (sensor, dataVal) in dataDict.items():
             if sensor in self.SensorNames:
+                #with self.chartLock:
                 for val in dataVal:
                     SensorData[sensor].append(val)
                     #self.SensorData[sensor].append(val)
-                    self.CurrentSensorData[sensor].append(val)
+                    #self.CurrentSensorData[sensor].append(val)
+                    self.CurrentSensorData[sensor].put(val)
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
 
