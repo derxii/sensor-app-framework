@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QLabel, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QGraphicsOpacityEffect
 from PySide6.QtGui import Qt, QFont
 from typing import Optional
 
@@ -9,6 +9,9 @@ class Button(QPushButton):
         self.icon = icon
         self.button_name = button_name
         self.text_name = text_name
+
+        self.opacity = QGraphicsOpacityEffect()
+        self.opacity.setOpacity(0.3)
         
         self.button_label = QLabel(text)
 
@@ -29,3 +32,18 @@ class Button(QPushButton):
 
     def add_text_font(self, text_font: QFont):
         self.button_label.setFont(text_font)
+
+    def setDisabled(self, arg__1: bool):
+        if arg__1:
+            self.setGraphicsEffect(self.opacity)
+        else:
+            self.setEnabled(True)
+        super().setDisabled(arg__1)
+
+
+    def setEnabled(self, arg__1: bool):
+        if arg__1:
+            self.setGraphicsEffect(None)
+        else:
+            self.setDisabled(True)
+        super().setEnabled(arg__1)

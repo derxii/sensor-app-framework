@@ -6,7 +6,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QSizePolicy,
     QHBoxLayout,
-    QPushButton,
     QSystemTrayIcon,
     QMessageBox,
 )
@@ -14,15 +13,16 @@ from PySide6.QtGui import QFont, Qt, QIcon
 from PySide6.QtCore import QSize, QTimer, QThread
 
 from frontend.config import (
-    dynamically_repaint_widget,
     get_backend,
     get_image_path,
     handle_exception,
     is_debug,
 )
 from frontend.thread.Worker import Worker
+from frontend.widgets.Button import Button
 from frontend.widgets.Loader import Loader
 from frontend.widgets.ResetButton import ResetButton
+from frontend.windows.Dashboard import Dashboard
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
@@ -55,8 +55,7 @@ class DeviceDetailed(ScrollableWindow):
         self.loader = Loader(200)
 
         self.restart_button = ResetButton(True, self.switch_window)
-        self.connect_button = QPushButton("Connect")
-
+        self.connect_button = Button("Connect", None, "connect-button", "white")
         self.connect_button.clicked.connect(self.connect)
 
         self.init_ui()
@@ -95,10 +94,9 @@ class DeviceDetailed(ScrollableWindow):
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
         )
 
-        self.connect_button.setObjectName("connect-button")
         connect_font = QFont()
         connect_font.setWeight(QFont.Weight.DemiBold)
-        self.connect_button.setFont(connect_font)
+        self.connect_button.add_text_font(connect_font)
         self.connect_button.setMinimumWidth(150)
 
         bottom_layout.addWidget(self.restart_button)
@@ -157,9 +155,7 @@ class DeviceDetailed(ScrollableWindow):
         self.loader.start_animation()
         self.connect_button.setDisabled(True)
         self.restart_button.setDisabled(True)
-        self.connect_button.setObjectName("disabled")
         self.restart_button.disable_button()
-        dynamically_repaint_widget(self.connect_button)
 
         if is_debug():
             QTimer.singleShot(0, lambda: self.handle_done_connect(True))
@@ -194,6 +190,7 @@ class DeviceDetailed(ScrollableWindow):
             QIcon(get_image_path("icon.svg")),
             3000,
         )
+        self.switch_window(Dashboard(self.switch_window))
 
     def on_connect_fail(self):
         message_box = QMessageBox()
@@ -215,9 +212,7 @@ class DeviceDetailed(ScrollableWindow):
         self.loader.stop_animation()
         self.connect_button.setDisabled(False)
         self.restart_button.setDisabled(False)
-        self.connect_button.setObjectName("connect-button")
         self.restart_button.enable_button()
-        dynamically_repaint_widget(self.connect_button)
         self.set_press_device_enabled(True)
 
     def get_strength_from_rssi(self, rssi: int):
