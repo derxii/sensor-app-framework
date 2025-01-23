@@ -90,6 +90,7 @@ class DeviceDetailed(ScrollableWindow):
 
         bottom_container = QWidget()
         bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(9, 0, 9, 0)
         bottom_layout.setAlignment(
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
         )
@@ -154,7 +155,6 @@ class DeviceDetailed(ScrollableWindow):
         self.set_press_device_enabled(False)
         self.loader.start_animation()
         self.connect_button.setDisabled(True)
-        self.restart_button.setDisabled(True)
         self.restart_button.disable_button()
 
         if is_debug():
@@ -211,7 +211,6 @@ class DeviceDetailed(ScrollableWindow):
     def reset_ui(self):
         self.loader.stop_animation()
         self.connect_button.setDisabled(False)
-        self.restart_button.setDisabled(False)
         self.restart_button.enable_button()
         self.set_press_device_enabled(True)
 

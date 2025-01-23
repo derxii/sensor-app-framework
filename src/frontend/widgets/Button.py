@@ -1,9 +1,16 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QGraphicsOpacityEffect
-from PySide6.QtGui import Qt, QFont
+from PySide6.QtGui import Qt, QFont, QIcon
 from typing import Optional
 
+
 class Button(QPushButton):
-    def __init__(self, text: str, icon: Optional[str] = None, button_name: str = "",text_name: str = ""):
+    def __init__(
+        self,
+        text: str,
+        icon: Optional[QIcon] = None,
+        button_name: str = "",
+        text_name: str = "",
+    ):
         super().__init__("")
         self.text = text
         self.icon = icon
@@ -12,7 +19,7 @@ class Button(QPushButton):
 
         self.opacity = QGraphicsOpacityEffect()
         self.opacity.setOpacity(0.3)
-        
+
         self.button_label = QLabel(text)
 
         self.init_ui()
@@ -41,10 +48,17 @@ class Button(QPushButton):
             self.setEnabled(True)
         super().setDisabled(arg__1)
 
-
     def setEnabled(self, arg__1: bool):
         if arg__1:
             self.setGraphicsEffect(None)
         else:
             self.setDisabled(True)
         super().setEnabled(arg__1)
+
+    def set_icon(self, icon: QIcon):
+        self.icon = icon
+        self.setIcon(icon)
+
+    def change_text(self, text: str):
+        self.text = text
+        self.button_label.setText(text)
