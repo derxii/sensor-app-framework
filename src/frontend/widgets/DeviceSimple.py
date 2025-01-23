@@ -100,5 +100,5 @@ class DeviceSimple(QWidget):
 
     def generate_detailed_view(self, switch_window: Callable[[QWidget], None]):
         return DeviceDetailed(
-            self.name.text(), self.address.text(), self.rssi, switch_window
+            self.name.text(), self.address.text(), self.rssi, switch_window, self.parentWidget().setEnabled
         )

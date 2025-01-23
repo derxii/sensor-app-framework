@@ -33,11 +33,13 @@ class DeviceDetailed(ScrollableWindow):
         address: str,
         rssi: int,
         switch_window: Callable[[QWidget], None],
+        set_press_device_enabled: Callable[[bool], None],
     ):
         super().__init__(switch_window)
         self.name = QLabel(name)
         self.address = QLabel(address)
         self.rssi = QLabel(f"{'Unknown ' if math.isinf(rssi) else rssi}dBm")
+        self.set_press_device_enabled = set_press_device_enabled
 
         self.thread = QThread()
 
@@ -151,6 +153,7 @@ class DeviceDetailed(ScrollableWindow):
         return container
 
     def connect(self):
+        self.set_press_device_enabled(False)
         self.loader.start_animation()
         self.connect_button.setDisabled(True)
         self.restart_button.setDisabled(True)
@@ -159,7 +162,7 @@ class DeviceDetailed(ScrollableWindow):
         dynamically_repaint_widget(self.connect_button)
 
         if is_debug():
-            QTimer.singleShot(0, lambda: self.on_connect_success())
+            QTimer.singleShot(0, lambda: self.handle_done_connect(True))
         else:
             self.worker = Worker(
                 self.thread,
@@ -215,6 +218,7 @@ class DeviceDetailed(ScrollableWindow):
         self.connect_button.setObjectName("connect-button")
         self.restart_button.enable_button()
         dynamically_repaint_widget(self.connect_button)
+        self.set_press_device_enabled(True)
 
     def get_strength_from_rssi(self, rssi: int):
         if math.isinf(rssi):
