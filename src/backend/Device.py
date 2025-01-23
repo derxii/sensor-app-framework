@@ -118,7 +118,7 @@ class Device(object):
         except:
             dataToParse = ""
 
-        if dataToParse != "" :
+        if dataToParse != "" and re.sub(",", "", dataToParse) != "":
             #print(dataToParse)
             returnDict = {}
             dataSegments = re.split(',', dataToParse)
@@ -157,7 +157,7 @@ class BluetoothDevice(Device):
         try:
             dataString = data.decode('utf-8')
             self.addToDataBuffer(dataString)
-            print(f"New notification: {dataString}")
+            #print(f"New notification: {dataString}")
         except:
             print("cannot convert notification to utf-8", flush=True)
         
