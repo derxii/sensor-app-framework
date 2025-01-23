@@ -1,5 +1,5 @@
 import math
-from typing import Callable
+from typing import Callable, Optional
 from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
@@ -41,20 +41,14 @@ class DeviceDetailed(ScrollableWindow):
 
         self.thread = QThread()
 
-        if math.isinf(rssi):
-            strength = "Unknown"
-        elif rssi < -95:
-            strength = "No Signal"
-        elif rssi < -85:
-            strength = "Poor"
-        elif rssi < -75:
-            strength = "Fair"
-        elif rssi < -65:
-            strength = "Good"
+        strength_text, strength_image = self.get_strength_from_rssi(rssi)
+        self.signal_strength = QLabel(strength_text)
+        if strength_image:
+            self.signal_image = QLabel()
+            image = QIcon(get_image_path(strength_image)).pixmap(QSize(16, 16))
+            self.signal_image.setPixmap(image)
         else:
-            strength = "Excellent"
-
-        self.signal_strength = QLabel(strength)
+            self.signal_image = None
 
         self.loader = Loader(200)
 
@@ -69,7 +63,7 @@ class DeviceDetailed(ScrollableWindow):
         root_layout = QVBoxLayout()
 
         name_font = QFont()
-        name_font.setPointSizeF(32)
+        name_font.setPointSizeF(24)
         name_font.setWeight(QFont.Weight.DemiBold)
         self.name.setFont(name_font)
         self.name.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -86,7 +80,9 @@ class DeviceDetailed(ScrollableWindow):
         )
         root_layout.addWidget(self.create_left_right_aligned_text(self.rssi, "RSSI"))
         root_layout.addWidget(
-            self.create_left_right_aligned_text(self.signal_strength, "Signal Strength")
+            self.create_left_right_aligned_text(
+                self.signal_strength, "Signal Strength", self.signal_image
+            )
         )
 
         root_layout.addWidget(self.loader, 3)
@@ -112,7 +108,9 @@ class DeviceDetailed(ScrollableWindow):
 
         self.bind_scroll(root_layout)
 
-    def create_left_right_aligned_text(self, text: QLabel, label: str):
+    def create_left_right_aligned_text(
+        self, text: QLabel, label: str, image: Optional[QLabel] = None
+    ):
         container = QWidget()
         container.setMaximumHeight(40)
         container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -123,13 +121,31 @@ class DeviceDetailed(ScrollableWindow):
         font.setPointSizeF(16)
 
         label_widget = QLabel(f"{label}: ")
-        label_widget.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        label_widget.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         label_widget.setFont(font)
         layout.addWidget(label_widget)
 
-        text.setAlignment(Qt.AlignmentFlag.AlignRight)
+        text.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         text.setFont(font)
-        layout.addWidget(text)
+
+        value_widget = text
+        if image:
+            value_container = QWidget()
+            container_layout = QHBoxLayout()
+            container_layout.setContentsMargins(0, 0, 0, 0)
+            container_layout.setAlignment(
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            )
+
+            image.setFixedSize(16, 16)
+            container_layout.addWidget(image)
+            container_layout.addWidget(text)
+            value_container.setLayout(container_layout)
+            value_widget = value_container
+
+        layout.addWidget(value_widget)
 
         container.setLayout(layout)
         return container
@@ -199,3 +215,25 @@ class DeviceDetailed(ScrollableWindow):
         self.connect_button.setObjectName("connect-button")
         self.restart_button.enable_button()
         dynamically_repaint_widget(self.connect_button)
+
+    def get_strength_from_rssi(self, rssi: int):
+        if math.isinf(rssi):
+            strength = "Unknown"
+            return strength, None
+        elif rssi < -95:
+            strength = "No Signal"
+            image = "none"
+        elif rssi < -85:
+            strength = "Poor"
+            image = "poor"
+        elif rssi < -75:
+            strength = "Fair"
+            image = "medium"
+        elif rssi < -65:
+            strength = "Good"
+            image = "medium"
+        else:
+            strength = " Excellent"
+            image = "excellent"
+
+        return strength, f"signal_{image}.svg"
