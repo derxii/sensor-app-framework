@@ -65,7 +65,7 @@ class DeviceDetailed(ScrollableWindow):
         root_layout = QVBoxLayout()
 
         name_font = QFont()
-        name_font.setPointSizeF(24)
+        name_font.setPointSizeF(32)
         name_font.setWeight(QFont.Weight.DemiBold)
         self.name.setFont(name_font)
         self.name.setAlignment(Qt.AlignmentFlag.AlignHCenter)
