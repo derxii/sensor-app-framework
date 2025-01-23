@@ -83,8 +83,8 @@ class DeviceSimple(QWidget):
     def select(self):
         if self.set_current_selected_device_index(self.index):
             self.setObjectName("selected")
-            self.name.setObjectName("selected")
-            self.address.setObjectName("selected")
+            self.name.setObjectName("white")
+            self.address.setObjectName("white")
             self.separator.setHidden(True)
             dynamically_repaint_widget(self, self.name, self.address)
 

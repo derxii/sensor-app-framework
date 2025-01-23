@@ -22,7 +22,7 @@ class Welcome(ScrollableWindow):
 
         self.connect_button = Button(
             "Scan Bluetooth Devices",
-            QIcon(get_image_path("bluetooth.svg")),
+            get_image_path("bluetooth.svg"),
             "scan-button",
             "scan-text",
         )

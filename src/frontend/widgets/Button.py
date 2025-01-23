@@ -1,24 +1,27 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QHBoxLayout, QGraphicsOpacityEffect
-from PySide6.QtGui import Qt, QFont, QIcon
-from typing import Optional
+from PySide6.QtGui import Qt, QFont, QIcon, QPixmap
+from typing import Optional, Union
 
 
 class Button(QPushButton):
     def __init__(
         self,
         text: str,
-        icon: Optional[QIcon] = None,
+        icon_image_path: Optional[str] = None,
         button_name: str = "",
         text_name: str = "",
     ):
         super().__init__("")
         self.text = text
-        self.icon = icon
+        self.icon: Union[QIcon, None] = None
+        if icon_image_path:
+            self.set_icon(icon_image_path)
+
         self.button_name = button_name
         self.text_name = text_name
 
-        self.opacity = QGraphicsOpacityEffect()
-        self.opacity.setOpacity(0.3)
+        self.opacity = QGraphicsOpacityEffect(self)
+        self.opacity.setOpacity(0.55)
 
         self.button_label = QLabel(text)
 
@@ -26,9 +29,6 @@ class Button(QPushButton):
 
     def init_ui(self):
         self.setObjectName(self.button_name)
-
-        if self.icon:
-            self.setIcon(self.icon)
 
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
@@ -44,20 +44,22 @@ class Button(QPushButton):
     def setDisabled(self, arg__1: bool):
         if arg__1:
             self.setGraphicsEffect(self.opacity)
+            super().setDisabled(arg__1)
         else:
             self.setEnabled(True)
-        super().setDisabled(arg__1)
 
     def setEnabled(self, arg__1: bool):
         if arg__1:
             self.setGraphicsEffect(None)
+            super().setEnabled(arg__1)
         else:
             self.setDisabled(True)
-        super().setEnabled(arg__1)
 
-    def set_icon(self, icon: QIcon):
-        self.icon = icon
-        self.setIcon(icon)
+    def set_icon(self, icon_image_path: str):
+        self.icon = QIcon()
+        self.icon.addPixmap(QPixmap(icon_image_path), QIcon.Mode.Normal)
+        self.icon.addPixmap(QPixmap(icon_image_path), QIcon.Mode.Disabled)
+        self.setIcon(self.icon)
 
     def change_text(self, text: str):
         self.text = text

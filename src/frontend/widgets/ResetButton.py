@@ -5,8 +5,9 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
 )
 from PySide6.QtGui import QFont
+from PySide6.QtCore import QSize
 
-from frontend.config import enable_custom_styling
+from frontend.config import enable_custom_styling, get_image_path
 from frontend.widgets.Button import Button
 
 
@@ -23,7 +24,10 @@ class ResetButton(QWidget):
             self.init_ui_simple()
         else:
             text = text.upper()
-            self.button = Button(text, None, "reset-button-icon", "red")
+            self.button = Button(
+                text, get_image_path("configure.svg"), "reset-button-icon", "red"
+            )
+            self.button.setIconSize(QSize(28, 28))
             self.init_ui()
             self.layout.setContentsMargins(0, 0, 0, 0)
             self.layout.addWidget(self.button)
@@ -59,9 +63,11 @@ class ResetButton(QWidget):
         self.switch_window(Welcome(self.switch_window))
 
     def disable_button(self):
+        if self.is_simple:
+            self.setGraphicsEffect(None)
         self.button.setDisabled(True)
-        self.setGraphicsEffect(None)
 
     def enable_button(self):
-        self.set_shadow()
+        if self.is_simple:
+            self.set_shadow()
         self.button.setEnabled(True)
