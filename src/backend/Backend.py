@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import sys
@@ -294,6 +294,10 @@ class LiveDataPlot(QMainWindow):
         self.plot_widget = PlotWidget()
         layout.addWidget(self.plot_widget)
 
+        # Add a button to pause/resume
+        self.pause_button = QPushButton("Stop")
+        layout.addWidget(self.pause_button)
+
         # Set up the plot
         self.plot_widget.setBackground('w')  # Set background to white
         self.plot_widget.setTitle("Live Data Plot", color="b", size="20pt")
@@ -307,51 +311,41 @@ class LiveDataPlot(QMainWindow):
         # Initialize data
         self.x_data = []
         self.y_data = []
+        self.is_paused = False
+        # Counter for x-axis
+        self.counter = 0
 
         # Set up a QTimer for live updates
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # Update every 100 ms
 
-        # Counter for x-axis
-        self.counter = 0
+        # Connect the pause button
+        self.pause_button.clicked.connect(self.toggle_pause)
+
+    def toggle_pause(self):
+        self.is_paused = not self.is_paused
+        self.pause_button.setText("Resume" if self.is_paused else "Stop")   
 
     def update_plot(self):
         """Updates the plot with new random data."""
         #self.counter += 1
         #self.x_data.append(self.counter)  # Increment x-axis data
         #chart = self.Backend.getChart(0)
-        dataDict = self.Backend.getRecentChartData(0)#chart.getRecentData()
+        if not self.is_paused:
+            dataDict = self.Backend.getRecentChartData(0)#chart.getRecentData()
         
-        data = []
-        for key in dataDict.keys():
-            data = dataDict[key]
-            print(key)
-            
-        #self.x_data.append(len(data))
-        dataSize = data.qsize()
-        #self.x_data.append(dataSize)
-        #print(data)
-        for i in range(dataSize):
-           val = float(data.get())
-           self.y_data.append(val) 
-           self.counter += 1
-           self.x_data.append(self.counter)
-           #print(f"{val} ", end="")
-           #print("")
-        #chartData = []
-
-        #for val in data:
-        #    self.y_data.append(float(val))
-        #if len(data) != 0:
-            #self.y_data.append(chartData)  # Add random y-axis data
-
-            # Limit the data to keep the plot from growing indefinitely
-        #self.x_data = self.x_data[-100:]  # Keep only the last 100 points
-        #self.y_data = self.y_data[-100:]
-
-            # Update the plot
-        self.plot_line.setData(self.x_data, self.y_data)
+            data = []
+            for key in dataDict.keys():
+                data = dataDict[key]
+                #print(key)
+            dataSize = data.qsize()
+            for i in range(dataSize):
+                val = float(data.get())
+                self.y_data.append(val) 
+                self.counter += 1
+                self.x_data.append(self.counter)
+            self.plot_line.setData(self.x_data, self.y_data)
 
 # Main shows the order and usage of backend functions
 async def main():
