@@ -20,9 +20,6 @@ class Button(QPushButton):
         self.button_name = button_name
         self.text_name = text_name
 
-        self.opacity = QGraphicsOpacityEffect(self)
-        self.opacity.setOpacity(0.55)
-
         self.button_label = QLabel(text)
 
         self.init_ui()
@@ -43,7 +40,9 @@ class Button(QPushButton):
 
     def setDisabled(self, arg__1: bool):
         if arg__1:
-            self.setGraphicsEffect(self.opacity)
+            opacity = QGraphicsOpacityEffect(self)
+            opacity.setOpacity(0.55)
+            self.setGraphicsEffect(opacity)
             super().setDisabled(arg__1)
         else:
             self.setEnabled(True)

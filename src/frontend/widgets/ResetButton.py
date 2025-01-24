@@ -27,7 +27,8 @@ class ResetButton(QWidget):
             self.button = Button(
                 text, get_image_path("configure.svg"), "reset-button-icon", "red"
             )
-            self.button.setIconSize(QSize(28, 28))
+            self.button.setIconSize(QSize(24, 24))
+            self.button.setFixedHeight(36)
             self.init_ui()
             self.layout.setContentsMargins(0, 0, 0, 0)
             self.layout.addWidget(self.button)
