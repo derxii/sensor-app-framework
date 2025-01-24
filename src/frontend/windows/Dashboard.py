@@ -4,6 +4,8 @@ from typing import Callable
 from frontend.DebugData import get_debug_sensor_names
 from frontend.config import get_backend, is_debug
 from frontend.widgets.DashboardConfig import DashboardConfig
+from frontend.widgets.DashboardStates.DashboardState import DashboardState
+from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
@@ -20,6 +22,10 @@ class Dashboard(ScrollableWindow):
         self.vertical_separator = QFrame()
         self.right_container = QWidget()
 
+        self.dashboard_state: DashboardState = StreamPrior(
+            self.change_state,
+            self.left_container.dashboard_button_group,
+        )
         self.init_ui()
 
     def init_ui(self):
@@ -35,3 +41,6 @@ class Dashboard(ScrollableWindow):
         layout.addWidget(self.right_container, 1)
 
         self.bind_scroll(layout)
+
+    def change_state(self, new_state: DashboardState):
+        self.dashboard_state = new_state
