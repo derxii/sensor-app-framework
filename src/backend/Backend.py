@@ -283,6 +283,7 @@ class LiveDataPlot(QMainWindow):
         # Set up the main window
         self.setWindowTitle("Live Data Plotting with PyQt6")
         self.setGeometry(100, 100, 800, 600)
+        self.allPlots = []
 
         # Set up the central widget and layout
         self.central_widget = QWidget()
@@ -298,19 +299,21 @@ class LiveDataPlot(QMainWindow):
         self.pause_button = QPushButton("Stop")
         layout.addWidget(self.pause_button)
 
-        # Set up the plot
-        self.plot_widget.setBackground('w')  # Set background to white
-        self.plot_widget.setTitle("Live Data Plot", color="b", size="20pt")
-        self.plot_widget.setLabel("left", "Value", color="r", size="14pt")
-        self.plot_widget.setLabel("bottom", "Time", color="r", size="14pt")
-        self.plot_widget.addLegend()
-
-        # Add a plot line
-        self.plot_line = self.plot_widget.plot(pen=pg.mkPen(color='b', width=2), name="Random Data")
-
-        # Initialize data
-        self.x_data = []
-        self.y_data = []
+        # Create all charts 
+        for chart in self.Backend.getChartObjects():
+            plot = PlotWidget()
+            layout.addWidget(plot)
+            self.setup_plot(plot, chart.getTitle())
+            line = plot.plot(pen=pg.mkPen(color='b', width=2))
+            plotDict = {}
+            plotDict["plot"] = plot
+            plotDict["line"] = line
+            plotDict["chartId"] = chart.getId()
+            plotDict["xData"] = []
+            plotDict["yData"] = []
+            plotDict["counter"] = 0
+            self.allPlots.append(plotDict)
+            #self.allPlots.append(plot)
         self.is_paused = False
         # Counter for x-axis
         self.counter = 0
@@ -319,9 +322,25 @@ class LiveDataPlot(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # Update every 100 ms
-
-        # Connect the pause button
         self.pause_button.clicked.connect(self.toggle_pause)
+
+        # Set up the plot
+    def setup_plot(self, plot_widget, title):
+        plot_widget.setBackground('w')
+        plot_widget.setTitle(title, color="k", size="16pt")
+        plot_widget.setLabel("left", "Value", color="b", size="12pt")
+        plot_widget.setLabel("bottom", "Time", color="b", size="12pt")
+            #self.plot_widget.addLegend()
+
+        # Add a plot line
+        #self.plot_line = self.plot_widget.plot(pen=pg.mkPen(color='b', width=2), name="Random Data")
+
+        # Initialize data
+        #self.x_data = []
+        #self.y_data = []
+        
+        # Connect the pause button
+        
 
     def toggle_pause(self):
         self.is_paused = not self.is_paused
@@ -332,20 +351,30 @@ class LiveDataPlot(QMainWindow):
         #self.counter += 1
         #self.x_data.append(self.counter)  # Increment x-axis data
         #chart = self.Backend.getChart(0)
+        #allCharts = self.Backend.getChartObjects()
         if not self.is_paused:
-            dataDict = self.Backend.getRecentChartData(0)#chart.getRecentData()
-        
-            data = []
-            for key in dataDict.keys():
-                data = dataDict[key]
-                #print(key)
-            dataSize = data.qsize()
-            for i in range(dataSize):
-                val = float(data.get())
-                self.y_data.append(val) 
-                self.counter += 1
-                self.x_data.append(self.counter)
-            self.plot_line.setData(self.x_data, self.y_data)
+
+            for i in range(0,len(self.allPlots)): #range(len(self.allPlots)):
+                chartId = int(self.allPlots[i]["chartId"])
+                
+                plot_line = self.allPlots[i]["line"]
+
+                dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
+            
+                data = []
+                for key in dataDict.keys():
+                    data = dataDict[key]
+                    #print(key)
+                dataSize = data.qsize()
+                for j in range(0,dataSize):
+                    val = float(data.get())
+                    print(val)
+                    self.allPlots[i]["yData"].append(val) 
+                    self.allPlots[i]["counter"] += 1
+                    self.allPlots[i]["xData"].append(self.allPlots[i]["counter"])
+
+                plot_line.setData(self.allPlots[i]["xData"], self.allPlots[i]["yData"])
+                self.allPlots[i]["line"] = plot_line 
 
 # Main shows the order and usage of backend functions
 async def main():
@@ -393,7 +422,8 @@ async def main():
         app = QApplication(sys.argv)
         main_window = LiveDataPlot(backend)
         main_window.show()
-        sys.exit(app.exec())
+        #sys.exit(app.exec())
+        app.processEvents()
         # End of comment section
 
         userInput = input("Press 2 to end session: ")
