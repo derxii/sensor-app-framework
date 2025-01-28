@@ -58,6 +58,8 @@ class DeviceDetailed(ScrollableWindow):
         self.connect_button = Button("Connect", None, "connect-button", "white")
         self.connect_button.clicked.connect(self.connect)
 
+        self.error_message = "Please ensure your device is paired and sending data in the correct format. If errors continue, check your Bluetooth connection."
+
         self.init_ui()
 
     def init_ui(self):
@@ -172,7 +174,7 @@ class DeviceDetailed(ScrollableWindow):
             self.thread.start()
 
     def handle_exceptions(self, e: Exception):
-        handle_exception(e)
+        handle_exception(e, None, None, self.error_message)
         self.reset_ui()
 
     def handle_done_connect(self, success: bool):
@@ -196,9 +198,7 @@ class DeviceDetailed(ScrollableWindow):
         message_box = QMessageBox()
         message_box.setWindowTitle("Connection Status")
         message_box.setText(f"{self.name.text()} Connection Failed")
-        message_box.setInformativeText(
-            "Please try connecting again or use " + "another Bluetooth device."
-        )
+        message_box.setInformativeText(self.error_message)
         message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         message_box.setDefaultButton(QMessageBox.StandardButton.Ok)
         message_box.setIconPixmap(
