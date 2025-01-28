@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QPushButton, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QHBoxLayout
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QFont
 
@@ -6,6 +6,8 @@ from frontend.config import enable_custom_styling
 
 
 from typing import TYPE_CHECKING
+
+from frontend.widgets.Button import Button
 
 if TYPE_CHECKING:
     from frontend.widgets.DraggableResizable import DraggableResizable
@@ -18,7 +20,7 @@ class DraggableTopBar(QWidget):
 
         self.drag_start_position = self.parent.pos()
 
-        self.close_button = QPushButton("X")
+        self.close_button = Button("X", None, "close-button")
         self.close_button.clicked.connect(self.parent.destroy)
 
         self.init_ui()
@@ -34,8 +36,7 @@ class DraggableTopBar(QWidget):
         button_font = QFont()
         button_font.setPointSizeF(10)
         button_font.setWeight(QFont.Weight.DemiBold)
-        self.close_button.setFont(button_font)
-        self.close_button.setObjectName("close-button")
+        self.close_button.add_text_font(button_font)
         layout.addWidget(
             self.close_button,
             0,
@@ -48,9 +49,10 @@ class DraggableTopBar(QWidget):
         self.drag_start_position = event.globalPosition().toPoint()
 
     def mouseMoveEvent(self, event):
-        delta = QPoint(event.globalPosition().toPoint() - self.drag_start_position)
-        self.parent.move(self.parent.x() + delta.x(), self.parent.y() + delta.y())
-        self.drag_start_position = event.globalPosition().toPoint()
+        if not self.close_button.underMouse():
+            delta = QPoint(event.globalPosition().toPoint() - self.drag_start_position)
+            self.parent.move(self.parent.x() + delta.x(), self.parent.y() + delta.y())
+            self.drag_start_position = event.globalPosition().toPoint()
 
     def paintEvent(self, _):
         enable_custom_styling(self)
