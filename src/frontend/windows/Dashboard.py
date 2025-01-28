@@ -6,7 +6,7 @@ from frontend.config import get_backend, is_debug
 from frontend.widgets.DashboardChart import DashboardChart
 from frontend.widgets.DashboardConfig import DashboardConfig
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
-from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
+from frontend.widgets.DashboardStates.NoChart import NoChart
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
@@ -21,11 +21,13 @@ class Dashboard(ScrollableWindow):
 
         self.left_container = DashboardConfig(self.sensor_names, switch_window)
         self.vertical_separator = QFrame()
-        self.right_container = DashboardChart(device_name, self.switch_window)
 
-        self.dashboard_state: DashboardState = StreamPrior(
+        self.dashboard_state: DashboardState = NoChart(
             self.change_state,
             self.left_container.dashboard_button_group,
+        )
+        self.right_container = DashboardChart(
+            self.dashboard_state, device_name, self.switch_window
         )
         self.init_ui()
 

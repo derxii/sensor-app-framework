@@ -23,11 +23,6 @@ Button#scan-button::pressed {
     background-color:rgb(0, 103, 214);
 }
 
-QLabel#scan-text {
-    color: white;
-}
-
-
 QWidget#scrollable-window {
     background: white;
 }
@@ -115,4 +110,43 @@ Button#clear-button {
 
 Button#clear-button::pressed {
     background-color:rgb(0, 103, 214);
+}
+
+Button#add-chart {
+    background: white;
+    border: 0.5px solid #004B9D;
+    border-radius: 7px;
+    padding: 8px;
+}
+
+Button#add-chart::pressed {
+    background: 0.5px solid #b6d8fc;
+}
+
+QLabel#blue {
+    color:  #004B9D;;
+}
+
+QWidget#chart-area {
+    border: 1px solid #b1afaf;
+    border-radius: 5px;
+}
+
+DraggableResizable {
+    border: 1px solid rgb(130, 130, 130);
+    border-radius: 2px;
+    background: white;
+}
+
+DraggableTopBar {
+    background: rgb(230, 230, 230);
+    border: 1px solid rgb(130, 130, 130);
+}
+
+QPushButton#close-button {
+    border: none;
+}
+
+QPushButton#close-button:pressed {
+    background: rgb(160, 160, 160);
 }

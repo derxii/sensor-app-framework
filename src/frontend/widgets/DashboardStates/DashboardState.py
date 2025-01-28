@@ -13,13 +13,13 @@ class DashboardState(ABC):
     ):
         self.dashboard_button_group = dashboard_button_group
         self.change_dash_state = change_dash_state
+        self.slot_to_disconnect = None
 
         self.set_button_state()
 
     def set_button_state(self):
         main_button_text, icon_location = self.set_new_button_info()
 
-        self.dashboard_button_group.button_main.clicked.connect(self.change_state)
         self.dashboard_button_group.button_main.change_text(main_button_text)
         self.dashboard_button_group.button_main.set_icon(get_image_path(icon_location))
 
@@ -31,6 +31,10 @@ class DashboardState(ABC):
     ) -> tuple[str, str]:
         pass
 
-    @abstractmethod
-    def change_state(self):
-        self.dashboard_button_group.button_main.clicked.disconnect(self.change_state)
+    def change_state(self, dashboard_state: "DashboardState"):
+        self.dashboard_button_group.button_main.clicked.disconnect(
+            self.slot_to_disconnect
+        )
+        self.change_dash_state(
+            dashboard_state(self.change_dash_state, self.dashboard_button_group)
+        )
