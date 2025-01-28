@@ -190,7 +190,7 @@ class DeviceDetailed(ScrollableWindow):
             QIcon(get_image_path("icon.svg")),
             3000,
         )
-        self.switch_window(Dashboard(self.switch_window))
+        self.switch_window(Dashboard(self.switch_window, self.name.text()))
 
     def on_connect_fail(self):
         message_box = QMessageBox()

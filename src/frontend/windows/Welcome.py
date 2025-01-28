@@ -24,7 +24,7 @@ class Welcome(ScrollableWindow):
             "Scan Bluetooth Devices",
             get_image_path("bluetooth.svg"),
             "scan-button",
-            "scan-text",
+            "white",
         )
 
         self.connect_button.clicked.connect(

@@ -27,7 +27,7 @@ class DashboardConfig(QWidget):
 
     def init_ui(self):
         root_layout = QVBoxLayout()
-        root_layout.setContentsMargins(0, 0, 10, 0)
+        root_layout.setContentsMargins(0, 25, 10, 0)
 
         self.sensor_scroll.main_layout.setContentsMargins(0, 0, 0, 0)
 

@@ -3,6 +3,7 @@ from typing import Callable
 
 from frontend.DebugData import get_debug_sensor_names
 from frontend.config import get_backend, is_debug
+from frontend.widgets.DashboardChart import DashboardChart
 from frontend.widgets.DashboardConfig import DashboardConfig
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
 from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
@@ -10,7 +11,7 @@ from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
 class Dashboard(ScrollableWindow):
-    def __init__(self, switch_window: Callable[[QWidget], None]):
+    def __init__(self, switch_window: Callable[[QWidget], None], device_name: str):
         super().__init__(switch_window)
 
         if is_debug():
@@ -20,7 +21,7 @@ class Dashboard(ScrollableWindow):
 
         self.left_container = DashboardConfig(self.sensor_names, switch_window)
         self.vertical_separator = QFrame()
-        self.right_container = QWidget()
+        self.right_container = DashboardChart(device_name, self.switch_window)
 
         self.dashboard_state: DashboardState = StreamPrior(
             self.change_state,
@@ -30,6 +31,7 @@ class Dashboard(ScrollableWindow):
 
     def init_ui(self):
         layout = QHBoxLayout()
+        layout.setContentsMargins(7, 5, 0, 10)
 
         self.left_container.setFixedWidth(235)
         layout.addWidget(self.left_container)
