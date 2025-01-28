@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Callable
 
-from frontend.config import dynamically_repaint_widget, get_image_path
+from frontend.config import dynamically_repaint_widget, get_backend, get_image_path
 from frontend.widgets.DashboardButtonGroup import DashboardButtonGroup
+from PySide6.QtWidgets import QLabel
 
 
 class DashboardState(ABC):
@@ -38,3 +39,15 @@ class DashboardState(ABC):
         self.change_dash_state(
             dashboard_state(self.change_dash_state, self.dashboard_button_group)
         )
+
+    def handle_change_chart_amount(self, no_chart_text: QLabel):
+        if len(get_backend().getChartObjects()) == 0:
+            from frontend.widgets.DashboardStates.NoChart import NoChart
+
+            self.change_state(NoChart)
+            no_chart_text.show()
+        else:
+            from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
+
+            self.change_state(StreamPrior)
+            no_chart_text.hide()

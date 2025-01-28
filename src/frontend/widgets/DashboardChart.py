@@ -6,7 +6,6 @@ from PySide6.QtGui import QFont
 from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
-from frontend.widgets.DashboardStates.NoChart import NoChart
 from frontend.widgets.DraggableResizable import DraggableResizable
 
 
@@ -73,15 +72,7 @@ class DashboardChart(QWidget):
 
         for chart in get_backend().getChartObjects():
             self.generate_chart(False, chart.getId())
-        self.check_state_changed()
-
-    def check_state_changed(self):
-        if len(get_backend().getChartObjects()) == 0:
-            NoChart.set_no_chart(self.dashboard_state)
-            self.no_chart_text.show()
-        else:
-            NoChart.trigger_manual_change(self.dashboard_state)
-            self.no_chart_text.hide()
+        self.dashboard_state.handle_change_chart_amount(self.no_chart_text)
 
     def generate_chart(self, is_new_chart: bool, existing_id: str = None):
         if not existing_id:
@@ -93,4 +84,4 @@ class DashboardChart(QWidget):
         new_chart.show()
 
         if is_new_chart:
-            self.check_state_changed()
+            self.dashboard_state.handle_change_chart_amount(self.no_chart_text)

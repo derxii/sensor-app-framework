@@ -1,8 +1,6 @@
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
 from PySide6.QtCore import QSize
 
-from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
-
 
 class NoChart(DashboardState):
     def set_new_button_info(self) -> tuple[str, str]:
@@ -20,9 +18,3 @@ class NoChart(DashboardState):
         self.change_dash_state(
             dashboard_state(self.change_dash_state, self.dashboard_button_group)
         )
-
-    def set_no_chart(chart_state: DashboardState):
-        chart_state.change_state(NoChart)
-
-    def trigger_manual_change(no_chart: "NoChart"):
-        no_chart.change_state(StreamPrior)

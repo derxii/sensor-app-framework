@@ -60,5 +60,7 @@ class DraggableResizable(QWidget):
     def destroy(self):
         get_backend().deleteChart(self.chart_id)
 
-        self.parent.check_state_changed()
+        self.parent.dashboard_state.handle_change_chart_amount(
+            self.parent.no_chart_text
+        )
         self.setParent(None)
