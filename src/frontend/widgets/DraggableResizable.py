@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class DraggableResizable(QWidget):
-    def __init__(self, parent: "DashboardChart", container: QWidget, chart_id: str):
+    def __init__(self, parent: "DashboardChart", container: QWidget, chart_id: int):
         super().__init__(container)
         self.setWindowFlag(Qt.WindowType.SubWindow)
         self.parent = parent
