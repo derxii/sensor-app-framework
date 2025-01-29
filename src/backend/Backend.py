@@ -294,8 +294,8 @@ class LiveDataPlot(QMainWindow):
         self.central_widget.setLayout(layout)
 
         # Create a pyqtgraph PlotWidget
-        self.plot_widget = PlotWidget()
-        layout.addWidget(self.plot_widget)
+       # self.plot_widget = PlotWidget()
+       # layout.addWidget(self.plot_widget)
 
         # Add a button to pause/resume
         self.pause_button = QPushButton("Stop")
@@ -306,8 +306,7 @@ class LiveDataPlot(QMainWindow):
             plot = PlotWidget()
             
             layout.addWidget(plot)
-            self.setup_plot(plot, chart.getTitle())
-            
+            self.setup_plot(plot, chart.getTitle(), chart.getxLabel(), chart.getyLabel())
             plotDict = {}
             plotDict["plot"] = plot
             #plotDict["line"] = line
@@ -318,17 +317,22 @@ class LiveDataPlot(QMainWindow):
             #plotDict["yData"] = {}
             plotDict["counter"] = 0
             plotDict["dataStream"] = {}
+            colourCount = 0
+            legend = pg.LegendItem(offset=(20, 10))
+            legend.setParentItem(plot.getPlotItem())
             for sensor in chart.getSensors():
                 #line = plot.plot(pen=pg.mkPen(color='b', width=2))
                 plotDict["dataStream"][sensor] = {}
-                line = plot.plot(pen=pg.mkPen(width=2), name=sensor)
+                line = plot.plot(pen=pg.intColor(colourCount), name=sensor)
                 plotDict["dataStream"][sensor]["line"] = line
                 plotDict["dataStream"][sensor]["yData"] = []
                 plotDict["dataStream"][sensor]["xData"] = []
                 plotDict["dataStream"][sensor]["counter"] = 0
+                colourCount += 1
+                legend.addItem(line, sensor)
 
             self.allPlots.append(plotDict)
-            plot.addLegend()
+            #plotDict["plot"].addLegend()
                 #self.allPlots.append(plot)
         self.is_paused = False
         # Counter for x-axis
@@ -341,11 +345,11 @@ class LiveDataPlot(QMainWindow):
         self.pause_button.clicked.connect(self.toggle_pause)
 
         # Set up the plot
-    def setup_plot(self, plot_widget, title):
+    def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')
         plot_widget.setTitle(title, color="k", size="16pt")
-        plot_widget.setLabel("left", "Value", color="b", size="12pt")
-        plot_widget.setLabel("bottom", "Time", color="b", size="12pt")
+        plot_widget.setLabel("left", yLabel, color="b", size="12pt")
+        plot_widget.setLabel("bottom", xLabel, color="b", size="12pt")
             #self.plot_widget.addLegend()
 
         # Add a plot line
@@ -376,10 +380,8 @@ class LiveDataPlot(QMainWindow):
                     dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
                     dataLength = dataDict[sensor].qsize()
                     plotLine = self.allPlots[i]["dataStream"][sensor]["line"]
-                    print("adding data to data stream")
-                    for i in range(0, dataLength):
+                    for j in range(0, dataLength):
                         val = float(dataDict[sensor].get())
-                        print(val)
                         self.allPlots[i]["dataStream"][sensor]["yData"].append(val)
                         self.allPlots[i]["dataStream"][sensor]["counter"] += 1
                         self.allPlots[i]["dataStream"][sensor]["xData"].append(self.allPlots[i]["dataStream"][sensor]["counter"])
