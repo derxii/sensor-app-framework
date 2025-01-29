@@ -1,23 +1,25 @@
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
 from frontend.config import get_backend
 from frontend.widgets.Button import Button
-from frontend.widgets.DashboardStates.DashboardState import DashboardState
 from frontend.widgets.DraggableResizable import DraggableResizable
+
+if TYPE_CHECKING:
+    from frontend.widgets.DashboardStates.DashboardState import DashboardState
 
 
 class DashboardChart(QWidget):
     def __init__(
         self,
-        dashboard_state: DashboardState,
+        get_dashboard_state: Callable[[], "DashboardState"],
         device_name: str,
         switch_window: Callable[[QWidget], None],
     ):
         super().__init__()
-        self.dashboard_state = dashboard_state
+        self.get_dashboard_state = get_dashboard_state
 
         self.title = QLabel(device_name)
         self.chart_area = QWidget()
@@ -72,7 +74,7 @@ class DashboardChart(QWidget):
 
         for chart in get_backend().getChartObjects():
             self.generate_chart(False, chart.getId())
-        self.dashboard_state.handle_change_chart_amount(self.no_chart_text)
+        self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
 
     def generate_chart(self, is_new_chart: bool, existing_id: str = None):
         if not existing_id:
@@ -84,4 +86,8 @@ class DashboardChart(QWidget):
         new_chart.show()
 
         if is_new_chart:
-            self.dashboard_state.handle_change_chart_amount(self.no_chart_text)
+            self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
+
+    def can_create_delete(self, value: bool):
+        self.add_chart_button.setEnabled(value)
+        self.chart_area.setEnabled(value)

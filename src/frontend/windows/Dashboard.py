@@ -23,12 +23,12 @@ class Dashboard(ScrollableWindow):
         self.vertical_separator = QFrame()
 
         self.dashboard_state: DashboardState = NoChart(
-            self.change_state,
-            self.left_container.dashboard_button_group,
+            self.change_state, self.left_container.dashboard_button_group
         )
         self.right_container = DashboardChart(
-            self.dashboard_state, device_name, self.switch_window
+            self.get_state, device_name, self.switch_window
         )
+        self.dashboard_state.bind_chart(self.right_container)
         self.init_ui()
 
     def init_ui(self):
@@ -48,3 +48,6 @@ class Dashboard(ScrollableWindow):
 
     def change_state(self, new_state: DashboardState):
         self.dashboard_state = new_state
+
+    def get_state(self):
+        return self.dashboard_state
