@@ -58,7 +58,7 @@ class ScanDevice(ScrollableWindow):
                 get_backend().scanForDevices,
                 lambda e: handle_exception(e, None, True),
             )
-            self.worker.cancel_thread_on_timeout(10)
+            self.worker.cancel_thread_on_timeout(15)
             self.worker.func_done.connect(self.on_scan_end)
             self.thread.start()
 

@@ -1,9 +1,10 @@
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 from PySide6.QtGui import Qt, QFont, QIcon
 from PySide6.QtCore import QSize
 from typing import Callable
 
 from frontend.config import get_image_path
+from frontend.widgets.Button import Button
 from frontend.windows.ScanDevice import ScanDevice
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
@@ -18,8 +19,13 @@ class Welcome(ScrollableWindow):
             "Visualise your sensor data in real time using "
             + "custom charts via a Bluetooth connection."
         )
-        self.connect_button = QPushButton()
-        self.connect_button_label = QLabel("Scan Bluetooth Devices")
+
+        self.connect_button = Button(
+            "Scan Bluetooth Devices",
+            get_image_path("bluetooth.svg"),
+            "scan-button",
+            "white",
+        )
 
         self.connect_button.clicked.connect(
             lambda: self.switch_window(ScanDevice(self.switch_window))
@@ -53,22 +59,14 @@ class Welcome(ScrollableWindow):
 
         layout.addSpacing(20)
 
-        self.connect_button.setObjectName("scan-button")
         self.connect_button.setMinimumHeight(40)
-        self.connect_button.setIcon(QIcon(get_image_path("bluetooth.svg")))
         self.connect_button.setIconSize(QSize(24, 24))
 
-        button_layout = QHBoxLayout()
-        self.connect_button_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.connect_button_label.setObjectName("scan-text")
         font = QFont()
         font.setPointSize(20)
         font.setWeight(QFont.Weight.DemiBold)
-        self.connect_button_label.setFont(font)
+        self.connect_button.add_text_font(font)
 
-        button_layout.addWidget(self.connect_button_label)
-
-        self.connect_button.setLayout(button_layout)
         layout.addWidget(self.connect_button)
 
         self.bind_scroll(layout)

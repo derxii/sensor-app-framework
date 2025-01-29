@@ -1,31 +1,37 @@
 from typing import Callable
 from PySide6.QtWidgets import (
-    QPushButton,
     QGraphicsDropShadowEffect,
     QWidget,
     QHBoxLayout,
 )
 from PySide6.QtGui import QFont
+from PySide6.QtCore import QSize
 
-from frontend.config import dynamically_repaint_widget, enable_custom_styling
+from frontend.config import enable_custom_styling, get_image_path
+from frontend.widgets.Button import Button
 
 
 class ResetButton(QWidget):
-    def __init__(self, is_simple: bool, switch_window: Callable[[QWidget], None]):
+    def __init__(self, is_icon: bool, switch_window: Callable[[QWidget], None]):
         super().__init__()
-        self.is_simple = is_simple
+        self.is_simple = is_icon
         self.switch_window = switch_window
 
         text = "Restart Setup"
-        if is_simple:
-            self.button = QPushButton(text)
+        if is_icon:
+            self.button = Button(text, None, "reset-button-simple", "red")
             self.init_ui()
             self.init_ui_simple()
         else:
             text = text.upper()
-            self.button = QPushButton(text)
+            self.button = Button(
+                text, get_image_path("configure.svg"), "reset-button-icon", "red"
+            )
+            self.button.setIconSize(QSize(24, 24))
+            self.button.setFixedHeight(36)
             self.init_ui()
-            self.init_ui_complex()
+            self.layout.setContentsMargins(0, 0, 0, 0)
+            self.layout.addWidget(self.button)
 
         self.button.clicked.connect(self.on_click)
 
@@ -35,11 +41,10 @@ class ResetButton(QWidget):
 
         font = QFont()
         font.setWeight(QFont.Weight.DemiBold)
-        self.button.setFont(font)
+        self.button.add_text_font(font)
 
     def init_ui_simple(self):
         self.set_shadow()
-        self.button.setObjectName("reset-button-simple")
         self.layout.addWidget(self.button)
         self.button.setMinimumWidth(150)
 
@@ -50,9 +55,6 @@ class ResetButton(QWidget):
 
         self.setGraphicsEffect(shadow)
 
-    def init_ui_complex(self):
-        pass
-
     def paintEvent(self, _):
         enable_custom_styling(self)
 
@@ -62,11 +64,11 @@ class ResetButton(QWidget):
         self.switch_window(Welcome(self.switch_window))
 
     def disable_button(self):
-        self.button.setObjectName("disabled")
-        self.setGraphicsEffect(None)
-        dynamically_repaint_widget(self, self.button)
+        if self.is_simple:
+            self.setGraphicsEffect(None)
+        self.button.setDisabled(True)
 
     def enable_button(self):
-        self.set_shadow()
-        self.button.setObjectName("reset-button-simple")
-        dynamically_repaint_widget(self, self.button)
+        if self.is_simple:
+            self.set_shadow()
+        self.button.setEnabled(True)

@@ -1,0 +1,8 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="50" height="50" x="12" y="138" fill="rgb(127, 127, 127)" />
+  <rect width="50" height="50" x="74" y="138" fill="rgb(127,127,127)" />
+  <rect width="50" height="50" x="136" y="138" fill="rgb(127,127,127)" />
+  <rect width="50" height="50" x="74" y="76" fill="rgb(127,127,127)" />
+  <rect width="50" height="50" x="136" y="76" fill="rgb(127,127,127)" />
+  <rect width="50" height="50" x="136" y="14" fill="rgb(127,127,127)" />
+</svg>

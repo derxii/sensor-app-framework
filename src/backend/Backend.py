@@ -54,15 +54,30 @@ class Backend(object):
         return self.connectedDevice.getSensorNames()
 
     def createChartObject(self, chartTitle, xlabel, ylabel, sensorNames, type):
-        id = len(self.chartObjects)
+        if len(self.chartObjects) >= 1:
+            id = self.chartObjects[-1].getId() + 1
+        else:
+            id = 0
         chartOb = Chart(id, chartTitle, xlabel, ylabel, sensorNames, type)
         self.chartObjects.append(chartOb)
+        return id
 
     def getChartObjects(self):
         return self.chartObjects
 
     def getChart(self, id):
-        return self.chartObjects[id]
+        for chart in self.chartObjects:
+            if chart.getId() == id:
+                return chart
+        return None
+
+    def deleteChart(self, id):
+        deleted_idx = -1
+        for idx, chart in enumerate(self.chartObjects):
+            if chart.getId() == id:
+                deleted_idx = idx
+
+        self.chartObjects.pop(deleted_idx)
 
     """
     def getChartData(self,id):

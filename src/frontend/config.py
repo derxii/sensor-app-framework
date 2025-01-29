@@ -44,6 +44,7 @@ def is_debug():
     args = parser.parse_args()
     return args.debug
 
+
 def set_backend():
     QCoreApplication.instance().setProperty("backend", Backend())
 
@@ -61,7 +62,10 @@ def get_switch_window() -> Callable[[QWidget], None]:
 
 
 def handle_exception(
-    e: Exception, message: Optional[str] = None, critical_error: Optional[bool] = False
+    e: Exception,
+    message: Optional[str] = None,
+    critical_error: Optional[bool] = False,
+    description: str = None,
 ):
     print("ERROR: " + str(e))
 
@@ -70,7 +74,7 @@ def handle_exception(
     message_box.setText(
         f"{'Fatal ' if critical_error else ''}Error: {message if message else str(e)}"
     )
-    message_box.setInformativeText("Please try again.")
+    message_box.setInformativeText(description if description else "Please try again.")
     message_box.setIconPixmap(QIcon(get_image_path("icon.svg")).pixmap(QSize(64, 64)))
     message_box.setStandardButtons(QMessageBox.StandardButton.Ok)
     message_box.setDefaultButton(QMessageBox.StandardButton.Ok)

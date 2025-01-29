@@ -2,6 +2,7 @@ PySide6==6.7.3
 pyserial
 numpy
 matplotlib
+bleak
 
 pyinstaller
 ruff
