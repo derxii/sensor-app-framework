@@ -22,6 +22,8 @@ import random
 from PyQt6.QtCore import QTimer
 from queue import Queue
 # TO DO: 
+# -Clear chart data when the session is restarted 
+# -Fic issue that occurs when session is restarted and the program is exited
 # -Add timestamp for data where t=0 is when the data was received 
 # -deal with frontend timeout
 # -Simulate chart plotting 
@@ -302,18 +304,32 @@ class LiveDataPlot(QMainWindow):
         # Create all charts 
         for chart in self.Backend.getChartObjects():
             plot = PlotWidget()
+            
             layout.addWidget(plot)
             self.setup_plot(plot, chart.getTitle())
-            line = plot.plot(pen=pg.mkPen(color='b', width=2))
+            
             plotDict = {}
             plotDict["plot"] = plot
-            plotDict["line"] = line
+            #plotDict["line"] = line
+            
+            #plotDict["line"] = []
             plotDict["chartId"] = chart.getId()
-            plotDict["xData"] = []
-            plotDict["yData"] = []
+            
+            #plotDict["yData"] = {}
             plotDict["counter"] = 0
+            plotDict["dataStream"] = {}
+            for sensor in chart.getSensors():
+                #line = plot.plot(pen=pg.mkPen(color='b', width=2))
+                plotDict["dataStream"][sensor] = {}
+                line = plot.plot(pen=pg.mkPen(width=2), name=sensor)
+                plotDict["dataStream"][sensor]["line"] = line
+                plotDict["dataStream"][sensor]["yData"] = []
+                plotDict["dataStream"][sensor]["xData"] = []
+                plotDict["dataStream"][sensor]["counter"] = 0
+
             self.allPlots.append(plotDict)
-            #self.allPlots.append(plot)
+            plot.addLegend()
+                #self.allPlots.append(plot)
         self.is_paused = False
         # Counter for x-axis
         self.counter = 0
@@ -356,16 +372,32 @@ class LiveDataPlot(QMainWindow):
 
             for i in range(0,len(self.allPlots)): #range(len(self.allPlots)):
                 chartId = int(self.allPlots[i]["chartId"])
-                
+                for sensor in self.allPlots[i]["dataStream"].keys(): #dataDict.keys():
+                    dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
+                    dataLength = dataDict[sensor].qsize()
+                    plotLine = self.allPlots[i]["dataStream"][sensor]["line"]
+                    print("adding data to data stream")
+                    for i in range(0, dataLength):
+                        val = float(dataDict[sensor].get())
+                        print(val)
+                        self.allPlots[i]["dataStream"][sensor]["yData"].append(val)
+                        self.allPlots[i]["dataStream"][sensor]["counter"] += 1
+                        self.allPlots[i]["dataStream"][sensor]["xData"].append(self.allPlots[i]["dataStream"][sensor]["counter"])
+
+                    plotLine.setData(self.allPlots[i]["dataStream"][sensor]["xData"], self.allPlots[i]["dataStream"][sensor]["yData"])
+                    self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
+                '''
                 plot_line = self.allPlots[i]["line"]
 
                 dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
-            
+
+                
                 data = []
                 for key in dataDict.keys():
                     data = dataDict[key]
                     #print(key)
                 dataSize = data.qsize()
+                # Make sure the data size is the same for all streams of data (i.e take the minimum data length)
                 for j in range(0,dataSize):
                     val = float(data.get())
                     print(val)
@@ -375,6 +407,7 @@ class LiveDataPlot(QMainWindow):
 
                 plot_line.setData(self.allPlots[i]["xData"], self.allPlots[i]["yData"])
                 self.allPlots[i]["line"] = plot_line 
+                '''
 
 # Main shows the order and usage of backend functions
 async def main():
