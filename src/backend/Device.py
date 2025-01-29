@@ -336,7 +336,7 @@ class SerialDevice(Device):
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
                 self.addToDataBuffer(dataString)
-                print(dataString)
+                #print(dataString)
 
     
             except:
