@@ -17,6 +17,3 @@ class StreamPrior(DashboardState):
         self.dashboard_button_group.button_main.setObjectName("play-button")
 
         return "START SESSION", "play.svg"
-
-    def trigger_manual_change(stream_prior: "StreamPrior"):
-        stream_prior.change_state(Streaming)
