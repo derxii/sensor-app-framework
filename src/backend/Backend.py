@@ -14,12 +14,12 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import sys
 import random
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, Qt
 from queue import Queue
 # TO DO: 
 # -Clear chart data when the session is restarted 
@@ -293,19 +293,23 @@ class LiveDataPlot(QMainWindow):
         layout = QVBoxLayout()
         self.central_widget.setLayout(layout)
 
+        #splitter = QSplitter()
+        #layout.addWidget(splitter)
+
         # Create a pyqtgraph PlotWidget
        # self.plot_widget = PlotWidget()
        # layout.addWidget(self.plot_widget)
 
         # Add a button to pause/resume
         self.pause_button = QPushButton("Stop")
+        self.pause_button.setFixedSize(100,100)
         layout.addWidget(self.pause_button)
 
         # Create all charts 
         for chart in self.Backend.getChartObjects():
             plot = PlotWidget()
-            
             layout.addWidget(plot)
+            #splitter.addWidget(plot)
             self.setup_plot(plot, chart.getTitle(), chart.getxLabel(), chart.getyLabel())
             plotDict = {}
             plotDict["plot"] = plot
@@ -332,6 +336,10 @@ class LiveDataPlot(QMainWindow):
                 legend.addItem(line, sensor)
 
             self.allPlots.append(plotDict)
+
+            dock = QDockWidget(chart.getTitle(), self)
+            dock.setWidget(plot)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
             #plotDict["plot"].addLegend()
                 #self.allPlots.append(plot)
         self.is_paused = False
