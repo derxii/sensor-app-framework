@@ -143,10 +143,11 @@ DraggableTopBar {
     border: 1px solid rgb(130, 130, 130);
 }
 
-QPushButton#close-button {
+Button#close-button {
     border: none;
+    border-radius: 0;
 }
 
-QPushButton#close-button:pressed {
+Button#close-button:pressed {
     background: rgb(160, 160, 160);
 }
