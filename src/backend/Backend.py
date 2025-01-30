@@ -324,8 +324,8 @@ async def main():
         # Comment out the following lines of code to run the program like normal
         
         app = QApplication(sys.argv)
-        #main_window = LiveDataPlot(backend)
-        main_window = LiveHeatMap(backend)
+        main_window = LiveDataPlot(backend)
+        #main_window = LiveHeatMap(backend)
         main_window.show()
         #sys.exit(app.exec())
         app.processEvents()
