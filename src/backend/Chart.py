@@ -59,9 +59,10 @@ class Chart(object):
             json.dump(SensorData, file, indent=4)
 
     def getLastDataPoint(self, sensorName):
-        with open(self.ChartFilename, "r") as file:
-            SensorData = json.load(file)
-        return SensorData[sensorName][-1] #check that no error occurs
+        #with open(self.ChartFilename, "r") as file:
+        #    SensorData = json.load(file)
+        #return SensorData[sensorName][-1] #check that no error occurs
+        return self.CurrentSensorData[sensorName].get()
     
     def getId(self):
         return self.Id 
