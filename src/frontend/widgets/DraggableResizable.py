@@ -66,3 +66,4 @@ class DraggableResizable(QWidget):
             self.parent.no_chart_text
         )
         self.setParent(None)
+        self.deleteLater()

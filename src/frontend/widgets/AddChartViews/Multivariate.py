@@ -70,7 +70,11 @@ class Multivariate(AddChartView):
         self.select_sensors_container.bind_scroll(select_sensor_layout)
 
         return self.set_left_right_aligned_widgets(
-            select_sensor_label, self.select_sensors_container
+            select_sensor_label,
+            self.select_sensors_container,
+            1,
+            1,
+            Qt.AlignmentFlag.AlignTop,
         )
 
     def on_submit_create(self):
@@ -87,7 +91,13 @@ class Multivariate(AddChartView):
                 "At least one sensor must be selected.",
             )
             return False, None
-        
-        id = get_backend().createChartObject(self.title_input.text(), self.x_axis_label_input.text(), self.y_axis_label_input.text(), sensors_selected, "line")
+
+        id = get_backend().createChartObject(
+            self.title_input.text(),
+            self.x_axis_label_input.text(),
+            self.y_axis_label_input.text(),
+            sensors_selected,
+            "line",
+        )
 
         return True, id

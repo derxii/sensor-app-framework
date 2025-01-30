@@ -91,4 +91,6 @@ class DashboardChart(QWidget):
         add_success = add_chart_form.exec()
         if add_success:
             self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
-            QTimer.singleShot(100, lambda: self.generate_chart(add_chart_form.created_chart_id))
+            QTimer.singleShot(
+                100, lambda: self.generate_chart(add_chart_form.created_chart_id)
+            )

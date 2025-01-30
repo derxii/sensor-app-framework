@@ -33,6 +33,7 @@ class AddChartView(QWidget):
         right_widget: QWidget,
         left_stretch: int = 1,
         right_stretch: int = 1,
+        alignment: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignVCenter,
     ):
         container = QWidget()
 
@@ -41,9 +42,9 @@ class AddChartView(QWidget):
         layout.addWidget(
             left_widget,
             left_stretch,
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+            Qt.AlignmentFlag.AlignLeft | alignment,
         )
-        layout.addWidget(right_widget, right_stretch, Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(right_widget, right_stretch, alignment)
 
         container.setLayout(layout)
         return container
