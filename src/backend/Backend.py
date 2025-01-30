@@ -6,6 +6,7 @@ from bleak import BleakScanner, BleakClient
 import re
 from Device import Device, BluetoothDevice, SerialDevice
 from Chart import Chart
+from LiveDataPlot import LiveDataPlot, LiveHeatMap
 import threading 
 import csv
 import os 
@@ -151,8 +152,8 @@ class Backend(object):
         print("session ended")
         self.connectedDevice.clearTerminateSession()
         self.stopSession.clear()
-        for chart in self.chartObjects:
-                chart.plotChart()
+        #for chart in self.chartObjects:
+        #        chart.plotChart()
 
     def saveData(self, filename, filePath):
         #-Description: saves data into a csv file in the specified location
@@ -278,148 +279,7 @@ def updateChart(frame):
     pass
 
     ############################################## TESTING CODE ########################################################
-class LiveDataPlot(QMainWindow):
-    def __init__(self, backend):
-        super().__init__()
-        self.Backend = backend
-        # Set up the main window
-        self.setWindowTitle("Live Data Plotting with PyQt6")
-        self.setGeometry(100, 100, 800, 600)
-        self.allPlots = []
 
-        # Set up the central widget and layout
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        layout = QVBoxLayout()
-        self.central_widget.setLayout(layout)
-
-        #splitter = QSplitter()
-        #layout.addWidget(splitter)
-
-        # Create a pyqtgraph PlotWidget
-       # self.plot_widget = PlotWidget()
-       # layout.addWidget(self.plot_widget)
-
-        # Add a button to pause/resume
-        self.pause_button = QPushButton("Stop")
-        self.pause_button.setFixedSize(100,100)
-        layout.addWidget(self.pause_button)
-
-        # Create all charts 
-        for chart in self.Backend.getChartObjects():
-            plot = PlotWidget()
-            layout.addWidget(plot)
-            #splitter.addWidget(plot)
-            self.setup_plot(plot, chart.getTitle(), chart.getxLabel(), chart.getyLabel())
-            plotDict = {}
-            plotDict["plot"] = plot
-            #plotDict["line"] = line
-            
-            #plotDict["line"] = []
-            plotDict["chartId"] = chart.getId()
-            
-            #plotDict["yData"] = {}
-            plotDict["counter"] = 0
-            plotDict["dataStream"] = {}
-            colourCount = 0
-            legend = pg.LegendItem(offset=(20, 10))
-            legend.setParentItem(plot.getPlotItem())
-            for sensor in chart.getSensors():
-                #line = plot.plot(pen=pg.mkPen(color='b', width=2))
-                plotDict["dataStream"][sensor] = {}
-                line = plot.plot(pen=pg.intColor(colourCount), name=sensor)
-                plotDict["dataStream"][sensor]["line"] = line
-                plotDict["dataStream"][sensor]["yData"] = []
-                plotDict["dataStream"][sensor]["xData"] = []
-                plotDict["dataStream"][sensor]["counter"] = 0
-                colourCount += 1
-                legend.addItem(line, sensor)
-
-            self.allPlots.append(plotDict)
-
-            dock = QDockWidget(chart.getTitle(), self)
-            dock.setWidget(plot)
-            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
-            #plotDict["plot"].addLegend()
-                #self.allPlots.append(plot)
-        self.is_paused = False
-        # Counter for x-axis
-        self.counter = 0
-
-        # Set up a QTimer for live updates
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_plot)
-        self.timer.start(100)  # Update every 100 ms
-        self.pause_button.clicked.connect(self.toggle_pause)
-
-        # Set up the plot
-    def setup_plot(self, plot_widget, title, xLabel, yLabel):
-        plot_widget.setBackground('w')
-        plot_widget.setTitle(title, color="k", size="16pt")
-        plot_widget.setLabel("left", yLabel, color="b", size="12pt")
-        plot_widget.setLabel("bottom", xLabel, color="b", size="12pt")
-            #self.plot_widget.addLegend()
-
-        # Add a plot line
-        #self.plot_line = self.plot_widget.plot(pen=pg.mkPen(color='b', width=2), name="Random Data")
-
-        # Initialize data
-        #self.x_data = []
-        #self.y_data = []
-        
-        # Connect the pause button
-        
-
-    def toggle_pause(self):
-        self.is_paused = not self.is_paused
-        self.pause_button.setText("Resume" if self.is_paused else "Stop")   
-
-    def update_plot(self):
-        """Updates the plot with new random data."""
-        #self.counter += 1
-        #self.x_data.append(self.counter)  # Increment x-axis data
-        #chart = self.Backend.getChart(0)
-        #allCharts = self.Backend.getChartObjects()
-        if not self.is_paused:
-
-            for i in range(0,len(self.allPlots)): #range(len(self.allPlots)):
-                chartId = int(self.allPlots[i]["chartId"])
-                for sensor in self.allPlots[i]["dataStream"].keys(): #dataDict.keys():
-                    dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
-                    dataLength = dataDict[sensor].qsize()
-                    plotLine = self.allPlots[i]["dataStream"][sensor]["line"]
-                    for j in range(0, dataLength):
-                        val = float(dataDict[sensor].get())
-                        self.allPlots[i]["dataStream"][sensor]["yData"].append(val)
-                        self.allPlots[i]["dataStream"][sensor]["counter"] += 1
-                        self.allPlots[i]["dataStream"][sensor]["xData"].append(self.allPlots[i]["dataStream"][sensor]["counter"])
-
-                    plotLine.setData(self.allPlots[i]["dataStream"][sensor]["xData"], self.allPlots[i]["dataStream"][sensor]["yData"])
-                    self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
-                '''
-                plot_line = self.allPlots[i]["line"]
-
-                dataDict = self.Backend.getRecentChartData(chartId)#chart.getRecentData()
-
-                
-                data = []
-                for key in dataDict.keys():
-                    data = dataDict[key]
-                    #print(key)
-                dataSize = data.qsize()
-                # Make sure the data size is the same for all streams of data (i.e take the minimum data length)
-                for j in range(0,dataSize):
-                    val = float(data.get())
-                    print(val)
-                    self.allPlots[i]["yData"].append(val) 
-                    self.allPlots[i]["counter"] += 1
-                    self.allPlots[i]["xData"].append(self.allPlots[i]["counter"])
-
-                plot_line.setData(self.allPlots[i]["xData"], self.allPlots[i]["yData"])
-                self.allPlots[i]["line"] = plot_line 
-                '''
-
-# Main shows the order and usage of backend functions
 async def main():
     backend = Backend()         
     count = 0
@@ -462,13 +322,15 @@ async def main():
             await backend.startSession()
 
         # Comment out the following lines of code to run the program like normal
+        
         app = QApplication(sys.argv)
-        main_window = LiveDataPlot(backend)
+        #main_window = LiveDataPlot(backend)
+        main_window = LiveHeatMap(backend)
         main_window.show()
         #sys.exit(app.exec())
         app.processEvents()
         # End of comment section
-
+        
         userInput = input("Press 2 to end session: ")
         if userInput == "2":    
             await backend.endSession()
