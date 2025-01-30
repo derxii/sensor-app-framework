@@ -326,6 +326,7 @@ class SerialDevice(Device):
     def getData(self):
         if not self.reconnect():
             self.serialObject = serial.Serial(self.Address, timeout=None) 
+            print(f"Is port open: {self.serialObject.is_open}")
         self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
 
@@ -336,7 +337,8 @@ class SerialDevice(Device):
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
                 self.addToDataBuffer(dataString)
-                #print(dataString)
+                modifiedString = re.sub('\s', "", dataString)
+                print(modifiedString)
 
     
             except:
