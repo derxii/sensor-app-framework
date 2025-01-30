@@ -22,7 +22,9 @@ class DraggableResizable(QWidget):
         self.bottom_bar = QWidget()
         self.grip = QSizeGrip(self)
 
-        self.setGeometry(0, 0, 300, 300)
+        self.base_size = (250, 250)
+
+        self.setGeometry(0, 0, self.base_size[0], self.base_size[1])
 
         self.init_ui()
 

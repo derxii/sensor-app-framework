@@ -76,7 +76,7 @@ class DeviceDetailed(ScrollableWindow):
 
         root_layout.addWidget(self.name)
 
-        root_layout.addSpacing(10)
+        root_layout.addSpacing(20)
 
         root_layout.addWidget(
             self.create_left_right_aligned_text(self.address, "Address")
