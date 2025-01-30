@@ -8,6 +8,8 @@ from PyQt6.QtCore import QTimer, Qt
 from queue import Queue
 import math
 import numpy as np
+
+
 class LiveDataPlot(QMainWindow):
     def __init__(self, backend):
         super().__init__()
@@ -16,7 +18,7 @@ class LiveDataPlot(QMainWindow):
         self.setWindowTitle("Live Data Plotting with PyQt6")
         self.setGeometry(100, 100, 800, 600)
         self.allPlots = []
-
+        self.allHeatmaps = [] # List of dictionaries that include chart id, sensor and plot
         # Set up the central widget and layout
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -28,32 +30,67 @@ class LiveDataPlot(QMainWindow):
         self.pause_button.setFixedSize(100,100)
         layout.addWidget(self.pause_button)
 
-        # Create all charts from backend
+        # Create all line charts from backend
         for chart in self.Backend.getChartObjects():
-            plot = PlotWidget()
-            layout.addWidget(plot)
-            self.setup_plot(plot, chart.getTitle(), chart.getxLabel(), chart.getyLabel())
-            plotDict = {}
-            plotDict["plot"] = plot
-            plotDict["chartId"] = chart.getId()
-            plotDict["counter"] = 0
-            plotDict["dataStream"] = {}
-            colourCount = 0
-            legend = pg.LegendItem(offset=(20, 10))
-            legend.setParentItem(plot.getPlotItem())
-            for sensor in chart.getSensors():
-                plotDict["dataStream"][sensor] = {}
-                line = plot.plot(pen=pg.intColor(colourCount), name=sensor)
-                plotDict["dataStream"][sensor]["line"] = line
-                plotDict["dataStream"][sensor]["yData"] = []
-                plotDict["dataStream"][sensor]["xData"] = []
-                plotDict["dataStream"][sensor]["counter"] = 0
-                colourCount += 1
-                legend.addItem(line, sensor)
-            self.allPlots.append(plotDict)
-            dock = QDockWidget(chart.getTitle(), self)
-            dock.setWidget(plot)
-            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+            if chart.getType() == "line":
+                plot = PlotWidget()
+                layout.addWidget(plot)
+                self.setup_plot(plot, chart.getTitle(), chart.getxLabel(), chart.getyLabel())
+                plotDict = {}
+                plotDict["plot"] = plot
+                plotDict["chartId"] = chart.getId()
+                plotDict["counter"] = 0
+                plotDict["dataStream"] = {}
+                colourCount = 0
+                legend = pg.LegendItem(offset=(20, 10))
+                legend.setParentItem(plot.getPlotItem())
+                for sensor in chart.getSensors():
+                    plotDict["dataStream"][sensor] = {}
+                    line = plot.plot(pen=pg.intColor(colourCount), name=sensor)
+                    plotDict["dataStream"][sensor]["line"] = line
+                    plotDict["dataStream"][sensor]["yData"] = []
+                    plotDict["dataStream"][sensor]["xData"] = []
+                    plotDict["dataStream"][sensor]["counter"] = 0
+                    colourCount += 1
+                    legend.addItem(line, sensor)
+                self.allPlots.append(plotDict)
+                dock = QDockWidget(chart.getTitle(), self)
+                dock.setWidget(plot)
+                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+
+            if chart.getType() == "heatmap":
+                # Create ImageView for heatmap
+                dock = QDockWidget(chart.getTitle(), self)
+                widget = QWidget()
+                dock.setWidget(widget)
+                heatmapLayout = QVBoxLayout(widget)
+                imageView = pg.ImageView()
+                heatmapLayout.addWidget(imageView)
+
+                
+                
+
+                #layout.addWidget(imageView)
+                colormap = pg.colormap.get('inferno')  # Choose a color map
+                lut = colormap.getLookupTable()  # Generate lookup table
+                # Set the image with correct LUT
+                image_item = imageView.getImageItem()  # Access the internal ImageItem
+                image_item.setLookupTable(lut)  # Apply color map
+                image_item.setLevels([20, 40])  # Set min-max temperature range
+
+                sensors = chart.getSensors()
+                heatmapDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "N": int(math.sqrt(len(sensors)))}
+                self.allHeatmaps.append(heatmapDict)
+                self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea,dock)
+                #dock = QDockWidget(chart.getTitle(), self)
+                #dock.setWidget(plot)
+                #self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                #layout.addWidget(imageView)
+                
+
+                
+                
+        
         self.is_paused = False
         # Counter for x-axis
         self.counter = 0
@@ -88,6 +125,18 @@ class LiveDataPlot(QMainWindow):
 
                     plotLine.setData(self.allPlots[i]["dataStream"][sensor]["xData"], self.allPlots[i]["dataStream"][sensor]["yData"])
                     self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
+                    
+            for i in range(0, len(self.allHeatmaps)):
+                chartId = int(self.allHeatmaps[i]["chartId"])
+                chart = self.Backend.getChart(chartId)
+                data = [] 
+                for sensor in self.allHeatmaps[i]["sensors"]:
+                    data.append(float(chart.getLastDataPoint(sensor)))
+                structuredData = np.resize(np.array(data), (self.allHeatmaps[i]["N"], self.allHeatmaps[i]["N"]))
+                self.allHeatmaps[i]["imageView"].setImage(structuredData.T)
+
+
+
 
 class LiveHeatMap(QMainWindow):
     def __init__(self, backend):
@@ -108,6 +157,8 @@ class LiveHeatMap(QMainWindow):
         # Get relevant info
         self.sensorNum = 0
         for chart in self.Backend.getChartObjects():
+            if chart.getType() != "heatmap":
+                continue
             self.chart = chart
             self.sensors = sorted(chart.getSensors()) 
             self.numSensors = len(self.sensors)    
