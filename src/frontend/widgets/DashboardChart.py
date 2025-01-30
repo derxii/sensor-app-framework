@@ -3,7 +3,6 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
-from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable
 from frontend.windows.AddChart import AddChart
@@ -73,10 +72,6 @@ class DashboardChart(QWidget):
         chart_layout.addWidget(self.no_chart_text, 0, Qt.AlignmentFlag.AlignCenter)
 
         self.chart_area.setLayout(chart_layout)
-
-        for chart in get_backend().getChartObjects():
-            self.generate_chart(chart.getId())
-        self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
 
     def generate_chart(self, existing_id: str):
         new_chart = DraggableResizable(self, self.chart_area, existing_id)
