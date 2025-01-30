@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, Callable
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable
+from frontend.windows.AddChart import AddChart
 
 if TYPE_CHECKING:
     from frontend.widgets.DashboardStates.DashboardState import DashboardState
@@ -20,6 +21,7 @@ class DashboardChart(QWidget):
     ):
         super().__init__()
         self.get_dashboard_state = get_dashboard_state
+        self.switch_window = switch_window
 
         self.title = QLabel(device_name)
         self.chart_area = QWidget()
@@ -28,7 +30,7 @@ class DashboardChart(QWidget):
             "At least one chart must be added before streaming data"
         )
         self.add_chart_button = Button("+ Add Chart", None, "add-chart", "blue")
-        self.add_chart_button.clicked.connect(lambda: self.generate_chart(True))
+        self.add_chart_button.clicked.connect(self.open_create_chart_form)
         self.init_ui()
 
     def init_ui(self):
@@ -73,21 +75,20 @@ class DashboardChart(QWidget):
         self.chart_area.setLayout(chart_layout)
 
         for chart in get_backend().getChartObjects():
-            self.generate_chart(False, chart.getId())
+            self.generate_chart(chart.getId())
         self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
 
-    def generate_chart(self, is_new_chart: bool, existing_id: str = None):
-        if not existing_id:
-            existing_id = get_backend().createChartObject(
-                "test", "x", "y", ["a", "b"], "line"
-            )
-
+    def generate_chart(self, existing_id: str):
         new_chart = DraggableResizable(self, self.chart_area, existing_id)
         new_chart.show()
-
-        if is_new_chart:
-            self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
 
     def can_create_delete(self, value: bool):
         self.add_chart_button.setEnabled(value)
         self.chart_area.setEnabled(value)
+
+    def open_create_chart_form(self):
+        add_chart_form = AddChart(self.window().geometry(), self.window().minimumSize())
+        add_success = add_chart_form.exec()
+        if add_success:
+            self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
+            QTimer.singleShot(100, lambda: self.generate_chart(add_chart_form.created_chart_id))

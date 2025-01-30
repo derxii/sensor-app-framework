@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLayout
 
 
 class ScrollableWindow(QWidget):
-    def __init__(self, switch_window: Callable[[QWidget], None]):
+    def __init__(self, switch_window: Callable[[QWidget], None] = None):
         super().__init__()
 
         self.switch_window = switch_window
