@@ -6,6 +6,7 @@ import tempfile
 import json
 import threading
 from queue import Queue
+import re
 # TO DO: 
 # - change getData()
 # - Change the chart class so that it only stores recent data and stores the rest of the data in a json file
@@ -54,7 +55,8 @@ class Chart(object):
                     SensorData[sensor].append(val)
                     #self.SensorData[sensor].append(val)
                     #self.CurrentSensorData[sensor].append(val)
-                    self.CurrentSensorData[sensor].put(val)
+                    if re.sub("\s", "", val) != "":
+                        self.CurrentSensorData[sensor].put(val)
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
 
@@ -118,4 +120,9 @@ class Chart(object):
     def getMinMaxRange(self):
         return self.MinMaxRange
 
+    def isQueueReady(self):
+        for sensor in self.SensorNames:
+            if self.CurrentSensorData[sensor].empty():
+                return False
+        return True
         
