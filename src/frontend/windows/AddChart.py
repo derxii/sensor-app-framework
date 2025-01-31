@@ -3,7 +3,7 @@ from PySide6.QtCore import QRect, QSize, Qt
 from PySide6.QtGui import QFont
 
 from frontend.widgets.AddChartViews.AddChartView import AddChartView
-from frontend.widgets.AddChartViews.Multivariate import Multivariate
+from frontend.widgets.AddChartViews.Univariate import Univariate
 from frontend.widgets.Button import Button
 from frontend.widgets.ButtonSwitchGroup import ButtonSwitchGroup
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -16,7 +16,7 @@ class AddChart(QDialog):
         self.created_chart_id = None
 
         self.container = ScrollableWindow(None)
-        self.chart_view: AddChartView = Multivariate()
+        self.chart_view: AddChartView = Univariate()
         self.button_switch_group = ButtonSwitchGroup(
             self.chart_view, self.change_add_chart_view
         )
