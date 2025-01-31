@@ -32,10 +32,7 @@ class Multivariate(AddChartView):
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(0)
-        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout = self.create_layout()
         layout.addWidget(self.title)
         layout.addWidget(self.x_axis_label)
         layout.addWidget(self.y_axis_label)

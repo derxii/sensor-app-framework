@@ -63,3 +63,12 @@ class Button(QPushButton):
     def change_text(self, text: str):
         self.text = text
         self.button_label.setText(text)
+
+    def alter_name(self, button_name: str, text_name: str):
+        self.button_name = button_name
+        self.text_name = text_name
+        self.set_name()
+
+    def set_name(self):
+        self.setObjectName(self.button_name)
+        self.button_label.setObjectName(self.text_name)

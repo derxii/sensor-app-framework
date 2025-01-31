@@ -3,10 +3,9 @@ from PySide6.QtCore import QRect, QSize, Qt
 from PySide6.QtGui import QFont
 
 from frontend.widgets.AddChartViews.AddChartView import AddChartView
-from frontend.widgets.AddChartViews.Bivariate import Bivariate
 from frontend.widgets.AddChartViews.Multivariate import Multivariate
-from frontend.widgets.AddChartViews.Univariate import Univariate
 from frontend.widgets.Button import Button
+from frontend.widgets.ButtonSwitchGroup import ButtonSwitchGroup
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
 
@@ -18,6 +17,9 @@ class AddChart(QDialog):
 
         self.container = ScrollableWindow(None)
         self.chart_view: AddChartView = Multivariate()
+        self.button_switch_group = ButtonSwitchGroup(
+            self.chart_view, self.change_add_chart_view
+        )
         self.create_chart_button = Button("+ Create", None, "create-chart", "white")
         self.create_chart_button.clicked.connect(self.try_submit)
 
@@ -34,51 +36,36 @@ class AddChart(QDialog):
         root_layout.addWidget(self.container)
 
         self.view_layout = QVBoxLayout()
-        self.view_layout.setContentsMargins(0, 0, 40, 0)
+        self.view_layout.setContentsMargins(20, 0, 20, 0)
 
-        button_switch_group = self.init_button_group_switch_ui()
-        self.view_layout.addWidget(button_switch_group)
+        self.view_layout.addWidget(
+            self.button_switch_group, 0, Qt.AlignmentFlag.AlignTop
+        )
+        self.view_layout.addWidget(self.chart_view, 1000)
 
-        self.view_layout.addWidget(self.chart_view)
+        self.create_button_container = QWidget()
+        create_button_layout = QHBoxLayout()
+        create_button_layout.setContentsMargins(0, 0, 10, 0)
 
         button_font = QFont()
         button_font.setWeight(QFont.Weight.DemiBold)
-        button_font.setPointSizeF(20)
-
+        button_font.setPointSizeF(18)
         self.create_chart_button.add_text_font(button_font)
-        self.create_chart_button.setFixedSize(150, 40)
-        self.view_layout.addWidget(
-            self.create_chart_button, 0, Qt.AlignmentFlag.AlignRight
+        self.create_chart_button.setFixedSize(130, 40)
+
+        create_button_layout.addWidget(
+            self.create_chart_button,
+            0,
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom,
         )
 
-        self.view_layout.addSpacing(40)
+        self.create_button_container.setLayout(create_button_layout)
+
+        self.view_layout.addWidget(self.create_button_container, 0)
+        self.view_layout.addSpacing(30)
 
         self.container.bind_scroll(self.view_layout)
         self.setLayout(root_layout)
-
-    def init_button_group_switch_ui(self):
-        button_group = QWidget()
-        button_layout = QHBoxLayout()
-
-        univariate_button = Button("Univariate")
-        univariate_button.clicked.connect(
-            lambda: self.change_add_chart_view(Univariate)
-        )
-
-        bivariate_button = Button("Bivariate")
-        bivariate_button.clicked.connect(lambda: self.change_add_chart_view(Bivariate))
-
-        multivariate_button = Button("Multivariate")
-        multivariate_button.clicked.connect(
-            lambda: self.change_add_chart_view(Multivariate)
-        )
-
-        button_layout.addWidget(univariate_button)
-        button_layout.addWidget(bivariate_button)
-        button_layout.addWidget(multivariate_button)
-
-        button_group.setLayout(button_layout)
-        return button_group
 
     def change_add_chart_view(self, new_view: AddChartView):
         if isinstance(self.chart_view, new_view):
@@ -87,7 +74,9 @@ class AddChart(QDialog):
         self.chart_view.setParent(None)
         self.chart_view.deleteLater()
         self.chart_view = new_view()
-        self.view_layout.insertWidget(1, self.chart_view)
+        self.view_layout.insertWidget(1, self.chart_view, 1000)
+
+        self.button_switch_group.refresh_switch_button_ui(self.chart_view)
 
     def try_submit(self):
         success, chart_id = self.chart_view.on_submit_create()

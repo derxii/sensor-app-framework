@@ -1,5 +1,12 @@
 from abc import abstractmethod
-from PySide6.QtWidgets import QWidget, QSizePolicy, QLabel, QHBoxLayout, QLineEdit
+from PySide6.QtWidgets import (
+    QWidget,
+    QSizePolicy,
+    QLabel,
+    QHBoxLayout,
+    QLineEdit,
+    QVBoxLayout,
+)
 from PySide6.QtGui import QFont, Qt
 
 
@@ -48,3 +55,10 @@ class AddChartView(QWidget):
 
         container.setLayout(layout)
         return container
+
+    def create_layout(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 20)
+        layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        return layout
