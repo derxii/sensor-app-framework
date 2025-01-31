@@ -48,6 +48,8 @@ class ButtonSwitchGroup(QWidget):
         button = Button(text)
         button.clicked.connect(lambda: self.switch_view(change_to_class))
         button.setFixedHeight(50)
+        button.setDefault(False)
+        button.setAutoDefault(False)
 
         font = QFont()
         font.setWeight(QFont.Weight.DemiBold)
