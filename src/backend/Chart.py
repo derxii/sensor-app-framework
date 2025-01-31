@@ -106,7 +106,16 @@ class Chart(object):
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
         
-        
+    def setCategories(self, allCategories):
+        self.AllCategories = allCategories # list of tuples 
 
+    def getCategories(self):
+        return self.AllCategories
+    
+    def setMinMaxRange(self, range):
+        self.MinMaxRange = range # tuple
+
+    def getMinMaxRange(self):
+        return self.MinMaxRange
 
         
