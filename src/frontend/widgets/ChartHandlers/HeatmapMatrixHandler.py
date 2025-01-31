@@ -1,6 +1,5 @@
 from typing import Union
 from PySide6.QtWidgets import QWidget
-from abc import abstractmethod
 
 from frontend.config import get_backend
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
@@ -21,7 +20,6 @@ class HeatmapMatrixHandler(ChartHandler):
         container.setLayout(layout)
         return container
 
-    @abstractmethod
     def on_submit_create(
         self, title_text: str, sensors_selected: list[str]
     ) -> tuple[bool, Union[int, None]]:
