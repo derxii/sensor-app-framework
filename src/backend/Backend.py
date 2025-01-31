@@ -7,6 +7,7 @@ import re
 from Device import Device, BluetoothDevice, SerialDevice
 from Chart import Chart
 from LiveDataPlot import LiveDataPlot, LiveHeatMap
+from StaticDataPlot import StaticDataPlot
 import threading 
 import csv
 import os 
@@ -335,6 +336,12 @@ async def main():
         if userInput == "2":    
             await backend.endSession()
         
+        #app = QApplication(sys.argv)
+        main_window = StaticDataPlot(backend)
+        #main_window = LiveHeatMap(backend)
+        main_window.show()
+        #sys.exit(app.exec())
+        app.processEvents()
     
         userInput = input("Would you like to save the data to a csv file? (y/n): ")
         if userInput == "y":
