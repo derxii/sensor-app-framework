@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QDo
 from PyQt6.QtCharts import QChart, QChartView, QPieSeries
 from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import QTimer, Qt
-
+from collections import Counter
 class StaticDataPlot(QMainWindow):
     def __init__(self, backend):
         super().__init__()
@@ -22,16 +22,22 @@ class StaticDataPlot(QMainWindow):
                 allData = []
                 for sensor in dictData.keys():
                     allData += dictData[sensor]
-                catagories = set(allData)
+                categories = chart.getCategories()
                 series = QPieSeries()
-                for item in catagories:
-                    series.append(item, allData.count(item))
-                
-                # Highlight the largest slice
-                largestSlice = max(series.slices(), key=lambda s: s.percentage())
-                largestSlice.setExploded(True)  # Pull the largest slice out
-                largestSlice.setLabelVisible(True)  # Show the label
+                if len(categories) == 0:
+                    counter = Counter(allData)
+                    for (category, count) in counter.items():
+                        series.append(category, count)
+                else:
+                    for (low, high) in categories:
+                        filteredData = list(filter(lambda val:float(val) >= low and float(val) <= high, allData))
+                        categoryString = f"{low}-{high}"
+                        series.append(categoryString, len(filteredData))
 
+                for slice in series.slices():
+                    percentage = slice.percentage()
+                    slice.setLabel(f"{slice.label()}: {str(round(percentage*100, 2))}%")
+                    slice.setLabelVisible(True)
                 # Create Chart
                 qchart = QChart()
                 qchart.addSeries(series)
@@ -48,5 +54,4 @@ class StaticDataPlot(QMainWindow):
                 pieChartLayout = QVBoxLayout(widget)
                 pieChartLayout.addWidget(chartView)
                 self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
-
 
