@@ -26,7 +26,7 @@ class DashboardChart(QWidget):
         self.chart_area = QWidget()
 
         self.no_chart_text = QLabel(
-            "At least one chart must be added before streaming data"
+            "At least one chart must be added before streaming data."
         )
         self.add_chart_button = Button("+ Add Chart", None, "add-chart", "blue")
         self.add_chart_button.clicked.connect(self.open_create_chart_form)
