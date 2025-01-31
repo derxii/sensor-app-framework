@@ -8,6 +8,7 @@ from PyQt6.QtCore import QTimer, Qt
 from queue import Queue
 import math
 import numpy as np
+import re
 
 
 class LiveDataPlot(QMainWindow):
@@ -76,7 +77,8 @@ class LiveDataPlot(QMainWindow):
                 # Set the image with correct LUT
                 image_item = imageView.getImageItem()  # Access the internal ImageItem
                 image_item.setLookupTable(lut)  # Apply color map
-                image_item.setLevels([20, 40])  # Set min-max temperature range
+                (min, max) = chart.getMinMaxRange()
+                image_item.setLevels([min, max])  # Set min-max temperature range
 
                 sensors = chart.getSensors()
                 heatmapDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "N": int(math.sqrt(len(sensors)))}
@@ -180,7 +182,11 @@ class LiveHeatMap(QMainWindow):
 
     def update_plot(self):
         # Get chart data
+        # Deal with the case where not all the sensor values are ready
         data = [] #np.zeros((1, self.numSensors))
+        #Check if the queues are ready
+        if not self.chart.isQueueReady():
+            return
         for sensor in self.sensors:
             data.append(float(self.chart.getLastDataPoint(sensor)))
         structuredData = np.resize(np.array(data), (self.N,self.N))
