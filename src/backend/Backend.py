@@ -68,9 +68,13 @@ class Backend(object):
         return self.connectedDevice.getSensorNames()
 
     def createChartObject(self, chartTitle, xlabel, ylabel, sensorNames, type):
-        id = len(self.chartObjects)
+        if len(self.chartObjects) >= 1:
+            id = self.chartObjects[-1].getId() + 1
+        else:
+            id = 0
         chartOb = Chart(id, chartTitle, xlabel, ylabel, sensorNames, type)
         self.chartObjects.append(chartOb)
+        return id
 
         #figureTuple = self.createFigure()
         #self.figures.append(figureTuple)
@@ -82,7 +86,11 @@ class Backend(object):
         return self.chartObjects
 
     def getChart(self,id):
-        return self.chartObjects[id]
+        for chart in self.chartObjects:
+            if chart.getId() == id:
+                return chart
+        return None
+
     
     def getChartInfo(self, id):
         chart = self.getChart(id)
@@ -304,14 +312,40 @@ async def main():
                 print(sensor)
             numCharts = int(input("How many charts do you want?: "))
             for _ in range(0, numCharts):
+                print("#############################################################")
+                chartType = input("Enter the chart type: ")
                 chartTitle = input("Enter the chart title: ")
-                xlabel = input("Enter x label: ")
-                ylabel = input("Enter y label: ")
+                xlabel = ""
+                ylabel = ""
+                if chartType == "line":
+                    xlabel = input("Enter x label: ")
+                if chartType != "pie":
+                    ylabel = input("Enter y label: ")
                 sensorNameStr = input("Enter the sensors you want to use (enter in the format: sensor1 sensor2): ")
                 sensorNames = re.split(' ', sensorNameStr)
-                print(f"The following sensors were chosen: {sensorNames}")
-                chartType = input("Enter the chart type: ")
-                backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
+                print(f"The following sensors were chosen: {sensorNames}") 
+                chartId = backend.createChartObject(chartTitle, xlabel, ylabel, sensorNames, chartType)
+                chart = backend.getChart(chartId)
+                if chartType == "pie":
+                    rangesString = input("Enter the value ranges for the chart categories (enter in the format: low1-high1 low2-high2): ") #note that if no range is given then the chart will use each data value as a category
+                    ranges = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangesString)
+                    rangeList = []
+                    print("Range:", end=" ") 
+                    for (low, high) in ranges:
+                        rangeList.append((float(low),float(high)))
+                        print(f"({float(low)},{float(high)})", end=" ")
+                    print()
+                    chart.setCategories(rangeList)
+                if chartType == "heatmap":
+                    rangeString = input("Enter the min-max range for sensor data values (enter in the format: min-max): ")
+                    minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
+                    chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
+                    
+
+                    
+
+
+
 
         elif userInput == "2":
             print("Automatically restarting session")
