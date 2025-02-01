@@ -312,6 +312,7 @@ class SerialDevice(Device):
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
+                    self.serialObject.close()
                     return True 
                 self.serialObject.close()
         except:
@@ -329,7 +330,7 @@ class SerialDevice(Device):
             print(f"Is port open: {self.serialObject.is_open}")
         self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
-
+            #print(self.serialObject.is_open)
             try:
                 dataString = None 
                 while dataString is None:
@@ -337,12 +338,11 @@ class SerialDevice(Device):
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
                 self.addToDataBuffer(dataString)
-                modifiedString = re.sub('\s', "", dataString)
-                print(modifiedString)
-
-    
+                #modifiedString = re.sub('\s', "", dataString)
+                #print(modifiedString, end="")
             except:
                 print("an error occurred") 
+        self.disconnect()
 
     def reconnect(self):
         # This function aims to reconnect to the connected device (no information needs to be found just establish the connection again)
@@ -367,6 +367,7 @@ class SerialDevice(Device):
             try:
                 self.serialObject.close()
                 print("disconnected")
+                return True
             except:
                 print("Error: could not disconnect")
-        return not self.serialObject.is_open
+        return False
