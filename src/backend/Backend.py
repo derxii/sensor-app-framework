@@ -16,13 +16,14 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QLabel
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import sys
 import random
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, QEventLoop
 from queue import Queue
+import qasync
 # TO DO: 
 # -Clear chart data when the session is restarted 
 # -Fic issue that occurs when session is restarted and the program is exited
@@ -289,25 +290,32 @@ def updateChart(frame):
 
     ############################################## TESTING CODE ########################################################
 
-async def main():
+def main():
     backend = Backend()
-    app = QApplication(sys.argv)         
+    app = QApplication(sys.argv)     
+    loop = qasync.QEventLoop(app)    
+    asyncio.set_event_loop(loop)
     count = 0
     while True:
         userInput = input("Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: ")
         if userInput == "3":
-            await backend.restartProgram()
+            #await backend.restartProgram()
+            loop.run_until_complete(backend.restartProgram())
             break
         elif userInput == "1":
             if count != 0:
-                await backend.restartProgram()
-            allDevices = await backend.scanForDevices()
+                #await backend.restartProgram()
+                loop.run_until_complete(backend.restartProgram())
+            #allDevices = await backend.scanForDevices()
+         
+            loop.run_until_complete(backend.scanForDevices())
+            #app.exec()
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
-            returnVal = await backend.connectToDevice(deviceName, deviceAddress)
-            print(f"Success: {returnVal}")
-            if not returnVal:
-                return
+            loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
+            #print(f"Success: {returnVal}")
+            #if not returnVal:
+            #    return
             print("Found the following sensors:")
             for sensor in backend.listSensorNames():
                 print(sensor)
@@ -352,7 +360,8 @@ async def main():
         userInput = input("Press 1 to start session: ")
         if userInput == "1":
             backend.clearSession()
-            await backend.startSession()
+            #await backend.startSession()
+            loop.run_until_complete(backend.startSession())
         
         # Comment out the following lines of code to run the program like normal
         #app = QApplication(sys.argv)
@@ -363,7 +372,8 @@ async def main():
         
         userInput = input("Press 2 to end session: ")
         if userInput == "2":    
-            await backend.endSession()
+            #await backend.endSession()
+            loop.run_until_complete(backend.endSession())
         
         
         #app = QApplication(sys.argv)
@@ -382,5 +392,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    #asyncio.run(main())
+    main()
     
