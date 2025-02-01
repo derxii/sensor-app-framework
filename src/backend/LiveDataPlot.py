@@ -138,7 +138,15 @@ class LiveDataPlot(QMainWindow):
                 self.allHeatmaps[i]["imageView"].setImage(structuredData.T)
 
 
-
+    def clearPlots(self):
+        for i in range(0,len(self.allPlots)): 
+            for sensor in self.allPlots[i]["dataStream"].keys(): 
+                self.allPlots[i]["dataStream"][sensor]["yData"] = []
+                self.allPlots[i]["dataStream"][sensor]["counter"] = 0
+                self.allPlots[i]["dataStream"][sensor]["xData"] = []
+                plotLine = self.allPlots[i]["dataStream"][sensor]["line"]
+                plotLine.setData(self.allPlots[i]["dataStream"][sensor]["xData"], self.allPlots[i]["dataStream"][sensor]["yData"])
+                self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
 
 class LiveHeatMap(QMainWindow):
     def __init__(self, backend):
