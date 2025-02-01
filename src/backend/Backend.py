@@ -290,7 +290,8 @@ def updateChart(frame):
     ############################################## TESTING CODE ########################################################
 
 async def main():
-    backend = Backend()         
+    backend = Backend()
+    app = QApplication(sys.argv)         
     count = 0
     while True:
         userInput = input("Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: ")
@@ -342,27 +343,21 @@ async def main():
                     chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
                     
 
-                    
-
-
-
-
         elif userInput == "2":
             print("Automatically restarting session")
             backend.clearSession()
+            #LiveWindow.clearPlots()
+
             
         userInput = input("Press 1 to start session: ")
         if userInput == "1":
             backend.clearSession()
             await backend.startSession()
-
-        # Comment out the following lines of code to run the program like normal
         
-        app = QApplication(sys.argv)
-        main_window = LiveDataPlot(backend)
-        #main_window = LiveHeatMap(backend)
-        main_window.show()
-        #sys.exit(app.exec())
+        # Comment out the following lines of code to run the program like normal
+        #app = QApplication(sys.argv)
+        LiveWindow = LiveDataPlot(backend)
+        LiveWindow.show()
         app.processEvents()
         # End of comment section
         
@@ -370,13 +365,14 @@ async def main():
         if userInput == "2":    
             await backend.endSession()
         
+        
         #app = QApplication(sys.argv)
-        main_window = StaticDataPlot(backend)
-        #main_window = LiveHeatMap(backend)
-        main_window.show()
+        StaticWindow = StaticDataPlot(backend)
+        StaticWindow.show()
         #sys.exit(app.exec())
-        app.processEvents()
-    
+        #app.processEvents()
+        
+        
         userInput = input("Would you like to save the data to a csv file? (y/n): ")
         if userInput == "y":
             filename = input("What would you like to save the filename as?: ")
