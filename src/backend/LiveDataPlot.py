@@ -70,11 +70,12 @@ class LiveDataPlot(QMainWindow):
                 matrixLayout.addWidget(imageView)
 
                 #layout.addWidget(imageView)
-                colormap = pg.colormap.get('inferno')  # Choose a color map
+                colormap = pg.colormap.get('turbo')  # Choose a color map
                 lut = colormap.getLookupTable()  # Generate lookup table
                 # Set the image with correct LUT
                 image_item = imageView.getImageItem()  # Access the internal ImageItem
                 image_item.setLookupTable(lut)  # Apply color map
+                imageView.setColorMap(colormap)
                 #(min, max) = chart.getMinMaxRange()
                 #image_item.setLevels([min, max])  # Set min-max temperature range
                 rangeVals = chart.getMinMaxRange()
@@ -98,8 +99,9 @@ class LiveDataPlot(QMainWindow):
                 heatmapLayout.addWidget(imageView)
 
                 #layout.addWidget(imageView)
-                colormap = pg.colormap.get('inferno')  # Choose a color map
+                colormap = pg.colormap.get('viridis')  # Choose a color map
                 lut = colormap.getLookupTable()  # Generate lookup table
+                imageView.setColorMap(colormap)
                 # Set the image with correct LUT
                 image_item = imageView.getImageItem()  # Access the internal ImageItem
                 image_item.setLookupTable(lut)  # Apply color map
@@ -163,7 +165,7 @@ class LiveDataPlot(QMainWindow):
                     plotLine.setData(self.allPlots[i]["dataStream"][sensor]["xData"], self.allPlots[i]["dataStream"][sensor]["yData"])
                     self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
                     
-            for i in range(0, len(self.allMatrices)):
+            for i in range(0,len(self.allMatrices)):
                 chartId = int(self.allMatrices[i]["chartId"])
                 chart = self.Backend.getChart(chartId)
                 #if not chart.isQueueReady():
@@ -175,11 +177,11 @@ class LiveDataPlot(QMainWindow):
                 structuredData = np.resize(np.array(data), (self.allMatrices[i]["N"], self.allMatrices[i]["N"]))
                 self.allMatrices[i]["imageView"].setImage(structuredData.T)
 
-            for i in range(0, len(self.allHeatmaps)):
+            for i in range(0,len(self.allHeatmaps)):
                 categories = self.allHeatmaps[i]["categories"]
                 sensors = self.allHeatmaps[i]["sensors"]
                 data = self.allHeatmaps[i]["data"]
-                chartId = int(self.allMatrices[i]["chartId"])
+                chartId = int(self.allHeatmaps[i]["chartId"])
                 chart = self.Backend.getChart(chartId)
                 for j in range(0, len(sensors)):
                     dataVal = chart.getLastDataPoint(sensors[j])
@@ -203,7 +205,7 @@ class LiveDataPlot(QMainWindow):
                 self.allPlots[i]["dataStream"][sensor]["line"] = plotLine
     
     def livePlotExists(self):
-        return len(self.allPlots) + len(self.allMatrices) != 0
+        return len(self.allPlots) + len(self.allMatrices) + len(self.allHeatmaps) != 0
 
 class LiveHeatMap(QMainWindow):
     def __init__(self, backend):
