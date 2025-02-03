@@ -1,7 +1,7 @@
 from typing import Callable
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QFileDialog, QSystemTrayIcon
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QIcon
 
 from frontend.config import get_image_path
 from frontend.widgets.Button import Button
@@ -18,6 +18,8 @@ class DashboardButtonGroup(QWidget):
         )
         self.button_main = Button("", None, "", "white")
         self.button_main_slot = None
+
+        self.button_download.clicked.connect(self.download_data)
 
         self.init_ui()
 
@@ -41,3 +43,16 @@ class DashboardButtonGroup(QWidget):
         layout.addWidget(self.button_main)
 
         self.setLayout(layout)
+
+    def download_data(self):
+        save_path, _ = QFileDialog.getSaveFileName(
+            self, "Save Data as a .csv File", "data.csv"
+        )
+
+        tray_icon = QSystemTrayIcon()
+        tray_icon.showMessage(
+            "Data Downloaded",
+            "Your data has been saved to " + save_path,
+            QIcon(get_image_path("icon.svg")),
+            3000,
+        )
