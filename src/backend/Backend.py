@@ -355,8 +355,9 @@ def main():
                     chart.setCategories(rangeList)
                 if chartType == "heatmap":
                     rangeString = input("Enter the min-max range for sensor data values (enter in the format: min-max): ")
-                    minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
-                    chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
+                    if rangeString != "":
+                        minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
+                        chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
                     rangesString = input("Enter the value ranges for the chart categories (enter in the format: low1-high1 low2-high2): ") #note that if no range is given then the chart will use each data value as a category
                     ranges = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangesString)
                     rangeList = []
@@ -368,8 +369,11 @@ def main():
                     chart.setCategories(rangeList)
                 if chartType == "matrix":
                     rangeString = input("Enter the min-max range for sensor data values (enter in the format: min-max): ")
-                    minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
-                    chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
+                    if rangeString != "":
+                        minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
+                        chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
+                    #minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
+                    #chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
                     
 
         elif userInput == "2":
