@@ -34,28 +34,30 @@ class Welcome(ScrollableWindow):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         title_font = QFont()
         title_font.setWeight(QFont.Weight.DemiBold)
         title_font.setPointSize(40)
 
         self.title.setFont(title_font)
-        self.title.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        layout.addWidget(self.title)
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.title, 3)
 
         image = QIcon(get_image_path("icon.svg")).pixmap(QSize(256, 256))
         self.logo.setPixmap(image)
-        self.logo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        layout.addWidget(self.logo)
+        self.logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.logo, 5)
 
         description_font = QFont()
         description_font.setPointSize(20)
 
         self.description.setFont(description_font)
         self.description.setWordWrap(True)
-        self.description.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        layout.addWidget(self.description)
+        self.description.setAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom
+        )
+        layout.addWidget(self.description, 1)
 
         layout.addSpacing(20)
 
@@ -68,5 +70,18 @@ class Welcome(ScrollableWindow):
         self.connect_button.add_text_font(font)
 
         layout.addWidget(self.connect_button)
+        layout.addSpacing(40)
 
         self.bind_scroll(layout)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        title_font = QFont()
+        title_font.setWeight(QFont.Weight.DemiBold)
+        title_font.setPointSizeF(min(int(min(self.width(), self.height()) * 0.08), 100))
+
+        self.title.setFont(title_font)
+
+        size = min(int(min(self.width(), self.height()) * 0.45), 512)
+        image = QIcon(get_image_path("icon.svg")).pixmap(QSize(size, size))
+        self.logo.setPixmap(image)

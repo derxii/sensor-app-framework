@@ -104,7 +104,9 @@ class Devices(ScrollableWindow):
 
             selected_device = self.device_simple_view_list[device_index]
 
-            self.right_container_layout.itemAt(0).widget().setParent(None)
+            deleted_widget = self.right_container_layout.itemAt(0).widget()
+            deleted_widget.setParent(None)
+            deleted_widget.deleteLater()
             self.right_container_layout.addWidget(
                 selected_device.generate_detailed_view(self.switch_window)
             )

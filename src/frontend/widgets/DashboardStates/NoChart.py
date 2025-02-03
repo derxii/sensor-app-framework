@@ -16,5 +16,9 @@ class NoChart(DashboardState):
 
     def change_state(self, dashboard_state: "DashboardState"):
         self.change_dash_state(
-            dashboard_state(self.change_dash_state, self.dashboard_button_group)
+            dashboard_state(
+                self.change_dash_state,
+                self.dashboard_button_group,
+                self.dashboard_chart,
+            )
         )

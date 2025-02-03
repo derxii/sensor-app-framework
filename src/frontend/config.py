@@ -25,8 +25,8 @@ def enable_custom_styling(widget: QWidget):
 
 def dynamically_repaint_widget(*widgets: QWidget):
     for widget in widgets:
-        widget.style().polish(widget)
         widget.style().unpolish(widget)
+        widget.style().polish(widget)
         widget.update()
 
 

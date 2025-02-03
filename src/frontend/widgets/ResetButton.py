@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QSize
 
-from frontend.config import enable_custom_styling, get_image_path
+from frontend.config import enable_custom_styling, get_image_path, set_backend
 from frontend.widgets.Button import Button
 
 
@@ -61,6 +61,7 @@ class ResetButton(QWidget):
     def on_click(self):
         from frontend.windows.Welcome import Welcome
 
+        set_backend()
         self.switch_window(Welcome(self.switch_window))
 
     def disable_button(self):

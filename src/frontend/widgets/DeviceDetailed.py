@@ -76,7 +76,7 @@ class DeviceDetailed(ScrollableWindow):
 
         root_layout.addWidget(self.name)
 
-        root_layout.addSpacing(10)
+        root_layout.addSpacing(20)
 
         root_layout.addWidget(
             self.create_left_right_aligned_text(self.address, "Address")
@@ -125,12 +125,12 @@ class DeviceDetailed(ScrollableWindow):
 
         label_widget = QLabel(f"{label}: ")
         label_widget.setAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
         )
         label_widget.setFont(font)
         layout.addWidget(label_widget)
 
-        text.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        text.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
         text.setFont(font)
 
         value_widget = text
@@ -139,7 +139,7 @@ class DeviceDetailed(ScrollableWindow):
             container_layout = QHBoxLayout()
             container_layout.setContentsMargins(0, 0, 0, 0)
             container_layout.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
             )
 
             image.setFixedSize(16, 16)

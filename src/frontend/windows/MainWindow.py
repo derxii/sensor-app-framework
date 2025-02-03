@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
 
     def init_ui(self, width: int, height: int, center: QPoint):
         self.resize(width, height)
-        self.setMinimumSize(width // 2, height // 2)
+        self.setMinimumSize(width * 0.7, height * 0.7)
         self.move(center.x() - width // 2, center.y() - height // 2)
 
         self.setWindowIcon(QIcon(get_image_path("icon.svg")))

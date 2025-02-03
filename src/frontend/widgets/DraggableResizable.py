@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class DraggableResizable(QWidget):
-    def __init__(self, parent: "DashboardChart", container: QWidget, chart_id: str):
+    def __init__(self, parent: "DashboardChart", container: QWidget, chart_id: int):
         super().__init__(container)
         self.setWindowFlag(Qt.WindowType.SubWindow)
         self.parent = parent
@@ -22,7 +22,9 @@ class DraggableResizable(QWidget):
         self.bottom_bar = QWidget()
         self.grip = QSizeGrip(self)
 
-        self.setGeometry(0, 0, 300, 300)
+        self.base_size = (250, 250)
+
+        self.setGeometry(0, 0, self.base_size[0], self.base_size[1])
 
         self.init_ui()
 
@@ -60,7 +62,8 @@ class DraggableResizable(QWidget):
     def destroy(self):
         get_backend().deleteChart(self.chart_id)
 
-        self.parent.dashboard_state.handle_change_chart_amount(
+        self.parent.get_dashboard_state().handle_change_chart_amount(
             self.parent.no_chart_text
         )
         self.setParent(None)
+        self.deleteLater()
