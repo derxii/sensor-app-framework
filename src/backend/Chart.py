@@ -23,6 +23,7 @@ class Chart(object):
         self.Type = type
         self.TempChartFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False) # This file contains all the chart data 
         self.ChartFilename = self.TempChartFile.name 
+        self.MinMaxRange = None
 
         SensorData = {}   
         for sensor in sensorNames:
