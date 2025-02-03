@@ -29,7 +29,7 @@ class HeatmapMatrixHandler(ChartHandler):
         result = self.range_input.get_bin_value()
         if result is None:
             return False, None
-        
+
         lower_value, upper_value = result
         print(result)
         id = get_backend().createChartObject(
