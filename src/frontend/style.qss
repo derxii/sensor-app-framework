@@ -194,3 +194,7 @@ Button#bin {
 Button#bin:pressed {
     background: #dbdbdb;
 }
+
+QLabel#tooltip {
+    padding-top: 5px;
+}

@@ -37,7 +37,7 @@ class TypeSelector(QComboBox):
         label.setFont(get_form_font())
 
         type_selector = TypeSelector(text_chart_handler_mapping, switch_chart_handler)
-        return set_left_right_aligned_widgets(label, type_selector, 5, 2)
+        return set_left_right_aligned_widgets(label, type_selector, 9, 4)
 
     def change_chart_handler(self):
         self.switch_chart_handler(self.text_chart_handler_mapping[self.currentText()]())

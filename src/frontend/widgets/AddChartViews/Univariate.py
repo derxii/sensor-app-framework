@@ -2,6 +2,7 @@ from frontend.config import handle_exception
 from frontend.widgets.AddChartViews.AddChartView import AddChartView
 
 from frontend.widgets.ChartHandlers.LineChartHandler import LineChartHandler
+from frontend.widgets.ChartHandlers.PieChartHandler import PieChartHandler
 
 
 class Univariate(AddChartView):
@@ -11,7 +12,7 @@ class Univariate(AddChartView):
                 "Line": LineChartHandler,
                 "Bar": LineChartHandler,
                 "Histogram": LineChartHandler,
-                "Pie": LineChartHandler,
+                "Pie": PieChartHandler,
                 "Box-Plot": LineChartHandler,
             }
         )
@@ -22,10 +23,10 @@ class Univariate(AddChartView):
         sensors_selected = self.get_sensors_selected()
         if len(sensors_selected) != 1:
             handle_exception(
-                Exception("Incorrect Amount of Sensors Selected"),
+                Exception("No Sensors Selected"),
                 None,
                 False,
-                "Only one sensor can be selected.",
+                "Please select a sensor.",
             )
             return False, None
 
