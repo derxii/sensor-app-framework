@@ -6,7 +6,7 @@ from bleak import BleakScanner, BleakClient
 import re
 from Device import Device, BluetoothDevice, SerialDevice
 from Chart import Chart
-from LiveDataPlot import LiveDataPlot, LiveHeatMap
+from LiveDataPlot import LiveDataPlot
 from StaticDataPlot import StaticDataPlot
 import threading 
 import csv
