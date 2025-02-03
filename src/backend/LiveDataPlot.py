@@ -44,7 +44,7 @@ class LiveDataPlot(QMainWindow):
                 plotDict["counter"] = 0
                 plotDict["dataStream"] = {}
                 colourCount = 0
-                legend = pg.LegendItem(offset=(20, 10))
+                legend = pg.LegendItem(offset=(0, -20))
                 legend.setParentItem(plot.getPlotItem())
                 for sensor in chart.getSensors():
                     plotDict["dataStream"][sensor] = {}
@@ -55,6 +55,8 @@ class LiveDataPlot(QMainWindow):
                     plotDict["dataStream"][sensor]["counter"] = 0
                     colourCount += 1
                     legend.addItem(line, sensor)
+                legendWidth = legend.width()
+                plot.getPlotItem().setContentsMargins(0, 0, legendWidth, 0) 
                 self.allPlots.append(plotDict)
                 dock = QDockWidget(chart.getTitle(), self)
                 dock.setWidget(plot)
@@ -207,54 +209,3 @@ class LiveDataPlot(QMainWindow):
     def livePlotExists(self):
         return len(self.allPlots) + len(self.allMatrices) + len(self.allHeatmaps) != 0
 
-class LiveHeatMap(QMainWindow):
-    def __init__(self, backend):
-        super().__init__()
-        self.Backend = backend
-        self.setWindowTitle("Temperature Heatmap")
-        self.setGeometry(100, 100, 600, 500)
-
-        # Create main widget
-        self.main_widget = QWidget()
-        self.setCentralWidget(self.main_widget)
-        layout = QVBoxLayout(self.main_widget)
-
-        # Create ImageView for heatmap
-        self.image_view = pg.ImageView()
-        layout.addWidget(self.image_view)
-
-        # Get relevant info
-        self.sensorNum = 0
-        for chart in self.Backend.getChartObjects():
-            if chart.getType() != "heatmap":
-                continue
-            self.chart = chart
-            self.sensors = sorted(chart.getSensors()) 
-            self.numSensors = len(self.sensors)    
-        self.N = int(math.sqrt(self.numSensors))
-
-        # Create a colormap
-        colormap = pg.colormap.get('inferno')  # Choose a color map
-        lut = colormap.getLookupTable()  # Generate lookup table
-
-        # Set the image with correct LUT
-        self.image_item = self.image_view.getImageItem()  # Access the internal ImageItem
-        self.image_item.setLookupTable(lut)  # Apply color map
-        self.image_item.setLevels([20, 40])  # Set min-max temperature range
-
-        #self.update_plot()
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_plot)
-        self.timer.start(100)
-
-    def update_plot(self):
-        # Get chart data
-        # Deal with the case where not all the sensor values are ready
-        data = [] #np.zeros((1, self.numSensors))
-        #Check if the queues are ready
-        if not self.chart.isQueueReady():
-            return
-        for sensor in self.sensors:
-            data.append(float(self.chart.getLastDataPoint(sensor)))
-        structuredData = np.resize(np.array(data), (self.N,self.N))
-        self.image_view.setImage(structuredData.T)
