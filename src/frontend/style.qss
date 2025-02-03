@@ -185,3 +185,12 @@ Button#switch-selected {
 QLabel#switch-selected {
     color: white;
 }
+
+Button#bin {
+    text-align: center;
+    padding: 8px;
+}
+
+Button#bin:pressed {
+    background: #dbdbdb;
+}
