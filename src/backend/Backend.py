@@ -42,6 +42,7 @@ class Backend(object):
         self.figures = []
         self.chartObjects = []
         self.stopSession = threading.Event()
+        
     async def scanForDevices(self):
         allDevices = []
         allBluetoothDevices = await self.scanForBluetoothDevices() #asyncio.run(self.scanForBluetoothDevices())
@@ -64,7 +65,12 @@ class Backend(object):
             self.connectedDevice = BluetoothDevice(deviceName, deviceAddress)
             success = await self.connectedDevice.connect() #asyncio.run(self.connectedDevice.connect())
         return  success 
+    
+    def togglePause(self):
+        self.connectedDevice.togglePause()
 
+
+    
     def listSensorNames(self):
         return self.connectedDevice.getSensorNames()
 
@@ -213,7 +219,8 @@ class Backend(object):
     def clearSession(self):
         #-Description: start a new session by clearing the current data in the chart 
         #-Parameters: None
-        #-Return: None 
+        #-Return: None
+        self.connectedDevice.setPaused(False) 
         self.connectedDevice.clearDataStructValues()
         self.connectedDevice.setDataBuffer("")
         #self.connectedDevice.ParsedData = ""
@@ -235,6 +242,7 @@ class Backend(object):
         #-Description: clears all charts and disconnects PC from bluetooth device 
         #-Parameters: None
         #-Return: None
+        self.connectedDevice.setPaused(False)
         if self.connectedDevice.Type == "Bluetooth":       
             if self.connectedDevice.client.is_connected:
                 try:
@@ -321,12 +329,12 @@ def main():
                 print(sensor)
             numCharts = int(input("How many charts do you want?: "))
             for _ in range(0, numCharts):
-                print("#############################################################")
+                print("#################################################### CREATING NEW CHART ###############################################################")
                 chartType = input("Enter the chart type: ")
                 chartTitle = input("Enter the chart title: ")
                 xlabel = ""
                 ylabel = ""
-                if chartType == "line":
+                if chartType == "line" or chartType == "heatmap":
                     xlabel = input("Enter x label: ")
                 if chartType != "pie":
                     ylabel = input("Enter y label: ")
@@ -349,6 +357,19 @@ def main():
                     rangeString = input("Enter the min-max range for sensor data values (enter in the format: min-max): ")
                     minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
                     chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
+                    rangesString = input("Enter the value ranges for the chart categories (enter in the format: low1-high1 low2-high2): ") #note that if no range is given then the chart will use each data value as a category
+                    ranges = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangesString)
+                    rangeList = []
+                    print("Range:", end=" ") 
+                    for (low, high) in ranges:
+                        rangeList.append((float(low),float(high)))
+                        print(f"({float(low)},{float(high)})", end=" ")
+                    print()
+                    chart.setCategories(rangeList)
+                if chartType == "matrix":
+                    rangeString = input("Enter the min-max range for sensor data values (enter in the format: min-max): ")
+                    minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
+                    chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
                     
 
         elif userInput == "2":
@@ -357,32 +378,23 @@ def main():
             #LiveWindow.clearPlots()
 
             
-        userInput = input("Press 1 to start session: ")
-        if userInput == "1":
-            backend.clearSession()
-            #await backend.startSession()
-            loop.run_until_complete(backend.startSession())
+        userInput = input("Press enter to start session: ")
+        backend.clearSession()
+        #await backend.startSession()
+        loop.run_until_complete(backend.startSession())
         
-        # Comment out the following lines of code to run the program like normal
-        #app = QApplication(sys.argv)
         LiveWindow = LiveDataPlot(backend)
-        LiveWindow.show()
-        app.processEvents()
-        # End of comment section
+        if LiveWindow.livePlotExists():
+            LiveWindow.show()
+            app.processEvents()
         
-        userInput = input("Press 2 to end session: ")
-        if userInput == "2":    
-            #await backend.endSession()
-            loop.run_until_complete(backend.endSession())
-        
-        
-        #app = QApplication(sys.argv)
+        userInput = input("Press enter to end session: ")
+        loop.run_until_complete(backend.endSession())
+
         StaticWindow = StaticDataPlot(backend)
-        StaticWindow.show()
-        #sys.exit(app.exec())
-        #app.processEvents()
-        
-        
+        if StaticWindow.staticPlotExists():
+            StaticWindow.show()
+    
         userInput = input("Would you like to save the data to a csv file? (y/n): ")
         if userInput == "y":
             filename = input("What would you like to save the filename as?: ")
