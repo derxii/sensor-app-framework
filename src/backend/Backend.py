@@ -175,11 +175,15 @@ class Backend(object):
         #-Description: saves data into a csv file in the specified location
         #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
         #-Return: boolean indicating if saving the file was successful 
+
+        # determine whether the file is a .txt or .csv 
+        
         if not os.path.isdir(filePath):
             print("Error: directory not found")
             return False
         #check if the full filepath already exists 
-        fullPath = filePath + filename + ".csv"
+        
+        fullPath = filePath + filename  #+ ".csv"
         print(fullPath)
         if os.path.exists(fullPath):
             print("Error: file already exists in the specified directory")
@@ -189,31 +193,47 @@ class Backend(object):
             deviceData = json.load(file)
         DataStruct = deviceData["DataStruct"]
 
-        data = []
-        fields = list(DataStruct.keys())
-        data.append(fields) # first row of the csv include the fields 
+        fileNameComponents = re.split( r"\.", filename)
+        exten = fileNameComponents[1]
+
+        if exten == "csv":
+            data = []
+            fields = list(DataStruct.keys())
+            data.append(fields) # first row of the csv include the fields 
+            
+            #allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
+            allRowLengths = [len(DataStruct[sensor]) for sensor in fields]
+            maxNumRows = max(allRowLengths) 
+            for i in range(0, maxNumRows):
+                currentRow = []
+                for field in fields:
+                    #if i < len(self.connectedDevice.DataStruct[field]):
+                    #    currentRow.append(self.connectedDevice.DataStruct[field][i])
+                    if i < len(DataStruct[field]):
+                        currentRow.append(DataStruct[field][i])
+                    else:
+                        currentRow.append("")
+                data.append(currentRow)
+            try:
+                with open(fullPath, 'w', newline='', encoding='utf-8') as csvFile:
+                    writer = csv.writer(csvFile)
+                    writer.writerows(data)
+            except:
+                print("Error: unable to create csv file")
+                return False
+            return True  
         
-        #allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
-        allRowLengths = [len(DataStruct[sensor]) for sensor in fields]
-        maxNumRows = max(allRowLengths) 
-        for i in range(0, maxNumRows):
-            currentRow = []
-            for field in fields:
-                #if i < len(self.connectedDevice.DataStruct[field]):
-                #    currentRow.append(self.connectedDevice.DataStruct[field][i])
-                if i < len(DataStruct[field]):
-                    currentRow.append(DataStruct[field][i])
-                else:
-                    currentRow.append("")
-            data.append(currentRow)
-        try:
-            with open(fullPath, 'w', newline='', encoding='utf-8') as csvFile:
-                writer = csv.writer(csvFile)
-                writer.writerows(data)
-        except:
-            print("Error: unable to create csv file")
-            return False
-        return True  
+        elif exten == "txt":
+            with open(fullPath, "w", encoding="utf-8") as file:
+                for (key, value) in DataStruct.items():
+                    print(f"{key}: [", end="", file=file)
+                    for i in range(len(value)):
+                        print(value[i], end="", file=file)
+                        if i != len(value) - 1:
+                            print(", ", end="", file=file)
+                    print("]", file=file)
+                
+                    
             
 
     def clearSession(self):
@@ -399,7 +419,7 @@ def main():
         if StaticWindow.staticPlotExists():
             StaticWindow.show()
     
-        userInput = input("Would you like to save the data to a csv file? (y/n): ")
+        userInput = input("Would you like to save the data to a csv/txt file? (y/n): ")
         if userInput == "y":
             filename = input("What would you like to save the filename as?: ")
             fileLocation = input("where would you like to save the file?: ")
