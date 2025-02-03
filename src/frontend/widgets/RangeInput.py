@@ -34,13 +34,15 @@ class RangeInput(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(5)
 
+        self.start_input.setMinimumWidth(50)
         self.start_input.setFont(get_form_font())
         layout.addWidget(self.start_input, 3)
 
         self.separator_dash.setFrameShape(QFrame.Shape.HLine)
         self.separator_dash.setFrameShadow(QFrame.Shadow.Sunken)
-        layout.addWidget(self.separator_dash, 2)
+        layout.addWidget(self.separator_dash, 1)
 
+        self.end_input.setMinimumWidth(50)
         self.end_input.setFont(get_form_font())
         layout.addWidget(self.end_input, 3)
 
