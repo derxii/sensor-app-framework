@@ -75,8 +75,12 @@ class LiveDataPlot(QMainWindow):
                 # Set the image with correct LUT
                 image_item = imageView.getImageItem()  # Access the internal ImageItem
                 image_item.setLookupTable(lut)  # Apply color map
-                (min, max) = chart.getMinMaxRange()
-                image_item.setLevels([min, max])  # Set min-max temperature range
+                #(min, max) = chart.getMinMaxRange()
+                #image_item.setLevels([min, max])  # Set min-max temperature range
+                rangeVals = chart.getMinMaxRange()
+                if rangeVals is not None:
+                    (min, max) = rangeVals
+                    image_item.setLevels([min, max]) 
 
                 sensors = sorted(chart.getSensors())
                 matrixDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "N": int(math.sqrt(len(sensors)))}
@@ -99,8 +103,10 @@ class LiveDataPlot(QMainWindow):
                 # Set the image with correct LUT
                 image_item = imageView.getImageItem()  # Access the internal ImageItem
                 image_item.setLookupTable(lut)  # Apply color map
-                (min, max) = chart.getMinMaxRange()
-                image_item.setLevels([min, max])  # Set min-max temperature range
+                rangeVals = chart.getMinMaxRange()
+                if rangeVals is not None:
+                    (min, max) = rangeVals
+                    image_item.setLevels([min, max])  # Set min-max temperature range
 
                 categories = chart.getCategories()
                 #Create data struct
