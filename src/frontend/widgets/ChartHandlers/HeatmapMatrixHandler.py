@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QWidget
 
 from frontend.config import get_backend
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
-from frontend.widgets.FormUtils import create_text_input
-from frontend.widgets.RangeInput import RangeInput
+from frontend.widgets.FormComponents.FormUtils import create_text_input
+from frontend.widgets.FormComponents.RangeInput import RangeInput
 
 
 class HeatmapMatrixHandler(ChartHandler):

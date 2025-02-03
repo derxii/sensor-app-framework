@@ -15,7 +15,7 @@ from frontend.config import get_backend, is_debug
 from frontend.widgets.AddChartViews.TypeSelector import TypeSelector
 from frontend.widgets.ChartHandlers.LineChartHandler import LineChartHandler
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
-from frontend.widgets.FormUtils import (
+from frontend.widgets.FormComponents.FormUtils import (
     create_text_input,
     get_form_font,
     set_left_right_aligned_widgets,

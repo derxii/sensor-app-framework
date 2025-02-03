@@ -2,8 +2,8 @@ from typing import Union
 from PySide6.QtWidgets import QWidget
 
 from frontend.config import get_backend, handle_exception
-from frontend.widgets.BinInputField import BinInputField
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
+from frontend.widgets.FormComponents.BinInputField import BinInputField
 
 
 class PieChartHandler(ChartHandler):

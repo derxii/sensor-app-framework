@@ -1,7 +1,10 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QFrame, QLabel, QDoubleSpinBox
 
 from frontend.config import handle_exception
-from frontend.widgets.FormUtils import get_form_font, set_left_right_aligned_widgets
+from frontend.widgets.FormComponents.FormUtils import (
+    get_form_font,
+    set_left_right_aligned_widgets,
+)
 
 
 class RangeInput(QWidget):

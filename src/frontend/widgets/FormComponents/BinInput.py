@@ -2,9 +2,9 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout
 from PySide6.QtGui import Qt
 
 from frontend.config import get_image_path
-from frontend.widgets.BinAddedContainer import BinAddedContainer
+from frontend.widgets.FormComponents.RangeInput import RangeInput
 from frontend.widgets.Button import Button
-from frontend.widgets.RangeInput import RangeInput
+from frontend.widgets.FormComponents.BinAddedContainer import BinAddedContainer
 
 
 class BinInput(QWidget):

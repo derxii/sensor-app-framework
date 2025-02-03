@@ -3,8 +3,11 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon, Qt
 
 from frontend.config import get_image_path
-from frontend.widgets.BinInput import BinInput
-from frontend.widgets.FormUtils import get_form_font, set_left_right_aligned_widgets
+from frontend.widgets.FormComponents.BinInput import BinInput
+from frontend.widgets.FormComponents.FormUtils import (
+    get_form_font,
+    set_left_right_aligned_widgets,
+)
 
 
 class BinInputField(QWidget):
