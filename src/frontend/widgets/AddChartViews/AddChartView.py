@@ -108,5 +108,5 @@ class AddChartView(QWidget):
         self.layout().addWidget(self.custom_fields_widget)
 
     @abstractmethod
-    def on_submit_create(self) -> tuple[bool, int]:
+    def on_submit_create(self) -> tuple[bool, Union[int, None]]:
         pass

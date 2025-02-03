@@ -73,7 +73,7 @@ class DashboardChart(QWidget):
 
         self.chart_area.setLayout(chart_layout)
 
-    def generate_chart(self, existing_id: str):
+    def generate_chart(self, existing_id: int):
         new_chart = DraggableResizable(self, self.chart_area, existing_id)
         new_chart.show()
 
