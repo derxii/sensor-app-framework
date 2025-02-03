@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QFileDialog, QSystemTrayIcon
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QFont, QIcon
 
-from frontend.config import get_image_path
+from frontend.config import get_backend, get_image_path, handle_exception
 from frontend.widgets.Button import Button
 from frontend.widgets.ResetButton import ResetButton
 
@@ -49,10 +49,17 @@ class DashboardButtonGroup(QWidget):
             self, "Save Data as a .csv File", "data.csv"
         )
 
-        tray_icon = QSystemTrayIcon()
-        tray_icon.showMessage(
-            "Data Downloaded",
-            "Your data has been saved to " + save_path,
-            QIcon(get_image_path("icon.svg")),
-            3000,
-        )
+        try:
+            success = get_backend().saveData(None, None, save_path)
+            if not success:
+                handle_exception("Unable to Save Data")
+                return
+            tray_icon = QSystemTrayIcon()
+            tray_icon.showMessage(
+                "Data Downloaded",
+                "Your data has been saved to " + save_path,
+                QIcon(get_image_path("icon.svg")),
+                3000,
+            )
+        except Exception as e:
+            handle_exception(e)
