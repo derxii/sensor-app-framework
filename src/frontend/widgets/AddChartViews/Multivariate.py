@@ -1,7 +1,8 @@
 from frontend.config import handle_exception
 from frontend.widgets.AddChartViews.AddChartView import AddChartView
 
-from frontend.widgets.ChartHandlers.HeatmapMatrixHandler import HeatmapMatrixHandler
+from frontend.widgets.ChartHandlers.HeatmapHandler import HeatmapHandler
+from frontend.widgets.ChartHandlers.MatrixHandler import MatrixHandler
 from frontend.widgets.ChartHandlers.LineChartHandler import LineChartHandler
 
 
@@ -10,7 +11,8 @@ class Multivariate(AddChartView):
         super().__init__(
             {
                 "Line": LineChartHandler,
-                "Heatmap Matrix (Sensors vs. Values)": HeatmapMatrixHandler,
+                "Matrix": MatrixHandler,
+                "Heatmap": HeatmapHandler,
             }
         )
 

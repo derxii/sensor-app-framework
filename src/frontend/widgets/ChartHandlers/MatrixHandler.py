@@ -7,12 +7,12 @@ from frontend.widgets.FormComponents.FormUtils import create_text_input
 from frontend.widgets.FormComponents.RangeInput import RangeInput
 
 
-class HeatmapMatrixHandler(ChartHandler):
+class MatrixHandler(ChartHandler):
     def __init__(self):
         super().__init__()
 
-        self.range_container, self.range_input = RangeInput.create_range_input()
         self.y_axis_label, self.y_axis_label_input = create_text_input("Y-Axis Label")
+        self.range_container, self.range_input = RangeInput.create_range_input()
 
     def get_custom_fields_container(self) -> QWidget:
         container, layout = self.create_basic_vertical_container()
@@ -37,6 +37,6 @@ class HeatmapMatrixHandler(ChartHandler):
             "",
             self.y_axis_label_input.text(),
             sensors_selected,
-            "heatmap",
+            "matrix",
         )
         return True, id

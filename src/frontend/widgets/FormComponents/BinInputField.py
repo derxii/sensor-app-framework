@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon, Qt
 
-from frontend.config import get_image_path
+from frontend.config import get_image_path, handle_exception
 from frontend.widgets.FormComponents.BinInput import BinInput
 from frontend.widgets.FormComponents.FormUtils import (
     get_form_font,
@@ -11,10 +11,10 @@ from frontend.widgets.FormComponents.FormUtils import (
 
 
 class BinInputField(QWidget):
-    def __init__(self):
+    def __init__(self, label: str = "Data Bins: "):
         super().__init__()
 
-        self.bin_label = QLabel("Data Bins: ")
+        self.bin_label = QLabel(label)
         self.bin_tooltip = QLabel("")
 
         self.bin_input = BinInput()
@@ -50,3 +50,8 @@ class BinInputField(QWidget):
 
     def get_bin_values(self):
         return self.bin_input.bin_value_container.get_bins()
+
+    def set_no_bin_exception(self):
+        handle_exception(
+            Exception("Not Enough Bins"), None, None, "Please add at least one bin."
+        )
