@@ -1,6 +1,9 @@
 from frontend.config import handle_exception
 from frontend.widgets.AddChartViews.AddChartView import AddChartView
 
+from frontend.widgets.ChartHandlers.BarChartHandler import BarChartHandler
+from frontend.widgets.ChartHandlers.BoxplotHandler import BoxplotHandler
+from frontend.widgets.ChartHandlers.HistogramHandler import HistogramHandler
 from frontend.widgets.ChartHandlers.LineChartHandler import LineChartHandler
 from frontend.widgets.ChartHandlers.PieChartHandler import PieChartHandler
 
@@ -10,10 +13,10 @@ class Univariate(AddChartView):
         super().__init__(
             {
                 "Line": LineChartHandler,
-                "Bar": LineChartHandler,
-                "Histogram": LineChartHandler,
+                "Bar": BarChartHandler,
+                "Histogram": HistogramHandler,
                 "Pie": PieChartHandler,
-                "Box-Plot": LineChartHandler,
+                "Box-Plot": BoxplotHandler,
             }
         )
 
