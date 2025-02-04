@@ -21,6 +21,8 @@ class LiveDataPlot(QMainWindow):
         self.allPlots = []
         self.allMatrices = [] # List of dictionaries that include chart id, sensor and plot
         self.allHeatmaps = []
+        self.allDocks = []
+        self.allDockRatios = []
         # Set up the central widget and layout
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -29,10 +31,11 @@ class LiveDataPlot(QMainWindow):
 
         # Add a button to pause/resume
         self.pause_button = QPushButton("Stop")
-        self.pause_button.setFixedSize(100,100)
+        self.pause_button.setFixedSize(70,70)
         layout.addWidget(self.pause_button)
 
         # Create all line charts from backend
+        dock = None
         for chart in self.Backend.getChartObjects():
             if chart.getType() == "line":
                 plot = PlotWidget()
@@ -61,6 +64,7 @@ class LiveDataPlot(QMainWindow):
                 dock = QDockWidget(chart.getTitle(), self)
                 dock.setWidget(plot)
                 self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                
 
             if chart.getType() == "matrix":
                 # Create ImageView for heatmap
@@ -88,8 +92,8 @@ class LiveDataPlot(QMainWindow):
                 sensors = sorted(chart.getSensors())
                 matrixDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "N": int(math.sqrt(len(sensors)))}
                 self.allMatrices.append(matrixDict)
-                self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea,dock)
-
+                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
+        
                 
             if chart.getType() == "heatmap":
                 dock = QDockWidget(chart.getTitle(), self)
@@ -128,9 +132,12 @@ class LiveDataPlot(QMainWindow):
                 dataStruct = np.zeros((len(categories), len(sensors)), dtype=float)
                 heatmapDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "categories": categories, "numCategories": len(categories), "data": dataStruct}
                 self.allHeatmaps.append(heatmapDict)
-                self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea,dock)
+                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
                 
-        
+            if dock is not None:
+                self.allDocks.append(dock)
+                self.allDockRatios.append(1)
+
         self.is_paused = False
         # Counter for x-axis
         self.counter = 0
@@ -138,6 +145,7 @@ class LiveDataPlot(QMainWindow):
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # specifies how frequently the plot should be updated
         self.pause_button.clicked.connect(self.toggle_pause)
+        self.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
 
     def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')
