@@ -411,3 +411,4 @@ class SerialDevice(Device):
             except:
                 print("Error: could not disconnect")
         return False
+
