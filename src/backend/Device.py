@@ -22,12 +22,27 @@ class Device(object):
         self.Type = type # Type is either "Bluetooth" or "Serial"
         self.Lock = threading.Lock()
         self.TerminateSession = threading.Event()
+        self.lock = threading.Lock()
+        self.pause = False
         #self.ParsedData = ""
         self.TempDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
         self.DataFilename = self.TempDataFile.name #"deviceData.json"
         self.TempRawDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
         self.RawDataFilename = self.TempRawDataFile.name#"rawData.json"
 
+    def togglePause(self):
+        with self.lock:
+            self.pause = not self.pause
+
+    def isPaused(self):
+        with self.lock:
+            val = self.pause
+        return val
+    
+    def setPaused(self, val):
+        with self.lock:
+            self.pause = val
+            
     def clearTerminateSession(self):
         self.TerminateSession.clear()
 
@@ -155,9 +170,10 @@ class BluetoothDevice(Device):
 
     def callback(self, sender, data):
         try:
-            dataString = data.decode('utf-8')
-            self.addToDataBuffer(dataString)
-            #print(f"New notification: {dataString}")
+            if not self.isPaused():
+                dataString = data.decode('utf-8')
+                self.addToDataBuffer(dataString)
+                #print(f"New notification: {dataString}")
         except:
             print("cannot convert notification to utf-8", flush=True)
         
@@ -337,7 +353,8 @@ class SerialDevice(Device):
                     numWaitingBytes = self.serialObject.in_waiting
                     dataString = self.serialObject.read(numWaitingBytes)
                 dataString = dataString.decode('utf-8')
-                self.addToDataBuffer(dataString)
+                if not self.isPaused():
+                    self.addToDataBuffer(dataString)
                 #modifiedString = re.sub('\s', "", dataString)
                 #print(modifiedString, end="")
             except:
