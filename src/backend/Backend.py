@@ -79,12 +79,14 @@ class Backend(object):
         self.chartObjects.append(chartOb)
         return id
 
-        #figureTuple = self.createFigure()
-        #self.figures.append(figureTuple)
+    def deleteChart(self, id):
+        deleted_idx = -1
+        for idx, chart in enumerate(self.chartObjects):
+            if chart.getId() == id:
+                deleted_idx = idx
 
-    # The following code is to simulate plotting 
-    
-
+        self.chartObjects.pop(deleted_idx)
+        
     def getChartObjects(self):
         return self.chartObjects
 
