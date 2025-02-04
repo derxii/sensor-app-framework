@@ -4,12 +4,14 @@ from PyQt6.QtCharts import QChart, QChartView, QPieSeries
 from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import QTimer, Qt
 from collections import Counter
+import numpy as np
 class StaticDataPlot(QMainWindow):
     def __init__(self, backend):
         super().__init__()
         self.Backend = backend
         self.docks = []
         self.dockWeights = []
+        self.chartCount = 0
         # Create the main window
         self.setWindowTitle("Static plots")
         self.setGeometry(100, 100, 800, 600)
@@ -54,4 +56,9 @@ class StaticDataPlot(QMainWindow):
                 pieChartLayout = QVBoxLayout(widget)
                 pieChartLayout.addWidget(chartView)
                 self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                self.chartCount += 1
+
+    def staticPlotExists(self):
+        return self.chartCount != 0
+
 
