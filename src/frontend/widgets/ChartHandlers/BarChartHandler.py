@@ -4,17 +4,23 @@ from PySide6.QtWidgets import QWidget
 from frontend.config import get_backend
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
 from frontend.widgets.FormComponents.BinInputField import BinInputField
+from frontend.widgets.FormComponents.FormUtils import create_text_input
 
 
-class PieChartHandler(ChartHandler):
+class BarChartHandler(ChartHandler):
     def __init__(self):
         super().__init__()
+
+        self.x_axis_label, self.x_axis_label_input = create_text_input("X-Axis Label")
+        self.y_axis_label, self.y_axis_label_input = create_text_input("Y-Axis Label")
 
         self.bin_input = BinInputField()
 
     def get_custom_fields_container(self) -> QWidget:
         container, layout = self.create_basic_vertical_container()
 
+        layout.addWidget(self.x_axis_label)
+        layout.addWidget(self.y_axis_label)
         layout.addWidget(self.bin_input)
 
         container.setLayout(layout)
@@ -29,9 +35,9 @@ class PieChartHandler(ChartHandler):
 
         id = get_backend().createChartObject(
             title_text,
-            "",
-            "",
+            self.x_axis_label_input.text(),
+            self.y_axis_label_input.text(),
             sensors_selected,
-            "pie",
+            "bar",
         )
         return True, id
