@@ -1,8 +1,16 @@
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import Qt, QFont
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread
 from typing import Callable
 
+from frontend.config import (
+    get_backend,
+    handle_exception,
+    is_debug,
+)
+
+from frontend.DebugData import get_debug_scan_devices
+from frontend.thread.Worker import Worker
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -13,9 +21,10 @@ class ScanDevice(ScrollableWindow):
         super().__init__(switch_window)
         self.title = QLabel("Scanning for Bluetooth Devices")
         self.loader = Loader(256)
-        self.description = QLabel("Please wait for up to 5 seconds...")
+        self.description = QLabel("Please wait for up to 10 seconds...")
         self.init_ui()
 
+        self.thread = QThread()
         self.trigger_bluetooth_scan()
 
     def init_ui(self):
@@ -41,14 +50,23 @@ class ScanDevice(ScrollableWindow):
         self.bind_scroll(layout)
 
     def trigger_bluetooth_scan(self):
-        QTimer.singleShot(1000, self.on_scan_end)
+        if is_debug():
+            QTimer.singleShot(0, lambda: self.on_scan_end([]))
+        else:
+            self.worker = Worker(
+                self.thread,
+                get_backend().scanForDevices,
+                lambda e: handle_exception(e, None, True),
+            )
+            self.worker.cancel_thread_on_timeout(15)
+            self.worker.func_done.connect(self.on_scan_end)
+            self.thread.start()
 
-    def on_scan_end(self):
+    def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()
-        dummy_data = [
-            ("Arduino HC-06", "M9SK1K31-252D-43E3-A986-DCF3CB63D08", -50)
-            for _ in range(33)
-        ]
-        dummy_data += [("long device name", "NDKA92N-24124-1241", -80)]
+        if is_debug():
+            data = get_debug_scan_devices()
 
-        self.switch_window(Devices(self.switch_window, dummy_data))
+        self.switch_window(
+            Devices(self.switch_window, sorted(data, key=lambda d: (-d[2], d[0])))
+        )

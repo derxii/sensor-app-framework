@@ -2,12 +2,17 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtCore import QCoreApplication, Qt
-import PySide6.QtAsyncio as QtAsyncio
 
 import sys
 
 from .windows.MainWindow import MainWindow
-from frontend.config import default_width, default_height, load_custom_font
+from frontend.config import (
+    default_width,
+    default_height,
+    load_custom_font,
+    set_backend,
+    set_switch_window,
+)
 
 
 def main():
@@ -17,9 +22,11 @@ def main():
     w = MainWindow(
         default_width, default_height, app.primaryScreen().availableGeometry().center()
     )
+    set_switch_window(w.switch_central_widget)
 
     w.show()
-    sys.exit(QtAsyncio.run(handle_sigint=True))
+    set_backend()
+    sys.exit(app.exec())
 
 
 def init_ui(app: QApplication):

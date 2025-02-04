@@ -6,36 +6,35 @@ QMainWindow {
     background: white;
 }
 
-QPushButton#scan-button {
+Button {
     text-align: right;
     padding-right: 20px;
-    background: #007AFF;
-    border: none;
+    padding-top: 5px;
+    padding-bottom: 5px;
     border-radius: 5px;
 }
 
-QPushButton#scan-button::pressed {
+Button#scan-button {
+    background: #007AFF;
+    border: none;
+}
+
+Button#scan-button::pressed {
     background-color:rgb(0, 103, 214);
 }
-
-QLabel#scan-text {
-    color: white;
-}
-
 
 QWidget#scrollable-window {
     background: white;
 }
 
-QPushButton#reset-button-simple {
+Button#reset-button-simple {
     background: white;
     border: 0.5px solid rgb(159, 159, 159);
     border-radius: 7px;
-    color: red;
-    padding: 5px;
+    padding: 8px;
 }
 
-QPushButton#reset-button-simple::pressed {
+Button#reset-button-simple::pressed {
     background: rgb(216, 216, 216);
 }
 
@@ -47,26 +46,155 @@ DeviceSimple#selected {
     background: #007AFF;
 }
 
-QLabel#selected {
+QLabel#white {
     color: white;
 }
 
+QLabel#red {
+    color: red;
+}
 
-QPushButton#connect-button {
+QLabel#green {
+    color: green;
+}
+
+Button#connect-button {
     background: #007AFF;
     border: none;
-    border-radius: 5px;
     color: white;
-    padding: 6px 14px 6px 14px;
+    padding: 8.5px 18px 8.5px 18px;
 }
 
-QPushButton#connect-button::pressed {
-    background:rgb(0, 103, 214);
+Button#connect-button::pressed {
+    background: rgb(0, 103, 214);
 }
 
-QPushButton#disabled {
-    border: 0.5px solid rgb(220, 220, 220);
+Button#reset-button-icon {
+    border: 1.2px solid red;
+}
+
+Button#reset-button-icon::pressed {
+    background: #ffd0d0;
+}
+
+Button#download-button {
+    border: 1.2px solid green;
+}
+
+Button#download-button::pressed {
+    background: #baffba;
+}
+
+Button#play-button {
+    padding-right: 24px;
+    background: #007AFF;
+}
+
+Button#play-button::pressed {
+    background-color:rgb(0, 103, 214);
+}
+
+Button#stop-button {
+    padding-right: 24px;
+    background: #b98200;
+}
+
+Button#stop-button::pressed {
+    background-color: #946801;
+}
+
+Button#clear-button {
+    padding-right: 20px;
+    background: rgb(185, 130, 0);
+}
+
+Button#clear-button::pressed {
+    background-color:rgb(0, 103, 214);
+}
+
+Button#add-chart {
+    background: white;
+    border: 0.5px solid #004B9D;
+    border-radius: 7px;
+    padding: 8px;
+}
+
+Button#add-chart::pressed {
+    background: #b6d8fc;
+}
+
+QLabel#blue {
+    color:  #004B9D;;
+}
+
+QWidget#chart-area {
+    border: 1px solid #b1afaf;
     border-radius: 5px;
-    padding: 6px 14px 6px 14px;
-    opacity: 30%;
+}
+
+DraggableResizable {
+    border: 1px solid rgb(130, 130, 130);
+    border-radius: 2px;
+    background: white;
+}
+
+DraggableTopBar {
+    background: rgb(230, 230, 230);
+    border: 1px solid rgb(130, 130, 130);
+}
+
+Button#close-button {
+    border: none;
+    border-radius: 0;
+}
+
+Button#close-button:pressed {
+    background: rgb(160, 160, 160);
+}
+
+Button#create-chart {
+    background: #007AFF;
+    border: none;
+}
+
+Button#create-chart::pressed {
+    background-color:rgb(0, 103, 214);
+}
+
+QScrollArea#bordered {
+    border: 1px solid rgb(169, 169, 169);
+}
+
+Button#switch-not-selected {
+    border: 1px solid rgb(0, 65, 159);
+}
+
+Button#switch-not-selected:pressed {
+    background: #f6faff;
+}
+
+QLabel#switch-not-selected {
+    color: rgb(0, 65, 159);
+}
+
+Button#switch-selected {
+    border: 1px solid rgb(0, 65, 159);
+    background: rgb(0, 65, 159);
+}
+
+QLabel#switch-selected {
+    color: white;
+}
+
+Button#bin {
+    text-align: center;
+    padding: 8px;
+}
+
+Button#bin:pressed {
+    background: #dbdbdb;
+}
+
+QLabel#tooltip {
+    padding-top: 5px;
 }

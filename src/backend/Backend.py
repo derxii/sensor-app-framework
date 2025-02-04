@@ -41,7 +41,9 @@ class Backend(object):
         
     async def scanForDevices(self):
         allDevices = []
-        allBluetoothDevices = await self.scanForBluetoothDevices() #asyncio.run(self.scanForBluetoothDevices())
+        allBluetoothDevices = (
+            await self.scanForBluetoothDevices()
+        )  # asyncio.run(self.scanForBluetoothDevices())
         for device in allBluetoothDevices:
             print(f"name: {device[0]}, address: {device[1]}, rssi: {device[2]}")
             allDevices.append(device)
@@ -53,7 +55,7 @@ class Backend(object):
 
         return allDevices
 
-    async def connectToDevice(self, deviceName, deviceAddress): 
+    async def connectToDevice(self, deviceName, deviceAddress):
         if re.search("COM|com", deviceAddress):
             self.connectedDevice = SerialDevice(deviceName, deviceAddress)
             success = self.connectedDevice.connect()
@@ -71,6 +73,10 @@ class Backend(object):
         return self.connectedDevice.getSensorNames()
 
     def createChartObject(self, chartTitle, xlabel, ylabel, sensorNames, type):
+        if len(self.chartObjects) >= 1:
+            id = self.chartObjects[-1].getId() + 1
+        else:
+            id = 0
         if len(self.chartObjects) >= 1:
             id = self.chartObjects[-1].getId() + 1
         else:
@@ -122,36 +128,40 @@ class Backend(object):
         loop.run_until_complete(self.runSession())
 
     async def startSession(self):
-        #-Description: starts data collection session by initiating a thread processes and initialising kill variable 
-        #-Parameters: None
-        #-Return: None
+        # -Description: starts data collection session by initiating a thread processes and initialising kill variable
+        # -Parameters: None
+        # -Return: None
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
             self.stopSession.clear()
             if self.connectedDevice.Type == "Bluetooth":
-                #if self.connectedDevice.Method == "read":
+                # if self.connectedDevice.Method == "read":
                 print("Attempting to create thread")
                 loop = asyncio.new_event_loop()
                 self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True)
             else:
-                self.getDataThread = threading.Thread(target=self.connectedDevice.getData, daemon=True)
-            
+                self.getDataThread = threading.Thread(
+                    target=self.connectedDevice.getData, daemon=True
+                )
+
             self.getDataThread.start()
-            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            self.runSessionThread = threading.Thread(
+                target=self.runSession, daemon=True
+            )
             self.runSessionThread.start()
 
     def runSession(self):
-        #-Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
-        #-Parameters: None
-        #-Return: None 
+        # -Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
+        # -Parameters: None
+        # -Return: None
         print("session started")
-        
+
         while not self.stopSession.is_set():
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
-            # Add data to charts 
+            # Add data to charts
             for chart in self.chartObjects:
                 chart.addData(dataDict)
            
@@ -252,9 +262,7 @@ class Backend(object):
             reconnectCount += 1
         if not reconnectSuccess:
             print("Error: failed to reconnect")
-            return 
-     
-
+            return
 
     async def restartProgram(self):
         #-Description: clears all charts and disconnects PC from bluetooth device 
@@ -271,14 +279,14 @@ class Backend(object):
                 except:
                     print("Error: could not disconnect")
             return False
-            
+
         else:
             self.connectedDevice.disconnect()
         self.chartObjects = []
 
         
     ########################### Backend class helper functions ###############################
-    # Helper for scanForDevices()    
+    # Helper for scanForDevices()
     async def scanForBluetoothDevices(self):
         availableDevices = []
         devices = await BleakScanner.discover()
@@ -289,13 +297,12 @@ class Backend(object):
             availableDevices.append((name, d.address, d.rssi))
         return availableDevices
 
-
-    # Helper for ScanForDevices 
+    # Helper for ScanForDevices
     def scanForSerialDevices(self):
         availablePorts = []
         ports = serial.tools.list_ports.comports()
         for port in ports:
-            availablePorts.append((port.name, port.device))
+            availablePorts.append((port.name, port.device, float("inf")))
         return availablePorts
 
     def printAllData(self):
@@ -308,7 +315,7 @@ class Backend(object):
             print(f"x label: {chart.getxLabel()}")
             print(f"y label: {chart.getyLabel()}")
             print(f"Type : {chart.getType()}")
-            for (key, value) in chart.getData().items():
+            for key, value in chart.getData().items():
                 print(f"{key}: {value}")
 
 def updateChart(frame):
@@ -323,7 +330,9 @@ def main():
     asyncio.set_event_loop(loop)
     count = 0
     while True:
-        userInput = input("Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: ")
+        userInput = input(
+            "Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: "
+        )
         if userInput == "3":
             #await backend.restartProgram()
             loop.run_until_complete(backend.restartProgram())

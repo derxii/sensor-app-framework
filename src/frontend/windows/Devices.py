@@ -1,4 +1,11 @@
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QScrollArea, QFrame
+from PySide6.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QHBoxLayout,
+    QScrollArea,
+    QFrame,
+    QSizePolicy,
+)
 from PySide6.QtGui import Qt
 from typing import Callable
 
@@ -49,9 +56,17 @@ class Devices(ScrollableWindow):
         left_container_layout = QVBoxLayout()
         left_container_layout.setSpacing(0)
         left_container_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.left_container_simple.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
+        )
 
         for device_simple in self.device_simple_view_list:
-            left_container_layout.addWidget(device_simple)
+            device_simple.setMinimumHeight(30)
+            device_simple.setSizePolicy(
+                QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
+            )
+            left_container_layout.addWidget(device_simple, 1)
+        left_container_layout.addWidget(QWidget(), 1000)
 
         self.left_container_simple.setObjectName("scrollable-window")
         self.left_container_simple.setLayout(left_container_layout)
@@ -68,7 +83,7 @@ class Devices(ScrollableWindow):
         layout.addWidget(self.separator)
 
         self.right_container_detailed.setMinimumWidth(
-            default_width - left_container_width - 100
+            default_width - left_container_width - 200
         )
         self.right_container_detailed.setLayout(self.right_container_layout)
 
@@ -89,7 +104,9 @@ class Devices(ScrollableWindow):
 
             selected_device = self.device_simple_view_list[device_index]
 
-            self.right_container_layout.itemAt(0).widget().setParent(None)
+            deleted_widget = self.right_container_layout.itemAt(0).widget()
+            deleted_widget.setParent(None)
+            deleted_widget.deleteLater()
             self.right_container_layout.addWidget(
                 selected_device.generate_detailed_view(self.switch_window)
             )
