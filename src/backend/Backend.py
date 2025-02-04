@@ -25,9 +25,7 @@ from PyQt6.QtCore import QTimer, Qt, QEventLoop
 from queue import Queue
 import qasync
 # TO DO: 
-# - Test file directory checking on a macbook
-# - Deal with serial connection issue when sensor names aren't received
-# - Resize docks
+#  Resize docks
 # -Add timestamp for data where t=0 is when the data was received 
 # -deal with frontend timeout
 # -Update backend.txt on laptop and in git repo
@@ -181,27 +179,21 @@ class Backend(object):
         #for chart in self.chartObjects:
         #        chart.plotChart()
 
-    def saveData(self, filePath):
+    def saveData(self, filename, filePath):
         #-Description: saves data into a csv file in the specified location
         #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
         #-Return: boolean indicating if saving the file was successful 
 
-        # Check if the directory exists
-        directory = None
-        if re.search(r'\\', filePath):
-            splitPath = re.split(r'\\', filePath)
-            directories = splitPath[:-1]
-            directory = r'\\'.join(directories)
-        elif re.search("/", filePath): # Directory format for windows   
-            splitPath = re.split("/", filePath)
-            directories = splitPath[:-1]
-            directory = "/".join(directories)
-        if directory is not None and not os.path.isdir(directory): # Directory format for MAC
+        # determine whether the file is a .txt or .csv 
+        
+        if not os.path.isdir(filePath):
             print("Error: directory not found")
             return False
-        #check if the filepath already exists 
-        print(filePath)
-        if os.path.exists(filePath):
+        #check if the full filepath already exists 
+        
+        fullPath = filePath + filename  #+ ".csv"
+        print(fullPath)
+        if os.path.exists(fullPath):
             print("Error: file already exists in the specified directory")
             return False 
         dataFilename = self.connectedDevice.getDataFileName()
@@ -209,10 +201,9 @@ class Backend(object):
             deviceData = json.load(file)
         DataStruct = deviceData["DataStruct"]
 
-        fileNameComponents = re.split( r"\.", filePath)
+        fileNameComponents = re.split( r"\.", filename)
         exten = fileNameComponents[1]
 
-        # determine whether the file is a .txt or .csv 
         if exten == "csv":
             data = []
             fields = list(DataStruct.keys())
@@ -232,7 +223,7 @@ class Backend(object):
                         currentRow.append("")
                 data.append(currentRow)
             try:
-                with open(filePath, 'w', newline='', encoding='utf-8') as csvFile:
+                with open(fullPath, 'w', newline='', encoding='utf-8') as csvFile:
                     writer = csv.writer(csvFile)
                     writer.writerows(data)
             except:
@@ -241,7 +232,7 @@ class Backend(object):
             return True  
         
         elif exten == "txt":
-            with open(filePath, "w", encoding="utf-8") as file:
+            with open(fullPath, "w", encoding="utf-8") as file:
                 for (key, value) in DataStruct.items():
                     print(f"{key}: [", end="", file=file)
                     for i in range(len(value)):
@@ -423,30 +414,23 @@ def main():
         #await backend.startSession()
         loop.run_until_complete(backend.startSession())
         
-        window = QMainWindow()
-        central_widget = QWidget()
-        window.setCentralWidget(central_widget)
-        layout = QVBoxLayout()
-        central_widget.setLayout(layout)
-        LiveWindow = LiveDataPlot(backend, window, layout)
-
+        LiveWindow = LiveDataPlot(backend)
         if LiveWindow.livePlotExists():
-            #LiveWindow.show()
-            window.show()
+            LiveWindow.show()
             app.processEvents()
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
 
-        StaticWindow = StaticDataPlot(backend, window)
+        StaticWindow = StaticDataPlot(backend)
         if StaticWindow.staticPlotExists():
-            #StaticWindow.show()
-            window.show()
+            StaticWindow.show()
     
         userInput = input("Would you like to save the data to a csv/txt file? (y/n): ")
         if userInput == "y":
+            filename = input("What would you like to save the filename as?: ")
             fileLocation = input("where would you like to save the file?: ")
-            backend.saveData(fileLocation)
+            backend.saveData(filename, fileLocation)
         count += 1
 
 
