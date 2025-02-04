@@ -11,24 +11,28 @@ import numpy as np
 import re
 
 
-class LiveDataPlot(QMainWindow):
-    def __init__(self, backend):
+class LiveDataPlot():
+    # add central widget as an argument so that front end can call LiveDataPlot and embed docks in the layout
+    def __init__(self, backend, window, layout):
         super().__init__()
         self.Backend = backend
         # Set up the main window
-        self.setWindowTitle("Live Data Plotting with PyQt6")
-        self.setGeometry(100, 100, 800, 600)
+        #self.setWindowTitle("Live Data Plotting with PyQt6")
+        #self.setGeometry(100, 100, 800, 600)
         self.allPlots = []
         self.allMatrices = [] # List of dictionaries that include chart id, sensor and plot
         self.allHeatmaps = []
         self.allDocks = []
         self.allDockRatios = []
         # Set up the central widget and layout
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        layout = QVBoxLayout()
-        self.central_widget.setLayout(layout)
+        #self.central_widget = centralWidget#QWidget()
 
+        #self.central_widget = QWidget()
+        #self.setCentralWidget(self.central_widget)
+        #layout = QVBoxLayout()
+        #self.central_widget.setLayout(layout)
+
+    
         # Add a button to pause/resume
         self.pause_button = QPushButton("Stop")
         self.pause_button.setFixedSize(70,70)
@@ -61,14 +65,14 @@ class LiveDataPlot(QMainWindow):
                 legendWidth = legend.width()
                 plot.getPlotItem().setContentsMargins(0, 0, legendWidth, 0) 
                 self.allPlots.append(plotDict)
-                dock = QDockWidget(chart.getTitle(), self)
+                dock = QDockWidget(chart.getTitle(), window)
                 dock.setWidget(plot)
-                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
                 
 
             if chart.getType() == "matrix":
                 # Create ImageView for heatmap
-                dock = QDockWidget(chart.getTitle(), self)
+                dock = QDockWidget(chart.getTitle(), window)
                 widget = QWidget()
                 dock.setWidget(widget)
                 matrixLayout = QVBoxLayout(widget)
@@ -92,11 +96,11 @@ class LiveDataPlot(QMainWindow):
                 sensors = sorted(chart.getSensors())
                 matrixDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "N": int(math.sqrt(len(sensors)))}
                 self.allMatrices.append(matrixDict)
-                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
+                window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
         
                 
             if chart.getType() == "heatmap":
-                dock = QDockWidget(chart.getTitle(), self)
+                dock = QDockWidget(chart.getTitle(), window)
                 widget = QWidget()
                 dock.setWidget(widget)
                 heatmapLayout = QVBoxLayout(widget)
@@ -132,7 +136,7 @@ class LiveDataPlot(QMainWindow):
                 dataStruct = np.zeros((len(categories), len(sensors)), dtype=float)
                 heatmapDict = {"chartId":chart.getId(), "imageView": imageView, "sensors": sensors , "numSensors": len(sensors), "categories": categories, "numCategories": len(categories), "data": dataStruct}
                 self.allHeatmaps.append(heatmapDict)
-                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
+                window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,dock)
                 
             if dock is not None:
                 self.allDocks.append(dock)
@@ -145,7 +149,7 @@ class LiveDataPlot(QMainWindow):
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # specifies how frequently the plot should be updated
         self.pause_button.clicked.connect(self.toggle_pause)
-        self.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
+        window.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
 
     def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')

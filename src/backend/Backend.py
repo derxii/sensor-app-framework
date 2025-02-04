@@ -423,17 +423,25 @@ def main():
         #await backend.startSession()
         loop.run_until_complete(backend.startSession())
         
-        LiveWindow = LiveDataPlot(backend)
+        window = QMainWindow()
+        central_widget = QWidget()
+        window.setCentralWidget(central_widget)
+        layout = QVBoxLayout()
+        central_widget.setLayout(layout)
+        LiveWindow = LiveDataPlot(backend, window, layout)
+
         if LiveWindow.livePlotExists():
-            LiveWindow.show()
+            #LiveWindow.show()
+            window.show()
             app.processEvents()
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
 
-        StaticWindow = StaticDataPlot(backend)
+        StaticWindow = StaticDataPlot(backend, window)
         if StaticWindow.staticPlotExists():
-            StaticWindow.show()
+            #StaticWindow.show()
+            window.show()
     
         userInput = input("Would you like to save the data to a csv/txt file? (y/n): ")
         if userInput == "y":

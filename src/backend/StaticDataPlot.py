@@ -5,16 +5,17 @@ from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import QTimer, Qt
 from collections import Counter
 import numpy as np
-class StaticDataPlot(QMainWindow):
-    def __init__(self, backend):
+class StaticDataPlot():
+    def __init__(self, backend, window):
         super().__init__()
         self.Backend = backend
         self.docks = []
         self.dockWeights = []
         self.chartCount = 0
+        
         # Create the main window
-        self.setWindowTitle("Static plots")
-        self.setGeometry(100, 100, 800, 600)
+        #self.setWindowTitle("Static plots")
+        #self.setGeometry(100, 100, 800, 600)
 
 
         # Create Pie Series
@@ -50,12 +51,14 @@ class StaticDataPlot(QMainWindow):
                 chartView.setRenderHint(QPainter.RenderHint.Antialiasing)
 
                 # Set Layout
-                dock = QDockWidget(str(chart.getId()), self)
+                #dock = QDockWidget(str(chart.getId()), self)
+                dock = QDockWidget(str(chart.getId()), window)
                 widget = QWidget()
                 dock.setWidget(widget)
                 pieChartLayout = QVBoxLayout(widget)
                 pieChartLayout.addWidget(chartView)
-                self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                #self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
+                window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
                 self.chartCount += 1
 
     def staticPlotExists(self):
