@@ -25,15 +25,11 @@ from PyQt6.QtCore import QTimer, Qt, QEventLoop
 from queue import Queue
 import qasync
 # TO DO: 
-# -Clear chart data when the session is restarted 
-# -Fic issue that occurs when session is restarted and the program is exited
+#  Resize docks
 # -Add timestamp for data where t=0 is when the data was received 
 # -deal with frontend timeout
-# -Simulate chart plotting 
 # -Update backend.txt on laptop and in git repo
 # -Fix issue where read method is checked for when conditions for notify method are satisfied
-# -Re implement Chart.getData()
-# -Complete getChartData()
 # data should be sent to the program in the following format: <sensor1>: dataval, <sensor2>: dataval, <sensor3>: dataval, \n
 # note that the last comma is needed 
 
