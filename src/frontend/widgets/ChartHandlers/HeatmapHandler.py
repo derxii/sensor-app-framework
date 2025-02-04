@@ -16,7 +16,6 @@ class HeatmapHandler(ChartHandler):
 
         self.bin_input = BinInputField("Sensor Value Data Bins: ")
 
-
     def get_custom_fields_container(self) -> QWidget:
         container, layout = self.create_basic_vertical_container()
 
