@@ -9,12 +9,7 @@ from queue import Queue
 import math
 import numpy as np
 import re
-
-class SquareDockWidget(QDockWidget):
-    def resizeEvent(self, event):
-        size = min(event.size().width(), event.size().height())
-        self.resize(size, size)
-        super().resizeEvent(event)
+from DockObjects import SquareDockWidget
 
 class LiveDataPlot():
     # add central widget as an argument so that front end can call LiveDataPlot and embed docks in the layout

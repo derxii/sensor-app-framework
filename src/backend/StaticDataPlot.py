@@ -5,6 +5,8 @@ from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import QTimer, Qt
 from collections import Counter
 import numpy as np
+
+
 class StaticDataPlot():
     def __init__(self, backend, window):
         super().__init__()
