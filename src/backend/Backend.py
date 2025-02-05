@@ -2,9 +2,9 @@
 # Description: This file contains the backend functions that should be accessed by the frontend
 import asyncio
 import serial.tools.list_ports
-from bleak import BleakScanner, BleakClient
+from bleak import BleakScanner
 import re
-from Device import Device, BluetoothDevice, SerialDevice
+from Device import BluetoothDevice, SerialDevice
 from Chart import Chart
 from LiveDataPlot import LiveDataPlot
 from StaticDataPlot import StaticDataPlot
@@ -12,32 +12,22 @@ import threading
 import csv
 import os 
 import json
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QLabel, QGridLayout
-from pyqtgraph import PlotWidget, plot
-import pyqtgraph as pg
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
 import sys
-import random
-from PyQt6.QtCore import QTimer, Qt, QEventLoop
-from queue import Queue
 import qasync
+
 # TO DO: 
 # - get rid of the pause button when session ends 
 # - add to requirements.txt
-# - create functions that clear the central widget
-# - Fix issue where graph doesn't respond
+# - create functions that clear the central widgetd
 # - Test file directory checking on a macbook
 # - Deal with serial connection issue when sensor names aren't received
-# - Resize docks
-# -Add timestamp for data where t=0 is when the data was received 
-# -deal with frontend timeout
-# -Update backend.txt on laptop and in git repo
-# -Fix issue where read method is checked for when conditions for notify method are satisfied
-# data should be sent to the program in the following format: <sensor1>: dataval, <sensor2>: dataval, <sensor3>: dataval, \n
-# note that the last comma is needed 
+
+# NOTE
+# Data should be sent to the program in the following format: <sensor1>: dataval, <sensor2>: dataval, <sensor3>: dataval, \n
+# Also note that the last comma is needed 
 
 class Backend(object):
     def __init__(self):
@@ -47,9 +37,7 @@ class Backend(object):
         
     async def scanForDevices(self):
         allDevices = []
-        allBluetoothDevices = (
-            await self.scanForBluetoothDevices()
-        )  # asyncio.run(self.scanForBluetoothDevices())
+        allBluetoothDevices = await self.scanForBluetoothDevices()
         for device in allBluetoothDevices:
             print(f"name: {device[0]}, address: {device[1]}, rssi: {device[2]}")
             allDevices.append(device)
@@ -67,14 +55,12 @@ class Backend(object):
             success = self.connectedDevice.connect()
         else:
             self.connectedDevice = BluetoothDevice(deviceName, deviceAddress)
-            success = await self.connectedDevice.connect() #asyncio.run(self.connectedDevice.connect())
+            success = await self.connectedDevice.connect() 
         return  success 
     
     def togglePause(self):
         self.connectedDevice.togglePause()
 
-
-    
     def listSensorNames(self):
         return self.connectedDevice.getSensorNames()
 
@@ -134,15 +120,11 @@ class Backend(object):
         loop.run_until_complete(self.runSession())
 
     async def startSession(self):
-        # -Description: starts data collection session by initiating a thread processes and initialising kill variable
-        # -Parameters: None
-        # -Return: None
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
             self.stopSession.clear()
             if self.connectedDevice.Type == "Bluetooth":
-                # if self.connectedDevice.Method == "read":
                 print("Attempting to create thread")
                 loop = asyncio.new_event_loop()
                 self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True)
@@ -158,23 +140,14 @@ class Backend(object):
             self.runSessionThread.start()
 
     def runSession(self):
-        # -Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
-        # -Parameters: None
-        # -Return: None
-        print("session started")
-
         while not self.stopSession.is_set():
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
-            # Add data to charts
             for chart in self.chartObjects:
                 chart.addData(dataDict)
            
     async def endSession(self):
-        #-Description: ends a session
-        #-Parameters: None 
-        #-Return: None 
         self.connectedDevice.setTerminateSession()
         self.stopSession.set()
         self.getDataThread.join()
@@ -182,14 +155,9 @@ class Backend(object):
         print("session ended")
         self.connectedDevice.clearTerminateSession()
         self.stopSession.clear()
-        #for chart in self.chartObjects:
-        #        chart.plotChart()
+
 
     def saveData(self, filePath):
-        #-Description: saves data into a csv file in the specified location
-        #-Parameters: filename to save the data to <string>, filePath <string> to save the file to 
-        #-Return: boolean indicating if saving the file was successful 
-
         # Check if the directory exists
         directory = None
         if re.search(r'\\', filePath):
@@ -203,7 +171,7 @@ class Backend(object):
         if directory is not None and not os.path.isdir(directory): # Directory format for MAC
             print("Error: directory not found")
             return False
-        #check if the filepath already exists 
+        # Check if the filepath already exists 
         print(filePath)
         if os.path.exists(filePath):
             print("Error: file already exists in the specified directory")
@@ -212,7 +180,6 @@ class Backend(object):
         with open(dataFilename, "r") as file:
             deviceData = json.load(file)
         DataStruct = deviceData["DataStruct"]
-
         fileNameComponents = re.split( r"\.", filePath)
         exten = fileNameComponents[1]
 
@@ -222,14 +189,11 @@ class Backend(object):
             fields = list(DataStruct.keys())
             data.append(fields) # first row of the csv include the fields 
             
-            #allRowLengths = [len(self.connectedDevice.DataStruct[sensor]) for sensor in fields]
             allRowLengths = [len(DataStruct[sensor]) for sensor in fields]
             maxNumRows = max(allRowLengths) 
             for i in range(0, maxNumRows):
                 currentRow = []
                 for field in fields:
-                    #if i < len(self.connectedDevice.DataStruct[field]):
-                    #    currentRow.append(self.connectedDevice.DataStruct[field][i])
                     if i < len(DataStruct[field]):
                         currentRow.append(DataStruct[field][i])
                     else:
@@ -254,17 +218,10 @@ class Backend(object):
                             print(", ", end="", file=file)
                     print("]", file=file)
                 
-                    
-            
-
     def clearSession(self):
-        #-Description: start a new session by clearing the current data in the chart 
-        #-Parameters: None
-        #-Return: None
         self.connectedDevice.setPaused(False) 
         self.connectedDevice.clearDataStructValues()
         self.connectedDevice.setDataBuffer("")
-        #self.connectedDevice.ParsedData = ""
         for chart in self.chartObjects:
             chart.clearData()
         # Confirm connection and attempt to reconnect maximum 5 times if not connected
@@ -278,9 +235,6 @@ class Backend(object):
             return
 
     async def restartProgram(self):
-        #-Description: clears all charts and disconnects PC from bluetooth device 
-        #-Parameters: None
-        #-Return: None
         self.connectedDevice.setPaused(False)
         if self.connectedDevice.Type == "Bluetooth":       
             if self.connectedDevice.client.is_connected:
@@ -292,7 +246,6 @@ class Backend(object):
                 except:
                     print("Error: could not disconnect")
             return False
-
         else:
             self.connectedDevice.disconnect()
         self.chartObjects = []
@@ -319,9 +272,6 @@ class Backend(object):
         return availablePorts
 
     def printAllData(self):
-        #for (key, value) in self.connectedDevice.DataStruct.items():
-        #    print(f"{key}: {value}")
-
         for chart in self.chartObjects:
             print(f"Chart id: {chart.getId()}")
             print(f"Title: {chart.getTitle()}")
@@ -331,8 +281,6 @@ class Backend(object):
             for key, value in chart.getData().items():
                 print(f"{key}: {value}")
 
-def updateChart(frame):
-    pass
 
     ############################################## TESTING CODE ########################################################
 
@@ -347,23 +295,15 @@ def main():
             "Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: "
         )
         if userInput == "3":
-            #await backend.restartProgram()
             loop.run_until_complete(backend.restartProgram())
             break
         elif userInput == "1":
             if count != 0:
-                #await backend.restartProgram()
                 loop.run_until_complete(backend.restartProgram())
-            #allDevices = await backend.scanForDevices()
-         
             loop.run_until_complete(backend.scanForDevices())
-            #app.exec()
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
             loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
-            #print(f"Success: {returnVal}")
-            #if not returnVal:
-            #    return
             print("Found the following sensors:")
             for sensor in backend.listSensorNames():
                 print(sensor)
@@ -412,30 +352,23 @@ def main():
                     if rangeString != "":
                         minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
                         chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
-                    #minMax = re.findall("([0-9\.\-]*)\-([0-9\.\-]*)", rangeString)
-                    #chart.setMinMaxRange((float(minMax[0][0]), float(minMax[0][1])))
                     
-
         elif userInput == "2":
             print("Automatically restarting session")
             backend.clearSession()
-            #LiveWindow.clearPlots()
-
-            
+       
         userInput = input("Press enter to start session: ")
         backend.clearSession()
-        #await backend.startSession()
         loop.run_until_complete(backend.startSession())
         
         window = QMainWindow()
         central_widget = QWidget()
         window.setCentralWidget(central_widget)
-        layout = QGridLayout() #QVBoxLayout()
+        layout = QGridLayout()
         central_widget.setLayout(layout)
         LiveWindow = LiveDataPlot(backend, window, layout)
 
         if LiveWindow.livePlotExists():
-            #LiveWindow.show()
             window.show()
             app.processEvents()
         
@@ -444,8 +377,8 @@ def main():
 
         StaticWindow = StaticDataPlot(backend, window)
         if StaticWindow.staticPlotExists():
-            #StaticWindow.show()
             window.show()
+            app.processEvents()
     
         userInput = input("Would you like to save the data to a csv/txt file? (y/n): ")
         if userInput == "y":
@@ -453,7 +386,5 @@ def main():
             backend.saveData(fileLocation)
         count += 1
 
-
 if __name__ == "__main__":
-    #asyncio.run(main())
     main()
