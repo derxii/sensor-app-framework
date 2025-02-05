@@ -50,6 +50,8 @@ class DashboardChart(QWidget):
         self.layout.addWidget(self.title, 1)
         self.layout.addSpacing(5)
 
+        self.chart_area.setObjectName("dock-area")
+
         no_chart_font = QFont()
         no_chart_font.setItalic(True)
         no_chart_font.setPointSizeF(18)

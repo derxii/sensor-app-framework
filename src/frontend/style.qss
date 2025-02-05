@@ -193,3 +193,8 @@ QWidget#chart-container-docked {
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
 }
+
+QMainWindow#dock-area {
+    border: 1px solid rgb(235, 235, 235);
+    border-radius: 2px;
+}
