@@ -46,8 +46,14 @@ class DashboardButtonGroup(QWidget):
 
     def download_data(self):
         save_path, _ = QFileDialog.getSaveFileName(
-            self, "Save Data as a .csv File", "data.csv"
+            self,
+            "Save Data as a csv/txt File",
+            "data.csv",
+            "CSV File (*.csv);;Text File (*.txt)",
         )
+
+        if save_path == "":
+            return
 
         try:
             success = get_backend().saveData(None, None, save_path)
