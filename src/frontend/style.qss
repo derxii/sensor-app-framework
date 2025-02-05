@@ -132,26 +132,6 @@ QWidget#chart-area {
     border-radius: 5px;
 }
 
-DraggableResizable {
-    border: 1px solid rgb(130, 130, 130);
-    border-radius: 2px;
-    background: white;
-}
-
-DraggableTopBar {
-    background: rgb(230, 230, 230);
-    border: 1px solid rgb(130, 130, 130);
-}
-
-Button#close-button {
-    border: none;
-    border-radius: 0;
-}
-
-Button#close-button:pressed {
-    background: rgb(160, 160, 160);
-}
-
 Button#create-chart {
     background: #007AFF;
     border: none;
@@ -197,4 +177,19 @@ Button#bin:pressed {
 
 QLabel#tooltip {
     padding-top: 5px;
+}
+
+QDockWidget::title {
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border: 1px solid rgb(191, 191, 191);
+    background: rgb(240, 232, 232)
+}
+
+QWidget#chart-container-docked {
+    border-bottom: 1px solid rgb(191, 191, 191);
+    border-left: 1px solid rgb(191, 191, 191);
+    border-right: 1px solid rgb(191, 191, 191);
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
 }

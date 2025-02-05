@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING, Callable
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QMainWindow
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
@@ -23,18 +23,20 @@ class DashboardChart(QWidget):
         self.switch_window = switch_window
 
         self.title = QLabel(device_name)
-        self.chart_area = QWidget()
 
+        self.chart_area = QMainWindow()
+        self.chart_area.setLayout(QVBoxLayout())
         self.no_chart_text = QLabel(
             "At least one chart must be added before streaming data."
         )
+
         self.add_chart_button = Button("+ Add Chart", None, "add-chart", "blue")
         self.add_chart_button.clicked.connect(self.open_create_chart_form)
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(5, 0, 5, 0)
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(5, 0, 5, 0)
 
         title_font = QFont()
         title_font.setWeight(QFont.Weight.DemiBold)
@@ -45,12 +47,16 @@ class DashboardChart(QWidget):
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter
         )
 
-        layout.addWidget(self.title, 1)
-        layout.addSpacing(5)
+        self.layout.addWidget(self.title, 1)
+        self.layout.addSpacing(5)
 
-        self.init_chart_ui()
-        layout.addWidget(self.chart_area, 1000)
-        layout.addSpacing(5)
+        no_chart_font = QFont()
+        no_chart_font.setItalic(True)
+        no_chart_font.setPointSizeF(18)
+        self.no_chart_text.setFont(no_chart_font)
+        self.layout.addWidget(self.no_chart_text, 1000, Qt.AlignmentFlag.AlignCenter)
+
+        self.layout.addSpacing(5)
 
         font_button = QFont()
         font_button.setWeight(QFont.Weight.DemiBold)
@@ -58,34 +64,24 @@ class DashboardChart(QWidget):
         self.add_chart_button.add_text_font(font_button)
 
         self.add_chart_button.setFixedHeight(40)
-        layout.addWidget(self.add_chart_button, 1)
+        self.layout.addWidget(self.add_chart_button, 1)
 
-        self.setLayout(layout)
-
-    def init_chart_ui(self):
-        chart_layout = QVBoxLayout()
-
-        no_chart_font = QFont()
-        no_chart_font.setItalic(True)
-        no_chart_font.setPointSizeF(18)
-        self.no_chart_text.setFont(no_chart_font)
-        chart_layout.addWidget(self.no_chart_text, 0, Qt.AlignmentFlag.AlignCenter)
-
-        self.chart_area.setLayout(chart_layout)
+        self.setLayout(self.layout)
 
     def generate_chart(self, existing_id: int):
         new_chart = DraggableResizable(self, self.chart_area, existing_id)
-        new_chart.show()
+        self.chart_area.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, new_chart)
 
     def can_create_delete(self, value: bool):
         self.add_chart_button.setEnabled(value)
-        self.chart_area.setEnabled(value)
+        for chart in self.chart_area.findChildren(DraggableResizable):
+            chart.set_enabled_closing(value)
 
     def open_create_chart_form(self):
         add_chart_form = AddChart(self.window().geometry(), self.window().minimumSize())
         add_success = add_chart_form.exec()
         if add_success:
-            self.get_dashboard_state().handle_change_chart_amount(self.no_chart_text)
+            self.get_dashboard_state().handle_change_chart_amount(self)
             QTimer.singleShot(
                 100, lambda: self.generate_chart(add_chart_form.created_chart_id)
             )

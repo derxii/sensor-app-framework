@@ -3,9 +3,10 @@ from typing import Callable
 
 from frontend.config import dynamically_repaint_widget, get_backend, get_image_path
 from frontend.widgets.DashboardButtonGroup import DashboardButtonGroup
-from PySide6.QtWidgets import QLabel
 
 from frontend.widgets.DashboardChart import DashboardChart
+
+from PySide6.QtCore import Qt
 
 
 class DashboardState(ABC):
@@ -49,7 +50,10 @@ class DashboardState(ABC):
             )
         )
 
-    def handle_change_chart_amount(self, no_chart_text: QLabel):
+    def handle_change_chart_amount(self, dashboard_chart: DashboardChart):
+        index_of_removal = 2
+        stretch = 1000
+
         if len(get_backend().getChartObjects()) == 0:
             from frontend.widgets.DashboardStates.NoChart import NoChart
 
@@ -57,7 +61,15 @@ class DashboardState(ABC):
                 return
 
             self.change_state(NoChart)
-            no_chart_text.show()
+            chart_area = dashboard_chart.layout.itemAt(index_of_removal).widget()
+            chart_area.setParent(None)
+
+            dashboard_chart.layout.insertWidget(
+                index_of_removal,
+                dashboard_chart.no_chart_text,
+                stretch,
+                Qt.AlignmentFlag.AlignCenter,
+            )
         else:
             from frontend.widgets.DashboardStates.StreamPrior import StreamPrior
 
@@ -65,7 +77,13 @@ class DashboardState(ABC):
                 return
 
             self.change_state(StreamPrior)
-            no_chart_text.hide()
+
+            no_chart_text = dashboard_chart.layout.itemAt(index_of_removal).widget()
+            no_chart_text.setParent(None)
+
+            dashboard_chart.layout.insertWidget(
+                index_of_removal, dashboard_chart.chart_area, stretch
+            )
 
     def bind_chart(self, dashboard_chart: DashboardChart):
         self.dashboard_chart = dashboard_chart
