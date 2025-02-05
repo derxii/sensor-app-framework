@@ -1,21 +1,19 @@
-Backend
 
-Global variables 
-connectedDevice <Device> 
-chartObjects = [] <list of chart objects>
-stopSession <boolean> (default is false)
+class Backend(object):
+Attributes:
+self.chartObjects = []
+self.stopSession = threading.Event()
 
-Functions 
-def scanForDevices()
--Description: Scans for all available bluetooth devices and serial communication devices 
+async def scanForDevices(self):
+-Description: Scans for bluetooth devices and serial port devices 
 -Parameters: None
--Return: a list of tuples that include the device name (string) and addresses of available BLE devices (string) if the available device is a serial device then the device name (string) and connected com port will be returned (string)
+-returns: Returns a list of tuples in the form (displayName, MACaddress, rssi) for bluetooth devices and (portName, portDevice) for serial port devices 
 
-def connectToDevice(deviceName, deviceAddress)
--Description: Creates the appropriate client object depending on whether the address is a COM port or bluetooth address (note that regex can be used to ensure valid bluetooth device or com port)
--Parameters: bluetooth device name (string), device address (string) which includes either the COM port or bluetooth address 
--Return: a boolean value indicating the status of the connection: true = successful, false = unsuccessful
-
+async def connectToDevice(self, deviceName, deviceAddress): 
+-Description: creates device object and connects to bluetooth device via deviceAddress and receives necessary connection information from the device 
+-Parameters: device display name <string> and device MAC address or port name <string>
+-Returns: True if a connection was established between the bluetooth device and local machine and false otherwise
+    
 def listSensorNames()
 -Description: gets sensor names from client by invoking 'get_sensor_names()' from device object
 -Parameters: None
@@ -35,92 +33,60 @@ def getChart(id)
 -Description: get a specific chart object by id 
 -Parameters: chart id <int> 
 -Return: chart object 
+    
+def getAllChartData(self, id):
+-Description: Retrieves all the chart data collected since the beginning of the session
+-Parameters: chart id <int>
+-Return: returns all chart data as a dictionary where the keys are the sensor names and the values are lists of data values eg. {"sensor1": [val1, val2], "sensor2": [val1, val2]}
+    
+def getRecentChartData(self, id):
+- Description: Retrieves all the chart data collected since the last time getChartData was called for the specified chart
+- Parameters: chart id 
+- Return: returns recent chart data as a dictionary in the following format {"sensor1": [val1, val2], "sensor2": [val1, val2]}
+        
+def runInLoop(self, loop): <backend use only>
+- Description: sets up getData thread 
+- Parameters: asyncio event loop object
+- Returns: None  
 
-def startSession()
--Description: starts data collection session by initiating a thread process/event/subprocess with kill that changes the "inSession" variable, runs run() and another process that listens to stop the session by changing the "inSession" variable 
+async def startSession(self):
+-Description: creates and starts runSession and getData threads and clears locked objects for shared memory
 -Parameters: None
 -Return: None 
 
-def runSession():*
--Description: runs a while loop that continuously updates chart objects and at the end of an iteration calls a front end function to update plots
+def runSession(self):
+-Description: Parses data in shared memory and stores it in the connected devices data struct. Also updates all chart objects
 -Parameters: None
--Return: None 
+-Return: None               
+            
+async def endSession(self):
+- Description: flags getData and runSession threads to terminate through locked objects, joins threads and clears locked objects
+- Parameters: None
+- Return: None
 
-def endSession():*
--Description: ends a session
--Parameters: None 
--Return: None 
-
-def saveData(filename, filePath):
--Description: saves data into a csv file 
+def saveData(self, filename, filePath):
+-Description: saves data into a csv file in the specified location
 -Parameters: filename to save the data to <string>, filePath <string> to save the file to 
 -Return: boolean indicating if saving the file was successful 
-
-def restartSession():
+ 
+def clearSession(self):
 -Description: start a new session by clearing the current data in the chart 
 -Parameters: None
 -Return: None 
-
-def restartProgram():
+      
+async def restartProgram(self):
 -Description: clears all charts and disconnects PC from bluetooth device 
 -Parameters: None
--Return: None 
-
-Chart class 
-Attributes: id <int>, title <string>, xlabel <string>, ylabel <string>, sensorNames <list of strings>, data <dictionary where key = string indicating sensor name, val = list of data >
-Methods:
-def Chart(id, title, xlabel, ylabel, sensorNames)
--Description: creates a chart object and constructs data object 
--Parameters: id <int>, title <string>, xlabel <string>, ylabel <string>, sensorNames <list of strings>
 -Return: None
-
-def getData()
--Description: returns sensor data for the chart object
+  
+async def scanForBluetoothDevices(self): <backend use only>
+-Description: scans for bluetooth devices (helper for scanForDevices)
 -Parameters: None
--Return: data <dictionary where key = string indicating sensor name, val = list of data >
+-Return: a list of tuples in the form (displayName, MACaddress, rssi)
 
-def getLastDataPoint(sensorName) 
--Description: returns the last data point of the specified sensor
--Parameters: sensor name <string>
--Return: data value <double/float>
-
-def addData(dataDict)
--Description: adds relevant sensor from input dictionary to chart data
--Parameters: dictionary of sensor data
--Return: None
-
-def getId() 
-
-def getTitle()
-
-def getxLabel()
-
-def getyLabel()
+def scanForSerialDevices(self): <backend use only>
+-Description: scans for serial port devices (helper for scanForDevices)
+-Parameters: None
+-Return: a list of tuples in the form (portName, portDevice) 
 
 
-
-Device class  (backend use only)
-Attributes: Name <string>, Address <string>, sensors <list of strings>
-Methods: 
-def Device(Name, Address, sensors)
--Description: Device constructor
-
-def connect() <virtual> 
--Description: connects to device 
-
-def getData() <virtual>
--Description: returns sensor data from connected device as a string 
--Parameters: None 
--Return: a string in the format "<sensor1Name>: dataVal, <sensor2Name>: dataVal"
-
-def setSensorNames() 
-
-def getSensorNames()
-
-Bluetooth class (inherits device)
-def connect(): implement connect using bleak library 
-def getData(): implement getData using bleak library
-
-Serial class (inherits device)
-def connect(): implement connect using pyserial library 
-def getData(): implement getData using pySerial library
