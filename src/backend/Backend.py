@@ -19,6 +19,8 @@ import sys
 import qasync
 
 # TO DO: 
+# - when a heatmap is created the error doesn't pop up
+# - stop data collection and plotting before ending the session
 # - get rid of the pause button when session ends 
 # - add to requirements.txt
 # - create functions that clear the central widgetd
@@ -148,6 +150,7 @@ class Backend(object):
                 chart.addData(dataDict)
            
     async def endSession(self):
+        self.connectedDevice.setPaused(True)
         self.connectedDevice.setTerminateSession()
         self.stopSession.set()
         self.getDataThread.join()

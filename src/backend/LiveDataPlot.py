@@ -64,10 +64,12 @@ class LiveDataPlot():
 
             if chart.getType() == "matrix":
                 dock = SquareDockWidget(chart.getTitle(), window)
+                #dock = QDockWidget(chart.getTitle(), window)
                 widget = QWidget()
                 dock.setWidget(widget)
                 dock.resize(150,150)
                 matrixLayout = QVBoxLayout(widget)
+                imageView = pg.ImageView()
                 imageView = pg.ImageView()
                 matrixLayout.addWidget(imageView)
 
