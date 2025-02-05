@@ -1,4 +1,3 @@
-
 from PyQt6.QtWidgets import QVBoxLayout, QWidget, QPushButton, QDockWidget, QGridLayout
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg 
@@ -94,6 +93,7 @@ class LiveDataPlot():
                 dock.setWidget(widget)
                 heatmapLayout = QVBoxLayout(widget)
                 plot_item = pg.PlotItem()
+                imageView = pg.ImageView()
                 imageView = pg.ImageView(view=plot_item)
                 heatmapLayout.addWidget(imageView)
                 colormap = pg.colormap.get('viridis') 
@@ -198,3 +198,6 @@ class LiveDataPlot():
     
     def livePlotExists(self):
         return len(self.allPlots) + len(self.allMatrices) + len(self.allHeatmaps) != 0
+    
+    def __del__(self):
+        print("live dataplot deleted")

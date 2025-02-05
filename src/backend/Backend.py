@@ -281,6 +281,7 @@ class Backend(object):
                 print(f"{key}: {value}")
 
 
+   
     ############################################## TESTING CODE ########################################################
 
 def main():
@@ -370,10 +371,11 @@ def main():
         if LiveWindow.livePlotExists():
             window.show()
             app.processEvents()
+            
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
-
+    
         StaticWindow = StaticDataPlot(backend, window)
         if StaticWindow.staticPlotExists():
             window.show()
