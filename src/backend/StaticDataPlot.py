@@ -43,7 +43,7 @@ class StaticDataPlot():
                 # Create Chart View
                 chartView = QChartView(qchart)
                 chartView.setRenderHint(QPainter.RenderHint.Antialiasing)
-                dock = SquareDockWidget(str(chart.getId()), window) 
+                dock = SquareDockWidget(chart.getTitle(), window) 
                 widget = QWidget()
                 dock.setWidget(widget)
                 pieChartLayout = QVBoxLayout(widget)
