@@ -66,4 +66,3 @@ class StaticDataPlot():
     def staticPlotExists(self):
         return self.chartCount != 0
 
-

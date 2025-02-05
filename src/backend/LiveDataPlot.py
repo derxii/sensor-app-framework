@@ -231,4 +231,3 @@ class LiveDataPlot():
     
     def livePlotExists(self):
         return len(self.allPlots) + len(self.allMatrices) + len(self.allHeatmaps) != 0
-
