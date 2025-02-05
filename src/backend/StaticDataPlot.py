@@ -5,7 +5,7 @@ from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import QTimer, Qt
 from collections import Counter
 import numpy as np
-
+from DockObjects import SquareDockWidget
 
 class StaticDataPlot():
     def __init__(self, backend, window):
@@ -54,7 +54,7 @@ class StaticDataPlot():
 
                 # Set Layout
                 #dock = QDockWidget(str(chart.getId()), self)
-                dock = QDockWidget(str(chart.getId()), window)
+                dock = SquareDockWidget(str(chart.getId()), window) #QDockWidget(str(chart.getId()), window)
                 widget = QWidget()
                 dock.setWidget(widget)
                 pieChartLayout = QVBoxLayout(widget)
