@@ -10,6 +10,11 @@ import math
 import numpy as np
 import re
 
+class SquareDockWidget(QDockWidget):
+    def resizeEvent(self, event):
+        size = min(event.size().width(), event.size().height())
+        self.resize(size, size)
+        super().resizeEvent(event)
 
 class LiveDataPlot():
     # add central widget as an argument so that front end can call LiveDataPlot and embed docks in the layout
@@ -72,9 +77,11 @@ class LiveDataPlot():
 
             if chart.getType() == "matrix":
                 # Create ImageView for heatmap
-                dock = QDockWidget(chart.getTitle(), window)
+                #dock = QDockWidget(chart.getTitle(), window)
+                dock = SquareDockWidget(chart.getTitle(), window)
                 widget = QWidget()
                 dock.setWidget(widget)
+                dock.resize(150,150)
                 matrixLayout = QVBoxLayout(widget)
                 imageView = pg.ImageView()
                 matrixLayout.addWidget(imageView)
@@ -149,7 +156,7 @@ class LiveDataPlot():
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # specifies how frequently the plot should be updated
         self.pause_button.clicked.connect(self.toggle_pause)
-        window.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
+        #window.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
 
     def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')

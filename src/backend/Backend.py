@@ -25,6 +25,10 @@ from PyQt6.QtCore import QTimer, Qt, QEventLoop
 from queue import Queue
 import qasync
 # TO DO: 
+# - get rid of the pause button when session ends 
+# - add to requirements.txt
+# - create functions that clear the central widget
+# - Fix issue where graph doesn't respond
 # - Test file directory checking on a macbook
 # - Deal with serial connection issue when sensor names aren't received
 # - Resize docks
