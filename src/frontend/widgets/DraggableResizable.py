@@ -25,11 +25,14 @@ class DraggableResizable(QDockWidget):
 
         self.widget.setObjectName("chart-container-docked")
 
-        layout.addWidget(QLabel("hello"), 100)
+        layout.addWidget(self.init_chart_ui(), 1000)
 
         self.widget.setLayout(layout)
         self.setWidget(self.widget)
         self.set_enabled_closing(True)
+
+    def init_chart_ui(self):
+        return QLabel("hello")
 
     def set_enabled_closing(self, enable: bool):
         if enable:
