@@ -7,9 +7,7 @@ import json
 import threading
 from queue import Queue
 import re
-# TO DO: 
-# - change getData()
-# - Change the chart class so that it only stores recent data and stores the rest of the data in a json file
+
 class Chart(object):
     def __init__(self, chartId, chartTitle, xlabel, ylabel, sensorNames, type):
         self.Id = chartId
@@ -18,7 +16,6 @@ class Chart(object):
         self.yLabel = ylabel
         self.SensorNames = sensorNames
         self.chartLock = threading.Lock()
-        #self.SensorData = {}
         self.CurrentSensorData = {}
         self.Type = type
         self.TempChartFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False) # This file contains all the chart data 
@@ -31,14 +28,10 @@ class Chart(object):
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
         for sensor in sensorNames:
-            self.CurrentSensorData[sensor] = Queue()  #[] #[]
-
-    # returns data received since the last time getCurrentData was called. This function should be used when plotting live data 
+            self.CurrentSensorData[sensor] = Queue()  
+   
     def getRecentData(self):
-        #with self.chartLock:
         returnData = self.CurrentSensorData
-        #for sensor in self.CurrentSensorData.keys():
-            #self.CurrentSensorData[sensor] = []
         return returnData
 
     def getAllData(self):
@@ -51,20 +44,14 @@ class Chart(object):
             SensorData = json.load(file)
         for (sensor, dataVal) in dataDict.items():
             if sensor in self.SensorNames:
-                #with self.chartLock:
                 for val in dataVal:
                     SensorData[sensor].append(val)
-                    #self.SensorData[sensor].append(val)
-                    #self.CurrentSensorData[sensor].append(val)
                     if re.sub("\s", "", val) != "":
                         self.CurrentSensorData[sensor].put(val)
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
 
     def getLastDataPoint(self, sensorName):
-        #with open(self.ChartFilename, "r") as file:
-        #    SensorData = json.load(file)
-        #return SensorData[sensorName][-1] #check that no error occurs
         return self.CurrentSensorData[sensorName].get()
     
     def getId(self):
@@ -84,6 +71,7 @@ class Chart(object):
     
     def getSensors(self):
         return self.SensorNames
+    
     # Function for testing the backend (ignore for frontend)
     def plotChart(self):
         with open(self.ChartFilename, "r") as file:

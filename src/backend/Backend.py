@@ -220,7 +220,6 @@ class Backend(object):
                 
     def clearSession(self):
         self.connectedDevice.setPaused(False) 
-        self.connectedDevice.clearDataStructValues()
         self.connectedDevice.setDataBuffer("")
         for chart in self.chartObjects:
             chart.clearData()

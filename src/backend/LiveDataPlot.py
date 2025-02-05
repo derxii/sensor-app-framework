@@ -1,14 +1,10 @@
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QGridLayout
+from PyQt6.QtWidgets import QVBoxLayout, QWidget, QPushButton, QDockWidget, QGridLayout
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg 
-import sys
-import random
 from PyQt6.QtCore import QTimer, Qt
-from queue import Queue
 import math
 import numpy as np
-import re
 from DockObjects import SquareDockWidget
 
 class LiveDataPlot():
@@ -16,24 +12,12 @@ class LiveDataPlot():
     def __init__(self, backend, window, layout):
         super().__init__()
         self.Backend = backend
-        # Set up the main window
-        #self.setWindowTitle("Live Data Plotting with PyQt6")
-        #self.setGeometry(100, 100, 800, 600)
         self.allPlots = []
-        self.allMatrices = [] # List of dictionaries that include chart id, sensor and plot
+        self.allMatrices = [] 
         self.allHeatmaps = []
         self.allDocks = []
         self.allDockRatios = []
-        # Set up the central widget and layout
-        #self.central_widget = centralWidget#QWidget()
-
-        #self.central_widget = QWidget()
-        #self.setCentralWidget(self.central_widget)
-        #layout = QVBoxLayout()
-        #self.central_widget.setLayout(layout)
-
-    
-        # Add a button to pause/resume
+       
         self.pause_button = QPushButton("Stop")
         self.pause_button.setFixedSize(70,70)
 
@@ -80,8 +64,6 @@ class LiveDataPlot():
                 
 
             if chart.getType() == "matrix":
-                # Create ImageView for heatmap
-                #dock = QDockWidget(chart.getTitle(), window)
                 dock = SquareDockWidget(chart.getTitle(), window)
                 widget = QWidget()
                 dock.setWidget(widget)
@@ -90,15 +72,11 @@ class LiveDataPlot():
                 imageView = pg.ImageView()
                 matrixLayout.addWidget(imageView)
 
-                #layout.addWidget(imageView)
-                colormap = pg.colormap.get('turbo')  # Choose a color map
-                lut = colormap.getLookupTable()  # Generate lookup table
-                # Set the image with correct LUT
-                image_item = imageView.getImageItem()  # Access the internal ImageItem
-                image_item.setLookupTable(lut)  # Apply color map
+                colormap = pg.colormap.get('turbo') 
+                lut = colormap.getLookupTable() 
+                image_item = imageView.getImageItem()  
+                image_item.setLookupTable(lut)  
                 imageView.setColorMap(colormap)
-                #(min, max) = chart.getMinMaxRange()
-                #image_item.setLevels([min, max])  # Set min-max temperature range
                 rangeVals = chart.getMinMaxRange()
                 if rangeVals is not None:
                     (min, max) = rangeVals
@@ -118,24 +96,17 @@ class LiveDataPlot():
                 plot_item = pg.PlotItem()
                 imageView = pg.ImageView(view=plot_item)
                 heatmapLayout.addWidget(imageView)
-
-                #layout.addWidget(imageView)
-                colormap = pg.colormap.get('viridis')  # Choose a color map
-                lut = colormap.getLookupTable()  # Generate lookup table
+                colormap = pg.colormap.get('viridis') 
+                lut = colormap.getLookupTable() 
                 imageView.setColorMap(colormap)
-                # Set the image with correct LUT
-                image_item = imageView.getImageItem()  # Access the internal ImageItem
-                image_item.setLookupTable(lut)  # Apply color map
+                image_item = imageView.getImageItem()  
+                image_item.setLookupTable(lut) 
                 rangeVals = chart.getMinMaxRange()
                 if rangeVals is not None:
                     (min, max) = rangeVals
-                    image_item.setLevels([min, max])  # Set min-max temperature range
-
+                    image_item.setLevels([min, max]) 
                 categories = chart.getCategories()
-                #Create data struct
-                
                 sensors = sorted(chart.getSensors())
-                # Set axis labels 
                 
                 plot_item.setLabel('left', chart.getyLabel())
                 plot_item.setLabel('bottom', chart.getxLabel())
@@ -154,13 +125,11 @@ class LiveDataPlot():
                 self.allDockRatios.append(1)
 
         self.is_paused = False
-        # Counter for x-axis
         self.counter = 0
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # specifies how frequently the plot should be updated
         self.pause_button.clicked.connect(self.toggle_pause)
-        #window.resizeDocks(self.allDocks, self.allDockRatios, Qt.Orientation.Vertical)
 
     def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')
@@ -193,8 +162,6 @@ class LiveDataPlot():
             for i in range(0,len(self.allMatrices)):
                 chartId = int(self.allMatrices[i]["chartId"])
                 chart = self.Backend.getChart(chartId)
-                #if not chart.isQueueReady():
-                #    continue
                 chart = self.Backend.getChart(chartId)
                 data = [] 
                 for sensor in self.allMatrices[i]["sensors"]:

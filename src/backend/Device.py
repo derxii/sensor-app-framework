@@ -6,28 +6,25 @@ import re
 import serial.tools.list_ports
 import serial
 import threading
-import time
 import json 
 import os 
 import tempfile
 class Device(object):
     def __init__(self, name, address, type):
-        self.Name = name  # string
-        self.Address = address  # string
-        self.Sensors = set()  # [] # sensors # List of strings
+        self.Name = name  
+        self.Address = address 
+        self.Sensors = set()  
         self.ConnectedDevice = None
         self.DataBuffer = ""
-        #self.DataStruct = {} # Separated into sensor data
         self.Type = type # Type is either "Bluetooth" or "Serial"
         self.Lock = threading.Lock()
         self.TerminateSession = threading.Event()
         self.lock = threading.Lock()
         self.pause = False
-        #self.ParsedData = ""
         self.TempDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
-        self.DataFilename = self.TempDataFile.name #"deviceData.json"
+        self.DataFilename = self.TempDataFile.name
         self.TempRawDataFile = tempfile.NamedTemporaryFile(suffix='.json', delete=True, delete_on_close= False)
-        self.RawDataFilename = self.TempRawDataFile.name#"rawData.json"
+        self.RawDataFilename = self.TempRawDataFile.name
 
     def togglePause(self):
         with self.lock:
@@ -55,7 +52,6 @@ class Device(object):
         with self.Lock:
             with open(self.RawDataFilename, "r") as file:
                 rawData = json.load(file)
-                #dataBuffer = rawData["DataBuffer"]
             rawData["DataBuffer"] += dataString
             with open(self.RawDataFilename, "w") as file:
                 json.dump(rawData, file, indent=4)
@@ -102,11 +98,6 @@ class Device(object):
     def setSensorNames(self, sensors):
         self.Sensors = sensors
 
-    def clearDataStructValues(self):
-        #for key in self.DataStruct.keys():
-        #    self.DataStruct[key] = [] 
-        pass
-
     def deleteJSONFiles(self):
         if os.path.isfile(self.DataFilename):
             try:
@@ -133,7 +124,6 @@ class Device(object):
             dataToParse = ""
 
         if dataToParse != "" and re.sub(",", "", dataToParse) != "":
-            #print(dataToParse)
             returnDict = {}
             dataSegments = re.split(",", dataToParse)
             items = dataSegments[:-1]
@@ -163,7 +153,7 @@ class BluetoothDevice(Device):
         self.characteristicUUID = ""
         self.characteristicProp = []
         self.client = None
-        self.Method = ""  # This indicates if the main data is received via notifications or the GATT read command
+        self.Method = ""  # This indicates if the sensor data is received via notifications or the GATT read command
         super().__init__(name, address, "Bluetooth")
 
     def callback(self, sender, data):
@@ -171,7 +161,6 @@ class BluetoothDevice(Device):
             if not self.isPaused():
                 dataString = data.decode('utf-8')
                 self.addToDataBuffer(dataString)
-                #print(f"New notification: {dataString}")
         except:
             print("cannot convert notification to utf-8", flush=True)
         
@@ -196,7 +185,6 @@ class BluetoothDevice(Device):
                                 )
                                 await asyncio.sleep(1)
                                 print("subscribing to notifications")
-                            # Find out if the read or notify method should be used to receive data
                             try:
                                 print(f"connection status: {client.is_connected}")
                                 data = None
@@ -220,7 +208,6 @@ class BluetoothDevice(Device):
                                         success = True
                                         self.Method = "notify"
                                         print("Method is notify")
-                                        # read string until 2 '\n' are found (This ensures that all sensor names are read in )
                                         while self.getDataBuffer().count("\n") < 2:
                                             await asyncio.sleep(0.05)
                                         await client.stop_notify(characteristic.uuid)
@@ -268,7 +255,6 @@ class BluetoothDevice(Device):
                                 print("error occurred")            
             except:
                 print("Unable to connect")
-        print(f"Method: {self.Method}")
         return success
 
     async def reconnect(self):
@@ -301,29 +287,13 @@ class BluetoothDevice(Device):
 
     async def getData(self):
         self.setDataBuffer("")
-        #if self.Method == "notify":
         await self.client.start_notify(self.characteristicUUID, self.callback)
         while not self.TerminateSession.is_set():
             await asyncio.sleep(0.5)   
         await self.client.stop_notify(self.characteristicUUID)
         await asyncio.sleep(0.5)
         print("unsubscribing to notifications")
-        '''else:
-            data = None
-            await self.client.start_notify(self.characteristicUUID, self.callback)
-            while not self.TerminateSession.is_set():
-                while data is None:
-                    data = await self.client.read_gatt_char(self.characteristicUUID) 
-                try:
-                    dataString = data.decode("utf-8")
-                    #print(dataString)
-                finally:
-
-                    #self.addToDataBuffer(dataString)
-                    await asyncio.sleep(0.5)
-            await self.client.stop_notify(self.characteristicUUID)'''
         
-
 # This class if for devices that use serial port profile (SPP)
 class SerialDevice(Device):
     def __init__(self, name, address):
@@ -332,26 +302,16 @@ class SerialDevice(Device):
     def connect(self ):
         try:
             self.serialObject = serial.Serial(self.Address, timeout=None)
-            print(self.serialObject.name)
-            print(f"Serial port open: {self.serialObject.is_open}")
             if not self.serialObject.is_open:
                 print("Unable to open serial port")
             else:
                 self.serialObject.reset_input_buffer()
-                print("buffer reset")
-                # Read string until 2 new line characters are found (note that if this method is used then the bytes in waiting read method can be used)
                 dataString = ""
-               
                 while dataString.count("\n") < 6:
-                #dataString = self.serialObject.readline()
                     numbytes = self.serialObject.in_waiting
                     byteString = self.serialObject.read(numbytes)
                     dataString += byteString.decode('utf-8')
-                # print("reading from buffer")
-                #dataString = dataString.decode("utf-8")
-                print("valid byte string")
-                print(dataString)
-                if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString):  # Check that full string is read in
+                if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString): 
                     sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
@@ -362,16 +322,12 @@ class SerialDevice(Device):
             print(e)
         return False
 
-    # Changes data buffer if data is read in
-    # Returns true if data was successfully received and false otherwise
-    # data should be added to the objects data buffer in the form "<sensor1>: data_val, <sensor2>: data_val\n"
     def getData(self):
         if not self.reconnect():
             self.serialObject = serial.Serial(self.Address, timeout=None) 
             print(f"Is port open: {self.serialObject.is_open}")
         self.serialObject.reset_input_buffer()
         while not self.TerminateSession.is_set():
-            #print(self.serialObject.is_open)
             try:
                 dataString = None
                 while dataString is None:
@@ -380,8 +336,6 @@ class SerialDevice(Device):
                 dataString = dataString.decode('utf-8')
                 if not self.isPaused():
                     self.addToDataBuffer(dataString)
-                #modifiedString = re.sub('\s', "", dataString)
-                #print(modifiedString, end="")
             except:
                 print("an error occurred") 
         self.disconnect()
@@ -400,7 +354,6 @@ class SerialDevice(Device):
             return True
 
     def isConnected(self):
-        # returns true if connected to the device
         return self.serialObject.is_open
 
     def disconnect(self):

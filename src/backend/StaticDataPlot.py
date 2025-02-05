@@ -1,10 +1,8 @@
-import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QDockWidget, QGridLayout
+from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from PyQt6.QtCharts import QChart, QChartView, QPieSeries
 from PyQt6.QtGui import QPainter
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import  Qt
 from collections import Counter
-import numpy as np
 from DockObjects import SquareDockWidget
 
 class StaticDataPlot():
@@ -14,11 +12,6 @@ class StaticDataPlot():
         self.docks = []
         self.dockWeights = []
         self.chartCount = 0
-        
-        # Create the main window
-        #self.setWindowTitle("Static plots")
-        #self.setGeometry(100, 100, 800, 600)
-
 
         # Create Pie Series
         for chart in self.Backend.getChartObjects():
@@ -38,7 +31,6 @@ class StaticDataPlot():
                         filteredData = list(filter(lambda val:float(val) >= low and float(val) <= high, allData))
                         categoryString = f"{low}-{high}"
                         series.append(categoryString, len(filteredData))
-
                 for slice in series.slices():
                     percentage = slice.percentage()
                     slice.setLabel(f"{slice.label()}: {str(round(percentage*100, 2))}%")
@@ -51,18 +43,13 @@ class StaticDataPlot():
                 # Create Chart View
                 chartView = QChartView(qchart)
                 chartView.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-                # Set Layout
-                #dock = QDockWidget(str(chart.getId()), self)
-                dock = SquareDockWidget(str(chart.getId()), window) #QDockWidget(str(chart.getId()), window)
+                dock = SquareDockWidget(str(chart.getId()), window) 
                 widget = QWidget()
                 dock.setWidget(widget)
                 pieChartLayout = QVBoxLayout(widget)
                 pieChartLayout.addWidget(chartView)
-                #self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
                 window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
                 self.chartCount += 1
 
     def staticPlotExists(self):
         return self.chartCount != 0
-
