@@ -1,5 +1,5 @@
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QGridLayout
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg 
 import sys
@@ -36,7 +36,16 @@ class LiveDataPlot():
         # Add a button to pause/resume
         self.pause_button = QPushButton("Stop")
         self.pause_button.setFixedSize(70,70)
-        layout.addWidget(self.pause_button)
+
+        controlsDock = QDockWidget("Controls", window)
+        controlsDock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea| Qt.DockWidgetArea.LeftDockWidgetArea)
+        controlsLayout = QGridLayout()
+        controlsWidget = QWidget()
+        controlsWidget.setLayout(controlsLayout)
+        controlsDock.setWidget(controlsWidget)
+        controlsDock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        controlsLayout.addWidget(self.pause_button)
+        window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, controlsDock)
 
         # Create all line charts from backend
         dock = None

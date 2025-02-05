@@ -189,10 +189,7 @@ class BluetoothDevice(Device):
                 for service in services:
                     for characteristic in service.characteristics:
                         self.setDataBuffer("")
-                        if (
-                            "notify" in characteristic.properties
-                            or "read" in characteristic.properties
-                        ):
+                        if "notify" in characteristic.properties or "read" in characteristic.properties:
                             if "notify" in characteristic.properties:
                                 await client.start_notify(
                                     characteristic.uuid, self.callback
@@ -341,23 +338,28 @@ class SerialDevice(Device):
                 print("Unable to open serial port")
             else:
                 self.serialObject.reset_input_buffer()
-                dataString = self.serialObject.readline()
-                dataString += self.serialObject.readline()
-                dataString = dataString.decode("utf-8")
+                print("buffer reset")
+                # Read string until 2 new line characters are found (note that if this method is used then the bytes in waiting read method can be used)
+                dataString = ""
+               
+                while dataString.count("\n") < 6:
+                #dataString = self.serialObject.readline()
+                    numbytes = self.serialObject.in_waiting
+                    byteString = self.serialObject.read(numbytes)
+                    dataString += byteString.decode('utf-8')
+                # print("reading from buffer")
+                #dataString = dataString.decode("utf-8")
+                print("valid byte string")
                 print(dataString)
-                if dataString is not None and re.search(
-                    "\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString
-                ):  # Check that full string is read in
-                    sensorNames = re.findall(
-                        "\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString
-                    )
+                if dataString is not None and re.search("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString):  # Check that full string is read in
+                    sensorNames = re.findall("\s*<(\w+)>:\s*[0-9\.]*\s*,?\s*", dataString)
                     for sensorName in sensorNames:
                         self.Sensors.add(sensorName)
                     self.serialObject.close()
                     return True 
                 self.serialObject.close()
-        except:
-            print("an error occurred")
+        except Exception as e:
+            print(e)
         return False
 
     # Changes data buffer if data is read in

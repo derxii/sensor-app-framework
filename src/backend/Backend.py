@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QSplitter, QDockWidget, QLabel, QGridLayout
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import sys
@@ -430,7 +430,7 @@ def main():
         window = QMainWindow()
         central_widget = QWidget()
         window.setCentralWidget(central_widget)
-        layout = QVBoxLayout()
+        layout = QGridLayout() #QVBoxLayout()
         central_widget.setLayout(layout)
         LiveWindow = LiveDataPlot(backend, window, layout)
 
