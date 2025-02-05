@@ -10,8 +10,30 @@ This application is a flexible tool for wirelessly visualising sensor data via B
 - Real-time data streaming
 
 ## Data Format for Transmission via Bluetooth
+### Structure
+Data is passed as strings, with each line being constructed of
+
+```
+<name_sensor_1>: data_sensor_1, <name_sensor_2>: data_sensor_2, ...
+```
+where each line represents a single reading for each sensor.
+
+#### Requirements
+- Names are alphanumeric characters with no spaces
+- Data are floats
+
+<br>
 
 ***Note: Not following the data format will lead to errors.***
+
+### Example 1
+```
+<temperature>: 32
+```
+### Example 2
+```
+<temperature>: 32, <weight>: 53.21, <height>: 173.21
+```
 
 
 ## Installation
