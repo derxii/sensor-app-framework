@@ -378,6 +378,7 @@ def main():
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
+        LiveWindow.set_pause(True)
     
         StaticWindow = StaticDataPlot(backend, window)
         if StaticWindow.staticPlotExists():

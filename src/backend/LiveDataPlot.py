@@ -143,6 +143,10 @@ class LiveDataPlot():
         self.is_paused = not self.is_paused
         self.Backend.togglePause()
         self.pause_button.setText("Resume" if self.is_paused else "Stop")   
+        
+    def set_pause(self, val):
+        self.is_paused = val
+        self.pause_button.setText("Resume" if self.is_paused else "Stop")   
 
     def update_plot(self):
         if not self.is_paused:
