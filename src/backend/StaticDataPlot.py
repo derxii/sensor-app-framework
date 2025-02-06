@@ -3,7 +3,7 @@ from PyQt6.QtCharts import QChart, QChartView, QPieSeries
 from PyQt6.QtGui import QPainter
 from PyQt6.QtCore import  Qt
 from collections import Counter
-from backend.DockObjects import SquareDockWidget
+from DockObjects import SquareDockWidget
 
 class StaticDataPlot():
     def __init__(self, backend, window):

@@ -4,10 +4,10 @@ import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner
 import re
-from backend.Device import BluetoothDevice, SerialDevice
-from backend.Chart import Chart
-from backend.LiveDataPlot import LiveDataPlot
-from backend.StaticDataPlot import StaticDataPlot
+from Device import BluetoothDevice, SerialDevice
+from Chart import Chart
+from LiveDataPlot import LiveDataPlot
+from StaticDataPlot import StaticDataPlot
 import threading 
 import csv
 import os 
@@ -126,7 +126,7 @@ class Backend(object):
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
             self.stopSession.clear()
-            if self.connectedDevice.Type == "Bluetooth":
+            '''if self.connectedDevice.Type == "Bluetooth":
                 print("Attempting to create thread")
                 loop = asyncio.new_event_loop()
                 self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True)
@@ -139,10 +139,16 @@ class Backend(object):
             self.runSessionThread = threading.Thread(
                 target=self.runSession, daemon=True
             )
+            self.runSessionThread.start()'''
+            self.runSessionThread = threading.Thread(
+                target=self.runSession, daemon=True
+            )
             self.runSessionThread.start()
+            #self.runSession()
 
     def runSession(self):
         while not self.stopSession.is_set():
+            self.connectedDevice.getData()
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
@@ -153,7 +159,7 @@ class Backend(object):
         self.connectedDevice.setPaused(True)
         self.connectedDevice.setTerminateSession()
         self.stopSession.set()
-        self.getDataThread.join()
+        #self.getDataThread.join()
         self.runSessionThread.join()
         print("session ended")
         self.connectedDevice.clearTerminateSession()
@@ -298,15 +304,21 @@ def main():
             "Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: "
         )
         if userInput == "3":
+            #backend.restartProgram()
             loop.run_until_complete(backend.restartProgram())
             break
         elif userInput == "1":
             if count != 0:
-                loop.run_until_complete(backend.restartProgram())
+                backend.restartProgram()
+                #loop.run_until_complete(backend.restartProgram())
             loop.run_until_complete(backend.scanForDevices())
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
-            loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
+            #backend.connectToDevice(deviceName, deviceAddress)
+            returnVal = loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
+            print(f"Connection success: {returnVal}")
+            if not returnVal:
+                return
             print("Found the following sensors:")
             for sensor in backend.listSensorNames():
                 print(sensor)
