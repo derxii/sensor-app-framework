@@ -1,8 +1,10 @@
 from typing import TYPE_CHECKING, Callable
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QMainWindow
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QGridLayout, QMainWindow
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
+from backend.LiveDataPlot import LiveDataPlot
+from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable
 from frontend.windows.AddChart import AddChart
@@ -25,7 +27,10 @@ class DashboardChart(QWidget):
         self.title = QLabel(device_name)
 
         self.chart_area = QMainWindow()
-        self.chart_area.setLayout(QVBoxLayout())
+        central_widget = QWidget()
+        self.chart_area.setCentralWidget(central_widget)
+        self.chart_area_layout = QGridLayout()
+        central_widget.setLayout(self.chart_area_layout)
         self.no_chart_text = QLabel(
             "At least one chart must be added before streaming data."
         )
@@ -70,9 +75,22 @@ class DashboardChart(QWidget):
 
         self.setLayout(self.layout)
 
-    def generate_chart(self, existing_id: int):
-        new_chart = DraggableResizable(self, self.chart_area, existing_id)
-        self.chart_area.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, new_chart)
+    def refresh_chart_layout(self):
+        if hasattr(self, "LiveWindow"):
+            self.LiveWindow.clearPlots()
+            self.LiveWindow.__del__()
+            self.chart_area.setParent(None)
+            self.chart_area = QMainWindow()
+            central_widget = QWidget()
+            self.chart_area.setCentralWidget(central_widget)
+            self.chart_area_layout = QGridLayout()
+            central_widget.setLayout(self.chart_area_layout)
+            self.layout.insertWidget(
+                2, self.chart_area, 1000
+            )
+        print(len(get_backend().chartObjects))
+        self.LiveWindow = LiveDataPlot(get_backend(), self.chart_area, self.chart_area_layout)
+        return
 
     def can_create_delete(self, value: bool):
         self.add_chart_button.setEnabled(value)
@@ -85,5 +103,5 @@ class DashboardChart(QWidget):
         if add_success:
             self.get_dashboard_state().handle_change_chart_amount(self)
             QTimer.singleShot(
-                100, lambda: self.generate_chart(add_chart_form.created_chart_id)
+                100, self.refresh_chart_layout
             )

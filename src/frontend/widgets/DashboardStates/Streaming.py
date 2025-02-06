@@ -1,5 +1,7 @@
+from asyncio import get_event_loop
 from typing import Callable
-from frontend.config import handle_exception
+from backend.LiveDataPlot import LiveDataPlot
+from frontend.config import get_backend, handle_exception
 from frontend.thread.Worker import Worker
 from frontend.widgets.DashboardButtonGroup import DashboardButtonGroup
 from frontend.widgets.DashboardChart import DashboardChart
@@ -30,10 +32,9 @@ class Streaming(DashboardState):
         self.session_thread.start()
 
     async def stream(self):
-        import asyncio
-
-        while True:
-            await asyncio.sleep(0.1)
+        backend = get_backend()
+        backend.clearSession()
+        await backend.startSession()
 
     def done_session(self):
         self.worker.stop()

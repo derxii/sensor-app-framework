@@ -56,7 +56,7 @@ class DashboardButtonGroup(QWidget):
             return
 
         try:
-            success = get_backend().saveData(None, None, save_path)
+            success = get_backend().saveData(save_path)
             if not success:
                 handle_exception("Unable to Save Data")
                 return
