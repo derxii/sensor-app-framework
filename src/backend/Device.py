@@ -293,6 +293,12 @@ class BluetoothDevice(Device):
         await self.client.stop_notify(self.characteristicUUID)
         await asyncio.sleep(0.5)
         print("unsubscribing to notifications")
+
+    async def startNotifications(self):
+        await self.client.start_notify(self.characteristicUUID, self.callback)
+    async def stopNotifications(self):
+        await self.client.stop_notify(self.characteristicUUID)
+
         
 # This class if for devices that use serial port profile (SPP)
 class SerialDevice(Device):

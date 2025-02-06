@@ -152,17 +152,15 @@ class Backend(object):
                     target=self.runSession, daemon=True
                 )'''
             #self.runSession()
-            loop = asyncio.new_event_loop()
-            self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
+            #loop = asyncio.new_event_loop()
+            #self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
+            #self.runSessionThread.start()
+            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
             self.runSessionThread.start()
 
-    async def runSession(self):
+    def runSession(self):
         while not self.stopSession.is_set():
-            if self.connectedDevice.Type == "Bluetooth":
-                
-                #loop.run_until_complete(self.connectedDevice.getData())
-                await self.connectedDevice.getData()
-            else:
+            if self.connectedDevice.Type == "Serial":
                 self.connectedDevice.getData()
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
@@ -389,6 +387,8 @@ def main():
        
         userInput = input("Press enter to start session: ")
         backend.clearSession()
+        if backend.connectedDevice.Type == "Bluetooth":
+            loop.run_until_complete(backend.connectedDevice.startNotifications())
         loop.run_until_complete(backend.startSession())
         
         window = QMainWindow()
@@ -405,6 +405,8 @@ def main():
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
+        if backend.connectedDevice.Type == "Bluetooth":
+            loop.run_until_complete(backend.connectedDevice.stopNotifications())
         LiveWindow.set_pause(True)
     
         StaticWindow = StaticDataPlot(backend, window)
