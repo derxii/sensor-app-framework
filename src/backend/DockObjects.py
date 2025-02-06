@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDockWidget
+from PySide6.QtWidgets import QDockWidget
 
 class SquareDockWidget(QDockWidget):
     def resizeEvent(self, event):

@@ -1,69 +1,63 @@
-from PySide6.QtWidgets import QSizeGrip, QWidget, QVBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QDockWidget, QHBoxLayout, QLabel, QMainWindow
 
-from frontend.config import enable_custom_styling, get_backend, get_image_path
-from frontend.widgets.DraggableTopBar import DraggableTopBar
 
 from typing import TYPE_CHECKING
+
+from frontend.config import dynamically_repaint_widget, get_backend
 
 if TYPE_CHECKING:
     from frontend.widgets.DashboardChart import DashboardChart
 
 
-class DraggableResizable(QWidget):
-    def __init__(self, parent: "DashboardChart", container: QWidget, chart_id: int):
+class DraggableResizable(QDockWidget):
+    def __init__(self, parent: "DashboardChart", container: QMainWindow, chart_id: int):
         super().__init__(container)
-        self.setWindowFlag(Qt.WindowType.SubWindow)
         self.parent = parent
         self.chart_id = chart_id
 
-        self.top_bar = DraggableTopBar(self)
-        self.contents = QWidget()
-        self.bottom_bar = QWidget()
-        self.grip = QSizeGrip(self)
-
-        self.base_size = (250, 250)
-
-        self.setGeometry(0, 0, self.base_size[0], self.base_size[1])
+        self.widget = QWidget()
+        self.topLevelChanged.connect(self.on_change_level)
 
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        layout = QHBoxLayout()
 
-        layout.addWidget(self.top_bar)
-        layout.addWidget(self.contents)
-        layout.addWidget(self.bottom_bar)
+        self.widget.setObjectName("chart-container-docked")
 
-        bottom_layout = QVBoxLayout()
-        bottom_layout.setContentsMargins(0, 0, 2, 2)
-        bottom_layout.addWidget(
-            self.grip, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
-        )
-        self.grip.setFixedSize(8, 8)
-        self.grip.setStyleSheet(
-            """QSizeGrip {
-            image: url("""
-            + get_image_path("gripper.svg")
-            + """);
-            width: 8px;
-            height: 8px;
-        }"""
-        )
+        layout.addWidget(self.init_chart_ui(), 1000)
 
-        self.bottom_bar.setLayout(bottom_layout)
-        self.setLayout(layout)
+        self.widget.setLayout(layout)
+        self.setWidget(self.widget)
+        self.set_enabled_closing(True)
 
-    def paintEvent(self, _):
-        enable_custom_styling(self)
+    def init_chart_ui(self):
+        return QLabel("hello")
 
-    def destroy(self):
+    def set_enabled_closing(self, enable: bool):
+        if enable:
+            self.setFeatures(
+                QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetMovable
+                | QDockWidget.DockWidgetFeature.DockWidgetClosable
+            )
+        else:
+            self.setFeatures(
+                QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetMovable
+            )
+
+    def closeEvent(self, _):
         get_backend().deleteChart(self.chart_id)
 
-        self.parent.get_dashboard_state().handle_change_chart_amount(
-            self.parent.no_chart_text
-        )
+        self.parent.get_dashboard_state().handle_change_chart_amount(self.parent)
         self.setParent(None)
         self.deleteLater()
+
+    def on_change_level(self, is_floating: bool):
+        if is_floating:
+            self.widget.setObjectName("")
+        else:
+            self.widget.setObjectName("chart-container-docked")
+
+        dynamically_repaint_widget(self.widget)

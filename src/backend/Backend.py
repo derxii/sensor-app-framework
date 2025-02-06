@@ -4,17 +4,17 @@ import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner
 import re
-from Device import BluetoothDevice, SerialDevice
-from Chart import Chart
-from LiveDataPlot import LiveDataPlot
-from StaticDataPlot import StaticDataPlot
+from backend.Device import BluetoothDevice, SerialDevice
+from backend.Chart import Chart
+from backend.LiveDataPlot import LiveDataPlot
+from backend.StaticDataPlot import StaticDataPlot
 import threading 
 import csv
 import os 
 import json
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
 import sys
 import qasync
 
@@ -193,11 +193,8 @@ class Backend(object):
         if directory is not None and not os.path.isdir(directory): # Directory format for MAC
             print("Error: directory not found")
             return False
-        # Check if the filepath already exists 
+
         print(filePath)
-        if os.path.exists(filePath):
-            print("Error: file already exists in the specified directory")
-            return False 
         dataFilename = self.connectedDevice.getDataFileName()
         with open(dataFilename, "r") as file:
             deviceData = json.load(file)

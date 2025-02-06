@@ -28,17 +28,25 @@ class Worker(QObject):
 
     def run(self):
         try:
-            asyncio.run(self.call_func_async())
+            asyncio.run(self.main())
         except Exception as e:
             print("Exception in backend: " + str(e))
             self.emit_error(e)
+
+    async def main(self):
+        self.task = asyncio.create_task(self.call_func_async())
+        try:
+            await self.task
+            self.stop()
+        except asyncio.exceptions.CancelledError:
+            print("Task Cancelled")
 
     def emit_error(self, e: Exception):
         if self.sent_payload:
             return
         self.sent_payload = True
         self.exception.emit(e)
-        self.thread.quit()
+        self.stop()
 
     async def call_func_async(self):
         result = await self.func(*self.args, **self.kwargs)
@@ -46,10 +54,14 @@ class Worker(QObject):
             return
         self.sent_payload = True
         self.func_done.emit(result)
-        self.thread.quit()
+        self.stop()
 
     def cancel_thread_on_timeout(self, time_s: int):
         def cancel_ongoing_threads():
             self.emit_error(Exception("Timed Out"))
 
         QTimer.singleShot(time_s * 1000, cancel_ongoing_threads)
+
+    def stop(self):
+        self.task.cancel()
+        self.thread.quit()
