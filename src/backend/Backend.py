@@ -140,15 +140,30 @@ class Backend(object):
                 target=self.runSession, daemon=True
             )
             self.runSessionThread.start()'''
-            self.runSessionThread = threading.Thread(
-                target=self.runSession, daemon=True
-            )
-            self.runSessionThread.start()
+            
+            #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            #self.runSessionThread.start()
+            '''if self.connectedDevice.Type == "Bluetooth":
+                print("Attempting to create thread")
+                loop = asyncio.new_event_loop()
+                self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
+            else:
+                self.runSessionThread= threading.Thread(
+                    target=self.runSession, daemon=True
+                )'''
             #self.runSession()
+            loop = asyncio.new_event_loop()
+            self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
+            self.runSessionThread.start()
 
-    def runSession(self):
+    async def runSession(self):
         while not self.stopSession.is_set():
-            self.connectedDevice.getData()
+            if self.connectedDevice.Type == "Bluetooth":
+                
+                #loop.run_until_complete(self.connectedDevice.getData())
+                await self.connectedDevice.getData()
+            else:
+                self.connectedDevice.getData()
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
@@ -309,8 +324,8 @@ def main():
             break
         elif userInput == "1":
             if count != 0:
-                backend.restartProgram()
-                #loop.run_until_complete(backend.restartProgram())
+                #backend.restartProgram()
+                loop.run_until_complete(backend.restartProgram())
             loop.run_until_complete(backend.scanForDevices())
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
