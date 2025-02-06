@@ -4,10 +4,10 @@ import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner
 import re
-from Device import BluetoothDevice, SerialDevice
-from Chart import Chart
-from LiveDataPlot import LiveDataPlot
-from StaticDataPlot import StaticDataPlot
+from backend.Device import BluetoothDevice, SerialDevice
+from backend.Chart import Chart
+from backend.LiveDataPlot import LiveDataPlot
+from backend.StaticDataPlot import StaticDataPlot
 import threading 
 import csv
 import os 

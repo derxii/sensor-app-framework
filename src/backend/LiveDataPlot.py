@@ -4,7 +4,7 @@ import pyqtgraph as pg
 from PyQt6.QtCore import QTimer, Qt
 import math
 import numpy as np
-from DockObjects import SquareDockWidget
+from backend.DockObjects import SquareDockWidget
 
 class LiveDataPlot():
     # add central widget as an argument so that front end can call LiveDataPlot and embed docks in the layout
