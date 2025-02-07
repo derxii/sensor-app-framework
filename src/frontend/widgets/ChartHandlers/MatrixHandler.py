@@ -39,4 +39,5 @@ class MatrixHandler(ChartHandler):
             sensors_selected,
             "matrix",
         )
+       
         return True, id

@@ -129,9 +129,14 @@ class LiveDataPlot():
         self.is_paused = False
         self.counter = 0
         self.timer = QTimer()
+        self.pause_button.clicked.connect(self.toggle_pause)
+        #self.is_paused = True
         self.timer.timeout.connect(self.update_plot)
         self.timer.start(100)  # specifies how frequently the plot should be updated
-        self.pause_button.clicked.connect(self.toggle_pause)
+        
+
+  
+       
 
     def setup_plot(self, plot_widget, title, xLabel, yLabel):
         plot_widget.setBackground('w')
@@ -170,6 +175,8 @@ class LiveDataPlot():
                 chart = self.Backend.getChart(chartId)
                 chart = self.Backend.getChart(chartId)
                 data = [] 
+                if chart.isQueueReady() is False:
+                    continue
                 for sensor in self.allMatrices[i]["sensors"]:
                     data.append(float(chart.getLastDataPoint(sensor)))
                 structuredData = np.resize(np.array(data), (self.allMatrices[i]["N"], self.allMatrices[i]["N"]))
@@ -181,6 +188,8 @@ class LiveDataPlot():
                 data = self.allHeatmaps[i]["data"]
                 chartId = int(self.allHeatmaps[i]["chartId"])
                 chart = self.Backend.getChart(chartId)
+                if chart.isQueueReady() is False:
+                    continue
                 for j in range(0, len(sensors)):
                     dataVal = chart.getLastDataPoint(sensors[j])
                     if dataVal is None:

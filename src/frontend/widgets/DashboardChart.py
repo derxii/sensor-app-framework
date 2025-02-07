@@ -78,7 +78,6 @@ class DashboardChart(QWidget):
     def refresh_chart_layout(self):
         if hasattr(self, "LiveWindow"):
             self.LiveWindow.clearPlots()
-            #self.chart_area.show()
             self.LiveWindow.__del__()
             self.chart_area.setParent(None)
             self.chart_area = QMainWindow()
@@ -106,3 +105,4 @@ class DashboardChart(QWidget):
             QTimer.singleShot(
                 100, self.refresh_chart_layout
             )
+
