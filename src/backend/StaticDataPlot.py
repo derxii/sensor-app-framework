@@ -51,5 +51,7 @@ class StaticDataPlot():
                 window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
                 self.chartCount += 1
 
+   
+
     def staticPlotExists(self):
         return self.chartCount != 0

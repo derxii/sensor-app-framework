@@ -34,4 +34,6 @@ class PieChartHandler(ChartHandler):
             sensors_selected,
             "pie",
         )
+        chart = get_backend().getChart(id)
+        chart.setCategories(self.bin_input.get_bin_values())
         return True, id

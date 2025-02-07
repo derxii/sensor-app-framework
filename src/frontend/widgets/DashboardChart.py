@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 from backend.LiveDataPlot import LiveDataPlot
+from backend.StaticDataPlot import StaticDataPlot
 from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable
@@ -90,6 +91,9 @@ class DashboardChart(QWidget):
             )
         print(len(get_backend().chartObjects))
         self.LiveWindow = LiveDataPlot(get_backend(), self.chart_area, self.chart_area_layout)
+        return
+    def refresh_static_plots(self):
+        self.StaticWindow = StaticDataPlot(get_backend(), self.chart_area)
         return
 
     def can_create_delete(self, value: bool):
