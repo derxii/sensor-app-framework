@@ -19,7 +19,6 @@ class MatrixHandler(ChartHandler):
 
         layout.addWidget(self.y_axis_label)
         layout.addWidget(self.range_container)
-
         container.setLayout(layout)
         return container
 
@@ -39,5 +38,6 @@ class MatrixHandler(ChartHandler):
             sensors_selected,
             "matrix",
         )
-       
+        chart = get_backend().getChart(id)
+        chart.setMinMaxRange(result)
         return True, id
