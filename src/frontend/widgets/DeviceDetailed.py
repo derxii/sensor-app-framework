@@ -15,6 +15,7 @@ from PySide6.QtCore import QSize, QTimer, QThread
 from frontend.config import (
     get_backend,
     get_image_path,
+    get_virtual_port,
     handle_exception,
     is_debug,
 )
@@ -159,9 +160,11 @@ class DeviceDetailed(ScrollableWindow):
         self.connect_button.setDisabled(True)
         self.restart_button.disable_button()
 
-        if is_debug():
+        virtual_port = get_virtual_port()
+        if is_debug() and not virtual_port:
             QTimer.singleShot(0, lambda: self.handle_done_connect(True))
         else:
+            self.address.setText(virtual_port)
             self.worker = Worker(
                 self.thread,
                 get_backend().connectToDevice,

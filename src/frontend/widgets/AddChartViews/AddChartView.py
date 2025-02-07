@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import Qt
 
 from frontend.DebugData import get_debug_sensor_names
-from frontend.config import get_backend, is_debug
+from frontend.config import get_backend, get_virtual_port, is_debug
 from frontend.widgets.AddChartViews.TypeSelector import TypeSelector
 from frontend.widgets.ChartHandlers.LineChartHandler import LineChartHandler
 from frontend.widgets.ChartHandlers.ChartHandler import ChartHandler
@@ -66,7 +66,7 @@ class AddChartView(QWidget):
         select_sensor_layout = QVBoxLayout()
         select_sensor_layout.setSpacing(0)
 
-        if is_debug():
+        if is_debug() and not get_virtual_port():
             sensor_names = get_debug_sensor_names()
         else:
             sensor_names = get_backend().listSensorNames()
