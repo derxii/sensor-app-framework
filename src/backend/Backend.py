@@ -14,7 +14,7 @@ import os
 import json
 
 # Plotting libraries 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
 import sys
 import qasync
 
@@ -122,12 +122,11 @@ class Backend(object):
         loop.run_until_complete(self.runSession())
 
     async def startSession(self):
-        print("starting session")
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
             self.stopSession.clear()
-            '''if self.connectedDevice.Type == "Bluetooth":
+            if self.connectedDevice.Type == "Bluetooth":
                 print("Attempting to create thread")
                 loop = asyncio.new_event_loop()
                 self.getDataThread = threading.Thread(target=self.runInLoop, args=(loop,), daemon=True)
@@ -140,49 +139,21 @@ class Backend(object):
             self.runSessionThread = threading.Thread(
                 target=self.runSession, daemon=True
             )
-            self.runSessionThread.start()'''
-            
-            #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
-            #self.runSessionThread.start()
-            '''if self.connectedDevice.Type == "Bluetooth":
-                print("Attempting to create thread")
-                loop = asyncio.new_event_loop()
-                self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
-            else:
-                self.runSessionThread= threading.Thread(
-                    target=self.runSession, daemon=True
-                )'''
-            #self.runSession()
-            
-            loop = asyncio.new_event_loop()
-            self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
             self.runSessionThread.start()
-            #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
-            #self.runSessionThread.start()
 
-    async def runSession(self):
-        #if self.connectedDevice == "Bluetooth":
-        #    await self.connectedDevice.startNotifications()
-        characteristicUUID = self.connectedDevice.characteristicUUID
-        await self.connectedDevice.client.start_notify(characteristicUUID, self.connectedDevice.callback)
+    def runSession(self):
         while not self.stopSession.is_set():
-            if self.connectedDevice.Type == "Serial":
-                self.connectedDevice.getData()
-            #else:
-            await asyncio.sleep(0.5)
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
             for chart in self.chartObjects:
                 chart.addData(dataDict)
-        #if self.connectedDevice == "Bluetooth":
-        #    await self.connectedDevice.stopNotifications()
            
     async def endSession(self):
         self.connectedDevice.setPaused(True)
         self.connectedDevice.setTerminateSession()
         self.stopSession.set()
-        #self.getDataThread.join()
+        self.getDataThread.join()
         self.runSessionThread.join()
         print("session ended")
         self.connectedDevice.clearTerminateSession()
@@ -203,8 +174,11 @@ class Backend(object):
         if directory is not None and not os.path.isdir(directory): # Directory format for MAC
             print("Error: directory not found")
             return False
-
+        # Check if the filepath already exists 
         print(filePath)
+        if os.path.exists(filePath):
+            print("Error: file already exists in the specified directory")
+            return False 
         dataFilename = self.connectedDevice.getDataFileName()
         with open(dataFilename, "r") as file:
             deviceData = json.load(file)
@@ -324,21 +298,15 @@ def main():
             "Would you like to start the program from the beginning (1) restart a data recording session (2) or exit the program (3)?: "
         )
         if userInput == "3":
-            #backend.restartProgram()
             loop.run_until_complete(backend.restartProgram())
             break
         elif userInput == "1":
             if count != 0:
-                #backend.restartProgram()
                 loop.run_until_complete(backend.restartProgram())
             loop.run_until_complete(backend.scanForDevices())
             deviceName = input("Enter the name of the device you want to connect to: ")
             deviceAddress = input("Enter the address of the device you want to connect to: ")
-            #backend.connectToDevice(deviceName, deviceAddress)
-            returnVal = loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
-            print(f"Connection success: {returnVal}")
-            if not returnVal:
-                return
+            loop.run_until_complete(backend.connectToDevice(deviceName, deviceAddress))
             print("Found the following sensors:")
             for sensor in backend.listSensorNames():
                 print(sensor)
@@ -394,8 +362,6 @@ def main():
        
         userInput = input("Press enter to start session: ")
         backend.clearSession()
-        if backend.connectedDevice.Type == "Bluetooth":
-            loop.run_until_complete(backend.connectedDevice.startNotifications())
         loop.run_until_complete(backend.startSession())
         
         window = QMainWindow()
@@ -412,8 +378,6 @@ def main():
         
         userInput = input("Press enter to end session: ")
         loop.run_until_complete(backend.endSession())
-        if backend.connectedDevice.Type == "Bluetooth":
-            loop.run_until_complete(backend.connectedDevice.stopNotifications())
         LiveWindow.set_pause(True)
     
         StaticWindow = StaticDataPlot(backend, window)

@@ -40,6 +40,7 @@ class Chart(object):
         return SensorData
     
     def addData(self, dataDict):
+        
         with open(self.ChartFilename, "r") as file:
             SensorData = json.load(file)
         for (sensor, dataVal) in dataDict.items():
@@ -48,6 +49,7 @@ class Chart(object):
                     SensorData[sensor].append(val)
                     if re.sub("\s", "", val) != "":
                         self.CurrentSensorData[sensor].put(val)
+        
         with open(self.ChartFilename, "w") as file:
             json.dump(SensorData, file, indent=4)
 

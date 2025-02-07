@@ -160,7 +160,6 @@ class BluetoothDevice(Device):
         try:
             if not self.isPaused():
                 dataString = data.decode('utf-8')
-                print(dataString)
                 self.addToDataBuffer(dataString)
         except:
             print("cannot convert notification to utf-8", flush=True)
@@ -289,17 +288,11 @@ class BluetoothDevice(Device):
     async def getData(self):
         self.setDataBuffer("")
         await self.client.start_notify(self.characteristicUUID, self.callback)
-        #while not self.TerminateSession.is_set():
-        await asyncio.sleep(1)   
+        while not self.TerminateSession.is_set():
+            await asyncio.sleep(0.5)   
         await self.client.stop_notify(self.characteristicUUID)
         await asyncio.sleep(0.5)
         print("unsubscribing to notifications")
-
-    async def startNotifications(self):
-        await self.client.start_notify(self.characteristicUUID, self.callback)
-    async def stopNotifications(self):
-        await self.client.stop_notify(self.characteristicUUID)
-
         
 # This class if for devices that use serial port profile (SPP)
 class SerialDevice(Device):
@@ -333,26 +326,19 @@ class SerialDevice(Device):
         if not self.reconnect():
             self.serialObject = serial.Serial(self.Address, timeout=None) 
             print(f"Is port open: {self.serialObject.is_open}")
-        #self.serialObject.reset_input_buffer()
-        #while not self.TerminateSession.is_set():
-        try:
-            dataString = ""
-            while dataString == "":
-                numWaitingBytes = self.serialObject.in_waiting
-                data = self.serialObject.read(numWaitingBytes)
-                success = False
-                try:
-                    dataString = data.decode('utf-8')
-                    success = True
-                except:
-                    print("could not decode")
-
-            if not self.isPaused() and success:
-                print(dataString)
-                self.addToDataBuffer(dataString)
-        except:
-            print("an error occurred") 
-        #self.disconnect()
+        self.serialObject.reset_input_buffer()
+        while not self.TerminateSession.is_set():
+            try:
+                dataString = None
+                while dataString is None:
+                    numWaitingBytes = self.serialObject.in_waiting
+                    dataString = self.serialObject.read(numWaitingBytes)
+                dataString = dataString.decode('utf-8')
+                if not self.isPaused():
+                    self.addToDataBuffer(dataString)
+            except:
+                print("an error occurred") 
+        self.disconnect()
 
     def reconnect(self):
         # This function aims to reconnect to the connected device (no information needs to be found just establish the connection again)

@@ -40,6 +40,10 @@ class Streaming(DashboardState):
         self.worker.stop()
         self.session_thread.wait()
         self.change_state(StreamEnd)
+        backend = get_backend()
+        loop = get_event_loop()
+        loop.run_until_complete(backend.endSession())
+        
 
     def set_new_button_info(self) -> tuple[str, str]:
         self.dashboard_button_group.button_restart.disable_button()
