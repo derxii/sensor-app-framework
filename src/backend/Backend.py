@@ -19,6 +19,7 @@ import sys
 import qasync
 
 # TO DO: 
+# - get rid of stop button
 # - when a heatmap is created the error doesn't pop up
 # - stop data collection and plotting before ending the session
 # - get rid of the pause button when session ends 
