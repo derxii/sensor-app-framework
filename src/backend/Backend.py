@@ -122,6 +122,7 @@ class Backend(object):
         loop.run_until_complete(self.runSession())
 
     async def startSession(self):
+        print("starting session")
         self.connectedDevice.formatDataStruct()
         if not self.connectedDevice.isSetTerminateSession():
             self.connectedDevice.clearTerminateSession()
@@ -152,21 +153,30 @@ class Backend(object):
                     target=self.runSession, daemon=True
                 )'''
             #self.runSession()
-            #loop = asyncio.new_event_loop()
-            #self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
-            #self.runSessionThread.start()
-            self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            
+            loop = asyncio.new_event_loop()
+            self.runSessionThread= threading.Thread(target=self.runSessionInLoop, args=(loop,), daemon=True)
             self.runSessionThread.start()
+            #self.runSessionThread = threading.Thread(target=self.runSession, daemon=True)
+            #self.runSessionThread.start()
 
-    def runSession(self):
+    async def runSession(self):
+        #if self.connectedDevice == "Bluetooth":
+        #    await self.connectedDevice.startNotifications()
+        characteristicUUID = self.connectedDevice.characteristicUUID
+        await self.connectedDevice.client.start_notify(characteristicUUID, self.connectedDevice.callback)
         while not self.stopSession.is_set():
             if self.connectedDevice.Type == "Serial":
                 self.connectedDevice.getData()
+            #else:
+            await asyncio.sleep(0.5)
             dataDict = self.connectedDevice.parseData()
             if dataDict is None:
                 continue
             for chart in self.chartObjects:
                 chart.addData(dataDict)
+        #if self.connectedDevice == "Bluetooth":
+        #    await self.connectedDevice.stopNotifications()
            
     async def endSession(self):
         self.connectedDevice.setPaused(True)

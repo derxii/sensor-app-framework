@@ -160,6 +160,7 @@ class BluetoothDevice(Device):
         try:
             if not self.isPaused():
                 dataString = data.decode('utf-8')
+                print(dataString)
                 self.addToDataBuffer(dataString)
         except:
             print("cannot convert notification to utf-8", flush=True)
