@@ -15,5 +15,5 @@ class StreamPrior(DashboardState):
 
         self.dashboard_button_group.button_main.setIconSize(QSize(18, 18))
         self.dashboard_button_group.button_main.setObjectName("play-button")
-
+        self.dashboard_chart.refresh_chart_layout()
         return "START SESSION", "play.svg"

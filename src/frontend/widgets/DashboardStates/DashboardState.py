@@ -49,6 +49,7 @@ class DashboardState(ABC):
                 self.dashboard_chart,
             )
         )
+  
 
     def handle_change_chart_amount(self, dashboard_chart: DashboardChart):
         index_of_removal = 2

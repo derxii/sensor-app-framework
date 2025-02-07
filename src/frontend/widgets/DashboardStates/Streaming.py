@@ -35,6 +35,7 @@ class Streaming(DashboardState):
         backend = get_backend()
         backend.clearSession()
         await backend.startSession()
+        
 
     def done_session(self):
         self.worker.stop()
