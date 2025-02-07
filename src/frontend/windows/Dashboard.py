@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QHBoxLayout, QWidget, QFrame
 from typing import Callable
 
 from frontend.DebugData import get_debug_sensor_names
-from frontend.config import get_backend, is_debug
+from frontend.config import get_backend, get_virtual_port, is_debug
 from frontend.widgets.DashboardChart import DashboardChart
 from frontend.widgets.DashboardConfig import DashboardConfig
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
@@ -14,7 +14,7 @@ class Dashboard(ScrollableWindow):
     def __init__(self, switch_window: Callable[[QWidget], None], device_name: str):
         super().__init__(switch_window)
 
-        if is_debug():
+        if is_debug() and not get_virtual_port():
             self.sensor_names: set[str] = get_debug_sensor_names()
         else:
             self.sensor_names: set[str] = get_backend().listSensorNames()
