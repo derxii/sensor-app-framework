@@ -20,15 +20,15 @@ class LiveDataPlot():
         self.pause_button = QPushButton("Stop")
         self.pause_button.setFixedSize(70,70)
 
-        controlsDock = QDockWidget("Controls", window)
-        controlsDock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea| Qt.DockWidgetArea.LeftDockWidgetArea)
+        self.controlsDock = QDockWidget("Controls", window)
+        self.controlsDock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea| Qt.DockWidgetArea.LeftDockWidgetArea)
         controlsLayout = QGridLayout()
         controlsWidget = QWidget()
         controlsWidget.setLayout(controlsLayout)
-        controlsDock.setWidget(controlsWidget)
-        controlsDock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        self.controlsDock.setWidget(controlsWidget)
+        self.controlsDock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         controlsLayout.addWidget(self.pause_button)
-        window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, controlsDock)
+        window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.controlsDock)
 
         # Create all line charts from backend
         dock = None
@@ -214,5 +214,8 @@ class LiveDataPlot():
     def livePlotExists(self):
         return len(self.allPlots) + len(self.allMatrices) + len(self.allHeatmaps) != 0
     
+    def hideControls(self):
+        self.controlsDock.hide()
+
     def __del__(self):
         print("live dataplot deleted")

@@ -110,3 +110,6 @@ class DashboardChart(QWidget):
                 100, self.refresh_chart_layout
             )
 
+    def hideControlsDock(self):
+        self.LiveWindow.hideControls()
+

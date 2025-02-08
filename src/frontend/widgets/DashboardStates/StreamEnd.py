@@ -15,6 +15,7 @@ class StreamEnd(DashboardState):
         self.dashboard_button_group.button_main.setIconSize(QSize(24, 24))
         self.dashboard_button_group.button_main.setObjectName("play-button")
         self.dashboard_chart.refresh_static_plots()
+        self.dashboard_chart.hideControlsDock()
         return "CLEAR SESSION", "clear.svg"
 
     def change_state(self, dashboard_state: DashboardState):
