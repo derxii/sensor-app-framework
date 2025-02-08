@@ -65,6 +65,8 @@ class Device(object):
             with open(self.RawDataFilename, "w") as file:
                 json.dump(rawData, file, indent=4)
 
+
+
     def getDataBuffer(self):
         with self.Lock:
             dataString = self.DataBuffer

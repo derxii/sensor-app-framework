@@ -37,6 +37,7 @@ class Backend(object):
         self.figures = []
         self.chartObjects = []
         self.stopSession = threading.Event()
+        self.connectedDevice = None 
         
     async def scanForDevices(self):
         allDevices = []
@@ -140,6 +141,7 @@ class Backend(object):
             self.runSessionThread = threading.Thread(
                 target=self.runSession, daemon=True
             )
+            self.connectedDevice.setPaused(False)
             self.runSessionThread.start()
 
     def runSession(self):
@@ -223,7 +225,7 @@ class Backend(object):
                     print("]", file=file)
                 
     def clearSession(self):
-        self.connectedDevice.setPaused(False) 
+        #self.connectedDevice.setPaused(False) 
         self.connectedDevice.setDataBuffer("")
         for chart in self.chartObjects:
             chart.clearData()
@@ -238,7 +240,7 @@ class Backend(object):
             return
 
     async def restartProgram(self):
-        self.connectedDevice.setPaused(False)
+        self.connectedDevice.setPaused(True)
         if self.connectedDevice.Type == "Bluetooth":       
             if self.connectedDevice.client.is_connected:
                 try:
@@ -285,7 +287,11 @@ class Backend(object):
                 print(f"{key}: {value}")
 
 
-   
+    def hasConnectedDevice(self):
+        return self.connectedDevice is not None
+
+
+
     ############################################## TESTING CODE ########################################################
 
 def main():

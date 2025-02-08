@@ -111,5 +111,10 @@ class DashboardChart(QWidget):
             )
 
     def hideControlsDock(self):
-        self.LiveWindow.hideControls()
+        if hasattr(self, "LiveWindow"):
+            self.LiveWindow.hideControls()
+
+    def setPauseLivePlot(self, val):
+        if hasattr(self, "LiveWindow"):
+            self.LiveWindow.set_pause(val)
 

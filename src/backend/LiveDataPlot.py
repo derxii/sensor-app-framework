@@ -219,3 +219,10 @@ class LiveDataPlot():
 
     def __del__(self):
         print("live dataplot deleted")
+    
+    def deleteAllData(self):
+        self.allPlots = []
+        self.allMatrices = [] 
+        self.allHeatmaps = []
+        self.allDocks = []
+        self.allDockRatios = []

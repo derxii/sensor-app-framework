@@ -4,10 +4,11 @@ from PySide6.QtWidgets import (
     QWidget,
     QHBoxLayout,
 )
+from asyncio import get_event_loop
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QSize
 
-from frontend.config import enable_custom_styling, get_image_path, set_backend
+from frontend.config import enable_custom_styling, get_image_path, set_backend, get_backend
 from frontend.widgets.Button import Button
 
 
@@ -16,7 +17,6 @@ class ResetButton(QWidget):
         super().__init__()
         self.is_simple = is_icon
         self.switch_window = switch_window
-
         text = "Restart Setup"
         if is_icon:
             self.button = Button(text, None, "reset-button-simple", "red")
@@ -60,7 +60,10 @@ class ResetButton(QWidget):
 
     def on_click(self):
         from frontend.windows.Welcome import Welcome
-
+        backend = get_backend()
+        if backend.hasConnectedDevice():
+            loop = get_event_loop()
+            loop.run_until_complete(backend.restartProgram())
         set_backend()
         self.switch_window(Welcome(self.switch_window))
 

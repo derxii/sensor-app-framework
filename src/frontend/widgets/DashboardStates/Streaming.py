@@ -45,6 +45,7 @@ class Streaming(DashboardState):
         backend = get_backend()
         loop = get_event_loop()
         loop.run_until_complete(backend.endSession())
+        self.dashboard_chart.setPauseLivePlot(True)
         
 
     def set_new_button_info(self) -> tuple[str, str]:
