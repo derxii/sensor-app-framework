@@ -164,7 +164,8 @@ class DeviceDetailed(ScrollableWindow):
         if is_debug() and not virtual_port:
             QTimer.singleShot(0, lambda: self.handle_done_connect(True))
         else:
-            self.address.setText(virtual_port)
+            if virtual_port: 
+                self.address.setText(virtual_port)
             self.worker = Worker(
                 self.thread,
                 get_backend().connectToDevice,
