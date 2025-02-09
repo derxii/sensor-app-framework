@@ -40,4 +40,6 @@ class BarChartHandler(ChartHandler):
             sensors_selected,
             "bar",
         )
+        chart = get_backend().getChart(id)
+        chart.setCategories(self.bin_input.get_bin_values())
         return True, id
