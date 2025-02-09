@@ -114,7 +114,33 @@ class StaticDataPlot():
                 dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
                 dock.setWidget(widget)
                 window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+
+            if chart.getType() == "histogram":
+                dictData = chart.getAllData()
+                data = []
+                allData = []
+                for sensor in dictData.keys():
+                    data.append([float(val) for val in dictData[sensor]])
+                    allData += dictData[sensor]
+                widget = QWidget()
+                chartFigure = Figure()
+                chartCanvas = FigureCanvas(chartFigure)
+                counter =Counter(allData)
+                bins = counter.keys()
+                axis = chartFigure.add_subplot()
+                axis.hist(data, bins=len(bins),color='blue', edgecolor='black')
+                axis.set_title(chart.getTitle())
+                axis.set(xlabel=chart.getxLabel(), ylabel=chart.getyLabel())
+                layout = QVBoxLayout()
+                layout.addWidget(chartCanvas)
+                widget.setLayout(layout)
+                dock = QDockWidget(chart.getTitle(), window)
+                dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+                dock.setWidget(widget)
+                window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
                 
+
+
 
 
    
