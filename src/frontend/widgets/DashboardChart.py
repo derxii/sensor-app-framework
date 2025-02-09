@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 from backend.LiveDataPlot import LiveDataPlot
-from backend.StaticDataPlot import StaticDataPlot
+from backend.StaticPlots.StaticDataPlot import StaticDataPlot
 from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable

@@ -7,7 +7,7 @@ import re
 from backend.Device import BluetoothDevice, SerialDevice
 from backend.Chart import Chart
 from backend.LiveDataPlot import LiveDataPlot
-from backend.StaticDataPlot import StaticDataPlot
+from backend.StaticPlots.StaticDataPlot import StaticDataPlot
 import threading 
 import csv
 import os 
