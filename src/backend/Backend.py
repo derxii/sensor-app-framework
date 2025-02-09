@@ -4,7 +4,9 @@ import asyncio
 import serial.tools.list_ports
 from bleak import BleakScanner
 import re
-from backend.Device import BluetoothDevice, SerialDevice
+from backend.Device.Device import Device
+from backend.Device.BluetoothDevice import BluetoothDevice
+from backend.Device.SerialDevice import SerialDevice
 from backend.Chart import Chart
 from backend.LivePlots.LiveDataPlot import LiveDataPlot
 from backend.StaticPlots.StaticDataPlot import StaticDataPlot
