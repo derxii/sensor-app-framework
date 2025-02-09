@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QGridLayout, QMainWi
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
-from backend.LiveDataPlot import LiveDataPlot
+from backend.LivePlots.LiveDataPlot import LiveDataPlot
 from backend.StaticPlots.StaticDataPlot import StaticDataPlot
 from frontend.config import get_backend
 from frontend.widgets.Button import Button

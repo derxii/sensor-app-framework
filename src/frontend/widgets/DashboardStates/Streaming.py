@@ -1,6 +1,6 @@
 from asyncio import get_event_loop
 from typing import Callable
-from backend.LiveDataPlot import LiveDataPlot
+from backend.LivePlots.LiveDataPlot import LiveDataPlot
 from frontend.config import get_backend, handle_exception
 from frontend.thread.Worker import Worker
 from frontend.widgets.DashboardButtonGroup import DashboardButtonGroup

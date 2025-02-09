@@ -6,7 +6,7 @@ from bleak import BleakScanner
 import re
 from backend.Device import BluetoothDevice, SerialDevice
 from backend.Chart import Chart
-from backend.LiveDataPlot import LiveDataPlot
+from backend.LivePlots.LiveDataPlot import LiveDataPlot
 from backend.StaticPlots.StaticDataPlot import StaticDataPlot
 import threading 
 import csv
