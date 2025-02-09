@@ -1,4 +1,3 @@
-import argparse
 from pathlib import Path
 from typing import Callable, Optional
 from PySide6.QtWidgets import QStyleOption, QStyle, QWidget, QMessageBox
@@ -36,22 +35,14 @@ def load_custom_font():
     return QFontDatabase.addApplicationFont(font_path)
 
 
-def parse_args():
+def is_debug():
+    import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-debug", "-d", action="store_true", help="Use mock data")
-    parser.add_argument(
-        "-virtual", "-v", type=str, help="Use virtual port at specified location"
-    )
 
-    return parser.parse_args()
-
-
-def is_debug():
-    return parse_args().debug
-
-
-def get_virtual_port():
-    return parse_args().virtual
+    args = parser.parse_args()
+    return args.debug
 
 
 def set_backend():
