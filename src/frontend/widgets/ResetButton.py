@@ -63,14 +63,21 @@ class ResetButton(QWidget):
     def on_click(self):
         from frontend.windows.Welcome import Welcome
         backend = get_backend()
-        if backend.hasConnectedDevice():
+        if not self.is_simple and backend.hasConnectedDevice():
             #loop = get_event_loop()
             #loop = asyncio.new_event_loop()
             #loop.run_until_complete(backend.restartProgram())
-            task = asyncio.create_task(backend.restartProgram())
-            sys.exit(1)
-        set_backend()
-        self.switch_window(Welcome(self.switch_window))
+           # backend.connectedDevice.setPaused(True)
+            asyncio.create_task(self.restartProgramWrapper())
+        else:
+            set_backend()
+            self.switch_window(Welcome(self.switch_window))
+
+    async def restartProgramWrapper(self):
+        task = await get_backend().restartProgram()#asyncio.create_task()
+        loop = get_event_loop()
+        loop.stop()
+        sys.exit(1)
 
     def disable_button(self):
         if self.is_simple:

@@ -47,6 +47,7 @@ class Streaming(DashboardState):
         #asyncio.create_task(get_backend().startSession())
         #loop = get_event_loop()
         #loop.run_until_complete(backend.endSession())
+        asyncio.create_task(get_backend().endSession())
         self.dashboard_chart.setPauseLivePlot(True)
         
 
