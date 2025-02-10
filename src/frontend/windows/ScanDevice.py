@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QApplication
 from PySide6.QtGui import Qt, QFont
 from PySide6.QtCore import QTimer, QThread
 from typing import Callable
+import asyncio
+import qasync
+
 
 from frontend.config import (
     get_backend,
@@ -15,6 +18,9 @@ from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
 
+def getScannedDevices(future):
+        print(f"Result: {future.result()}")
+
 
 class ScanDevice(ScrollableWindow):
     def __init__(self, switch_window: Callable[[QWidget], None]):
@@ -24,9 +30,12 @@ class ScanDevice(ScrollableWindow):
         self.description = QLabel("Please wait for up to 10 seconds...")
         self.init_ui()
 
-        self.thread = QThread()
-        self.trigger_bluetooth_scan()
-
+        #self.thread = QThread()
+        #asyncio.run(self.trigger_bluetooth_scan())
+        
+        task = asyncio.create_task(self.trigger_bluetooth_scan())
+        #self.trigger_bluetooth_scan()
+         
     def init_ui(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -49,8 +58,9 @@ class ScanDevice(ScrollableWindow):
 
         self.bind_scroll(layout)
 
-    def trigger_bluetooth_scan(self):
-        if is_debug():
+    
+    async def trigger_bluetooth_scan(self):
+        '''if is_debug():
             QTimer.singleShot(0, lambda: self.on_scan_end([]))
         else:
             self.worker = Worker(
@@ -60,7 +70,23 @@ class ScanDevice(ScrollableWindow):
             )
             self.worker.cancel_thread_on_timeout(15)
             self.worker.func_done.connect(self.on_scan_end)
-            self.thread.start()
+            self.thread.start()'''
+        #loop = asyncio.new_event_loop()
+        #app = QApplication.instance()
+        #loop = qasync.QEventLoop(app)    
+        #asyncio.set_event_loop(loop)
+        #loop = asyncio.get_event_loop()
+        #print(loop)
+
+
+      
+        #returnVal = await backend.scanForDevices() #loop.run_until_complete(backend.scanForDevices())
+        #task = asyncio.create_task(get_backend().scanForDevices())
+        backend = get_backend()
+        returnVal = await backend.scanForDevices()
+        self.on_scan_end(returnVal)
+       
+
 
     def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()

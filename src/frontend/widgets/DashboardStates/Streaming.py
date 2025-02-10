@@ -9,7 +9,7 @@ from frontend.widgets.DashboardStates.DashboardState import DashboardState
 from PySide6.QtCore import QSize, QThread
 
 from frontend.widgets.DashboardStates.StreamEnd import StreamEnd
-
+import asyncio
 
 class Streaming(DashboardState):
     def __init__(
@@ -20,8 +20,9 @@ class Streaming(DashboardState):
     ):
         super().__init__(change_dash_state, dashboard_button_group, dashboard_chart)
         self.dashboard_chart.can_create_delete(False)
-        self.session_thread = QThread()
-        self.setup_backend_worker()
+        asyncio.create_task(get_backend().startSession())
+        #self.session_thread = QThread()
+        #self.setup_backend_worker()
 
     def setup_backend_worker(self):
         self.worker = Worker(
@@ -39,12 +40,13 @@ class Streaming(DashboardState):
         
 
     def done_session(self):
-        self.worker.stop()
-        self.session_thread.wait()
+        #self.worker.stop()
+        #self.session_thread.wait()
         self.change_state(StreamEnd)
         backend = get_backend()
-        loop = get_event_loop()
-        loop.run_until_complete(backend.endSession())
+        #asyncio.create_task(get_backend().startSession())
+        #loop = get_event_loop()
+        #loop.run_until_complete(backend.endSession())
         self.dashboard_chart.setPauseLivePlot(True)
         
 

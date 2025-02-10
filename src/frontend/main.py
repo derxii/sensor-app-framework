@@ -4,6 +4,8 @@ from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtCore import QCoreApplication, Qt
 
 import sys
+import asyncio
+import qasync
 
 from .windows.MainWindow import MainWindow
 from frontend.config import (
@@ -16,9 +18,12 @@ from frontend.config import (
 
 
 def main():
-    app = QApplication([])
+    app = QApplication(sys.argv)
+    loop = qasync.QEventLoop(app)    
+    asyncio.set_event_loop(loop)
+    print(app)
 
-    init_ui(app)
+    
     w = MainWindow(
         default_width, default_height, app.primaryScreen().availableGeometry().center()
     )
@@ -26,7 +31,16 @@ def main():
 
     w.show()
     set_backend()
-    sys.exit(app.exec())
+    
+    #with loop:
+    #    loop.run_forever()
+    #print("in main")
+    #app.processEvents()
+    with loop:
+        loop.run_forever()
+
+
+    #sys.exit(app.exec())
 
 
 def init_ui(app: QApplication):

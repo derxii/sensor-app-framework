@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont, Qt, QIcon
 from PySide6.QtCore import QSize, QTimer, QThread
+import asyncio
 
 from frontend.config import (
     get_backend,
@@ -162,7 +163,7 @@ class DeviceDetailed(ScrollableWindow):
         if is_debug():
             QTimer.singleShot(0, lambda: self.handle_done_connect(True))
         else:
-            self.worker = Worker(
+            '''self.worker = Worker(
                 self.thread,
                 get_backend().connectToDevice,
                 self.handle_exceptions,
@@ -171,7 +172,17 @@ class DeviceDetailed(ScrollableWindow):
             )
             self.worker.cancel_thread_on_timeout(15)
             self.worker.func_done.connect(self.handle_done_connect)
-            self.thread.start()
+            self.thread.start()'''
+            #loop = asyncio.get_event_loop()
+            #loop = asyncio.new_event_loop()
+            #returnVal = loop.run_until_complete(get_backend().connectToDevice(self.name.text(), self.address.text()))
+            asyncio.create_task(self.connectToDeviceWrapper(self.name.text(), self.address.text()))
+            
+    async def connectToDeviceWrapper(self, name, address):
+        returnVal = await asyncio.create_task(get_backend().connectToDevice(name, address))
+        print(returnVal)
+        self.handle_done_connect(returnVal)
+
 
     def handle_exceptions(self, e: Exception):
         handle_exception(e, None, None, self.error_message)

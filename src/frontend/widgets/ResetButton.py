@@ -10,6 +10,8 @@ from PySide6.QtCore import QSize
 
 from frontend.config import enable_custom_styling, get_image_path, set_backend, get_backend
 from frontend.widgets.Button import Button
+import sys
+import asyncio
 
 
 class ResetButton(QWidget):
@@ -62,8 +64,11 @@ class ResetButton(QWidget):
         from frontend.windows.Welcome import Welcome
         backend = get_backend()
         if backend.hasConnectedDevice():
-            loop = get_event_loop()
-            loop.run_until_complete(backend.restartProgram())
+            #loop = get_event_loop()
+            #loop = asyncio.new_event_loop()
+            #loop.run_until_complete(backend.restartProgram())
+            task = asyncio.create_task(backend.restartProgram())
+            sys.exit(1)
         set_backend()
         self.switch_window(Welcome(self.switch_window))
 
