@@ -16,7 +16,7 @@ import os
 import json
 
 # Plotting libraries 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout
 import sys
 import qasync
 
