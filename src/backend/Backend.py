@@ -185,11 +185,14 @@ class Backend(object):
             print("Error: file already exists in the specified directory")
             return False 
         dataFilename = self.connectedDevice.getDataFileName()
-        with open(dataFilename, "r") as file:
-            deviceData = json.load(file)
-        DataStruct = deviceData["DataStruct"]
-        fileNameComponents = re.split( r"\.", filePath)
-        exten = fileNameComponents[1]
+        try:
+            with open(dataFilename, "r") as file:
+                deviceData = json.load(file)
+            DataStruct = deviceData["DataStruct"]
+            fileNameComponents = re.split( r"\.", filePath)
+            exten = fileNameComponents[1]
+        except:
+            return False
 
         # determine whether the file is a .txt or .csv 
         if exten == "csv":
@@ -217,14 +220,18 @@ class Backend(object):
             return True  
         
         elif exten == "txt":
-            with open(filePath, "w", encoding="utf-8") as file:
-                for (key, value) in DataStruct.items():
-                    print(f"{key}: [", end="", file=file)
-                    for i in range(len(value)):
-                        print(value[i], end="", file=file)
-                        if i != len(value) - 1:
-                            print(", ", end="", file=file)
-                    print("]", file=file)
+            try:
+                with open(filePath, "w", encoding="utf-8") as file:
+                    for (key, value) in DataStruct.items():
+                        print(f"{key}: [", end="", file=file)
+                        for i in range(len(value)):
+                            print(value[i], end="", file=file)
+                            if i != len(value) - 1:
+                                print(", ", end="", file=file)
+                        print("]", file=file)
+            except:
+                return False
+            return True
                 
     def clearSession(self):
         #self.connectedDevice.setPaused(False) 

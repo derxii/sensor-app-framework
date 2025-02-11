@@ -77,7 +77,7 @@ class ResetButton(QWidget):
         task = await get_backend().restartProgram()#asyncio.create_task()
         loop = get_event_loop()
         loop.stop()
-        sys.exit(1)
+        #sys.exit(1)
 
     def disable_button(self):
         if self.is_simple:
