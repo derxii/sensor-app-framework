@@ -83,8 +83,11 @@ class ScanDevice(ScrollableWindow):
         #returnVal = await backend.scanForDevices() #loop.run_until_complete(backend.scanForDevices())
         #task = asyncio.create_task(get_backend().scanForDevices())
         backend = get_backend()
-        returnVal = await backend.scanForDevices()
-        self.on_scan_end(returnVal)
+        try:
+            returnVal = await backend.scanForDevices()
+            self.on_scan_end(returnVal)
+        except Exception as e:
+            handle_exception(e, None, True),
        
 
 
