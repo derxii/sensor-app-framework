@@ -9,7 +9,7 @@ from frontend.config import get_backend
 from frontend.widgets.Button import Button
 from frontend.widgets.DraggableResizable import DraggableResizable
 from frontend.windows.AddChart import AddChart
-
+import asyncio
 if TYPE_CHECKING:
     from frontend.widgets.DashboardStates.DashboardState import DashboardState
 
@@ -106,9 +106,14 @@ class DashboardChart(QWidget):
         add_success = add_chart_form.exec()
         if add_success:
             self.get_dashboard_state().handle_change_chart_amount(self)
+            #asyncio.create_task(self.delay())
             QTimer.singleShot(
                 100, self.refresh_chart_layout
             )
+            self.refresh_chart_layout()
+
+    async def delay(self):
+        await asyncio.sleep(0.1)
 
     def hideControlsDock(self):
         if hasattr(self, "LiveWindow"):
