@@ -56,6 +56,7 @@ class Backend(object):
         return allDevices
 
     async def connectToDevice(self, deviceName, deviceAddress):
+        # deviceAddress = "/tmp/vcomport1"
         if re.search("COM|com", deviceAddress):
             self.connectedDevice = SerialDevice(deviceName, deviceAddress)
             success = self.connectedDevice.connect()

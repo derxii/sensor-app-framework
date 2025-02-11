@@ -2,12 +2,21 @@
 
 <img width="150" height="150" src="./src/resources/icon.svg"/>
 
-This application is a flexible tool for wirelessly visualising sensor data via Bluetooth. Simply transmit data in the specified format over Bluetooth.
+This application is a flexible framework for wirelessly visualising sensor data via Bluetooth. Simply transmit data in the specified format over Bluetooth.
 
 ## Features
-- Support for Bluetooth Low Energy and Bluetooth Classic
+- Support for Bluetooth Low Energy and Bluetooth Serial Port
 - Customisable Charts
 - Real-time data streaming
+
+<br>
+
+# Table of Contents  
+- [Data Packet Format](#Data-Format-for-Transmission-via-Bluetooth)
+- [Installation](#Installation)
+- [Running the App](#Running-the-App)
+- [Compatibility](#Compatibility)
+
 
 ## Data Format for Transmission via Bluetooth
 ### Structure
@@ -21,6 +30,7 @@ where each line represents a single reading for each sensor.
 #### Requirements
 - Names are alphanumeric characters with no spaces
 - Data are floats
+- The comma at the end is required
 
 <br>
 
@@ -28,16 +38,16 @@ where each line represents a single reading for each sensor.
 
 ### Example 1
 ```
-<temperature>: 32
+<temperature>: 32,
 ```
 ### Example 2
 ```
-<temperature>: 32, <weight>: 53.21, <height>: 173.21
+<temperature>: 32, <weight>: 53.21, <height>: 173.21, 
 ```
 
 
 ## Installation
-1. Install Python version 3.10 (Any version from 3.9 - 3.12 should work)
+1. Install Python version 3.12 (Any version 3.12+ should work)
 2. Create a virtual environment
 ```console
 python -m venv venv
@@ -50,11 +60,22 @@ source venv/bin/activate
 ```console
 pip install -r requirements.txt
 ```
-5. Run the app
+
+## Running the App
+### Standalone App
 ```console
 python src/app.py
 ```
-6. To run the app in debug mode, pass the -d flag
+### App Debug Mode
 ```console
 python src/app.py -d
 ```
+
+### Backend Only Mode
+```console
+python src/play_backend.py
+```
+
+## Compatibility
+- This app has been tested on both Windows and MacOS
+- Linux should be compatible
