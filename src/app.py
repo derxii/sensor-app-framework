@@ -1,7 +1,6 @@
 import sys
 from frontend.main import main
 import traceback
-import asyncio
 
 def error_handler(etype, value, tb):
     error_msg = "".join(traceback.format_exception(etype, value, tb))

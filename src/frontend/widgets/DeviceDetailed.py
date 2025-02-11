@@ -10,16 +10,15 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtGui import QFont, Qt, QIcon
-from PySide6.QtCore import QSize, QTimer, QThread
+from PySide6.QtCore import QSize, QThread
 import asyncio
 
 from frontend.config import (
     get_backend,
     get_image_path,
+    get_virtual_port,
     handle_exception,
-    is_debug,
 )
-from frontend.thread.Worker import Worker
 from frontend.widgets.Button import Button
 from frontend.widgets.Loader import Loader
 from frontend.widgets.ResetButton import ResetButton
@@ -160,9 +159,9 @@ class DeviceDetailed(ScrollableWindow):
         self.connect_button.setDisabled(True)
         self.restart_button.disable_button()
 
-        if is_debug():
-            QTimer.singleShot(0, lambda: self.handle_done_connect(True))
-        else:
+        virtual_port = get_virtual_port()
+        if virtual_port: 
+            self.address.setText(virtual_port)
             '''self.worker = Worker(
                 self.thread,
                 get_backend().connectToDevice,
@@ -176,7 +175,7 @@ class DeviceDetailed(ScrollableWindow):
             #loop = asyncio.get_event_loop()
             #loop = asyncio.new_event_loop()
             #returnVal = loop.run_until_complete(get_backend().connectToDevice(self.name.text(), self.address.text()))
-            asyncio.create_task(self.connectToDeviceWrapper(self.name.text(), self.address.text()))
+        asyncio.create_task(self.connectToDeviceWrapper(self.name.text(), self.address.text()))
             
     async def connectToDeviceWrapper(self, name, address):
         returnVal = await asyncio.create_task(get_backend().connectToDevice(name, address))

@@ -74,7 +74,7 @@ class ResetButton(QWidget):
             self.switch_window(Welcome(self.switch_window))
 
     async def restartProgramWrapper(self):
-        task = await get_backend().restartProgram()#asyncio.create_task()
+        _task = await get_backend().restartProgram()#asyncio.create_task()
         loop = get_event_loop()
         loop.stop()
         sys.exit(1)

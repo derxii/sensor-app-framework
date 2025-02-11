@@ -2,7 +2,7 @@
 
 <img width="150" height="150" src="./src/resources/icon.svg"/>
 
-This application is a flexible framework for wirelessly visualising sensor data via Bluetooth. Simply transmit data in the specified format over Bluetooth.
+This application is a flexible framework for wirelessly visualising sensor data via Bluetooth. Simply transmit data in a specified format over Bluetooth.
 
 ## Features
 - Support for Bluetooth Low Energy and Bluetooth Serial Port
@@ -66,9 +66,18 @@ pip install -r requirements.txt
 ```console
 python src/app.py
 ```
-### App Debug Mode
+### App Virtual Port Mode (For Debugging without Bluetooth Devices)
+In Terminal 1,
+1. Install socat
+2. Customise the create_virtual_port.sh script to emit any type of data packet
+3. Run the create_virtual_port.sh script with
 ```console
-python src/app.py -d
+bash create_virtual_port.sh
+```
+
+In Terminal 2, run with the -v argument
+```console
+python src/app.py -v /tmp/vcomport1
 ```
 
 ### Backend Only Mode
