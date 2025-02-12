@@ -4,7 +4,7 @@ import pyqtgraph as pg
 from PySide6.QtCore import QTimer, Qt
 import math
 import numpy as np
-from backend.DockObjects import SquareDockWidget
+from backend.DockObjects import SquareDockWidget, on_change_level
 
 class LineChart():
     def __init__(self, window, layout, chart):
@@ -35,6 +35,7 @@ class LineChart():
         #self.allPlots.append(plotDict)
         dock = QDockWidget(chart.getTitle(), window)
         plot.setObjectName("dock-container")
+        dock.topLevelChanged.connect(lambda floating: on_change_level(floating, plot))
         dock.setWidget(plot)
         window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
         self.plotDict = plotDict

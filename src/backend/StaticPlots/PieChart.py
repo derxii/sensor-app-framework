@@ -3,7 +3,7 @@ from PySide6.QtCharts import QChart, QChartView, QPieSeries
 from PySide6.QtGui import QPainter
 from PySide6.QtCore import  Qt
 from collections import Counter
-from backend.DockObjects import SquareDockWidget
+from backend.DockObjects import SquareDockWidget, on_change_level
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
@@ -40,6 +40,7 @@ class PieChart():
         dock = SquareDockWidget(chart.getTitle(), window) 
         widget = QWidget()
         widget.setObjectName("dock-container")
+        dock.topLevelChanged.connect(lambda floating: on_change_level(floating, widget))
         dock.setWidget(widget)
         pieChartLayout = QVBoxLayout(widget)
         pieChartLayout.addWidget(chartView)
