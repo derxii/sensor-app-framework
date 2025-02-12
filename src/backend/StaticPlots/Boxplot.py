@@ -11,6 +11,7 @@ import numpy as np
 class Boxplot():
     def __init__(self, chart, window):
         widget = QWidget()
+        widget.setObjectName("dock-container")
         chartFigure = Figure()
         chartCanvas = FigureCanvas(chartFigure)
         dictData = chart.getAllData()

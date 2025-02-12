@@ -8,6 +8,7 @@ class Heatmap():
         self.chart = chart
         dock = QDockWidget(chart.getTitle(), window)
         widget = QWidget()
+        widget.setObjectName("dock-container")
         dock.setWidget(widget)
         heatmapLayout = QVBoxLayout(widget)
         plot_item = pg.PlotItem()

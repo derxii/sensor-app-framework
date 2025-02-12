@@ -39,6 +39,7 @@ class PieChart():
         chartView.setRenderHint(QPainter.RenderHint.Antialiasing)
         dock = SquareDockWidget(chart.getTitle(), window) 
         widget = QWidget()
+        widget.setObjectName("dock-container")
         dock.setWidget(widget)
         pieChartLayout = QVBoxLayout(widget)
         pieChartLayout.addWidget(chartView)

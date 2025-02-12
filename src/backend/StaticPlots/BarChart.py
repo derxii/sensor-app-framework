@@ -32,6 +32,7 @@ class BarChart():
                 countData.append(len(filteredData))
                 categoryLabels.append(categoryString)
         widget = QWidget()
+        widget.setObjectName("dock-container")
         chartFigure = Figure()
         chartCanvas = FigureCanvas(chartFigure)
         axis = chartFigure.add_subplot()

@@ -17,6 +17,7 @@ class Histogram():
             data.append([float(val) for val in dictData[sensor]])
             allData += dictData[sensor]
         widget = QWidget()
+        widget.setObjectName("dock-container")
         chartFigure = Figure()
         chartCanvas = FigureCanvas(chartFigure)
         counter =Counter(allData)

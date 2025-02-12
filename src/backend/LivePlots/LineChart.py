@@ -34,6 +34,7 @@ class LineChart():
         plot.getPlotItem().setContentsMargins(0, 0, legendWidth, 0) 
         #self.allPlots.append(plotDict)
         dock = QDockWidget(chart.getTitle(), window)
+        plot.setObjectName("dock-container")
         dock.setWidget(plot)
         window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock)
         self.plotDict = plotDict

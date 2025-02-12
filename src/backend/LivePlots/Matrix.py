@@ -10,6 +10,7 @@ class Matrix():
         self.chart = chart
         dock = SquareDockWidget(chart.getTitle(), window)
         widget = QWidget()
+        widget.setObjectName("dock-container")
         dock.setWidget(widget)
         dock.resize(150,150)
         matrixLayout = QVBoxLayout(widget)
