@@ -3,7 +3,7 @@ import pyqtgraph as pg
 from PySide6.QtCore import Qt
 import math
 import numpy as np
-from backend.DockObjects import SquareDockWidget
+from backend.DockObjects import SquareDockWidget, on_change_level
 
 class Matrix():
     def __init__(self, window, layout, chart):
@@ -11,6 +11,8 @@ class Matrix():
         dock = SquareDockWidget(chart.getTitle(), window)
         dock.setLayout(layout)
         widget = QWidget()
+        widget.setObjectName("dock-container")
+        dock.topLevelChanged.connect(lambda floating: on_change_level(floating, widget))
         dock.setWidget(widget)
         dock.resize(150,150)
         matrixLayout = QGridLayout(widget) #QVBoxLayout(widget)

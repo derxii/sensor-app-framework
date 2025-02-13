@@ -1,12 +1,10 @@
-from asyncio import get_event_loop
 from typing import Callable
-from backend.LivePlots.LiveDataPlot import LiveDataPlot
 from frontend.config import get_backend, handle_exception
 from frontend.thread.Worker import Worker
 from frontend.widgets.DashboardButtonGroup import DashboardButtonGroup
 from frontend.widgets.DashboardChart import DashboardChart
 from frontend.widgets.DashboardStates.DashboardState import DashboardState
-from PySide6.QtCore import QSize, QThread
+from PySide6.QtCore import QSize
 
 from frontend.widgets.DashboardStates.StreamEnd import StreamEnd
 import asyncio
@@ -43,7 +41,6 @@ class Streaming(DashboardState):
         #self.worker.stop()
         #self.session_thread.wait()
         self.change_state(StreamEnd)
-        backend = get_backend()
         #asyncio.create_task(get_backend().startSession())
         #loop = get_event_loop()
         #loop.run_until_complete(backend.endSession())

@@ -1,19 +1,17 @@
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel, QApplication
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import Qt, QFont
-from PySide6.QtCore import QTimer, QThread
+from PySide6.QtCore import QTimer
 from typing import Callable
 import asyncio
-import qasync
 
 
 from frontend.config import (
     get_backend,
+    get_virtual_port,
     handle_exception,
-    is_debug,
 )
 
 from frontend.DebugData import get_debug_scan_devices
-from frontend.thread.Worker import Worker
 from frontend.widgets.Loader import Loader
 from frontend.windows.Devices import Devices
 from frontend.windows.ScrollableWindow import ScrollableWindow
@@ -33,7 +31,7 @@ class ScanDevice(ScrollableWindow):
         #self.thread = QThread()
         #asyncio.run(self.trigger_bluetooth_scan())
         
-        task = asyncio.create_task(self.trigger_bluetooth_scan())
+        _task = asyncio.create_task(self.trigger_bluetooth_scan())
         #self.trigger_bluetooth_scan()
          
     def init_ui(self):
@@ -60,8 +58,10 @@ class ScanDevice(ScrollableWindow):
 
     
     async def trigger_bluetooth_scan(self):
-        '''if is_debug():
+        if get_virtual_port(): 
             QTimer.singleShot(0, lambda: self.on_scan_end([]))
+            return
+        '''if is_debug():
         else:
             self.worker = Worker(
                 self.thread,
@@ -93,7 +93,7 @@ class ScanDevice(ScrollableWindow):
 
     def on_scan_end(self, data: list[tuple[str, str, int]]):
         self.loader.stop_animation()
-        if is_debug():
+        if get_virtual_port():
             data = get_debug_scan_devices()
 
         self.switch_window(

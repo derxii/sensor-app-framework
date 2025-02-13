@@ -17,6 +17,7 @@ class LiveDataPlot():
         self.controlsDock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea| Qt.DockWidgetArea.LeftDockWidgetArea)
         controlsLayout = QGridLayout()
         controlsWidget = QWidget()
+        controlsWidget.setObjectName("dock-container")
         controlsWidget.setLayout(controlsLayout)
         self.controlsDock.setWidget(controlsWidget)
         self.controlsDock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)

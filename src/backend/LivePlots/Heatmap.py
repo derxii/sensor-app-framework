@@ -3,11 +3,15 @@ import pyqtgraph as pg
 from PySide6.QtCore import Qt
 import numpy as np
 
+from backend.DockObjects import on_change_level
+
 class Heatmap():
     def __init__(self, window, chart):
         self.chart = chart
         dock = QDockWidget(chart.getTitle(), window)
         widget = QWidget()
+        widget.setObjectName("dock-container")
+        dock.topLevelChanged.connect(lambda floating: on_change_level(floating, widget))
         dock.setWidget(widget)
         heatmapLayout = QGridLayout(widget) #QVBoxLayout(widget)
         plot_item = pg.PlotItem()
