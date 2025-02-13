@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QDockWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QDockWidget, QGridLayout
 import pyqtgraph as pg 
 from PySide6.QtCore import Qt
 import numpy as np
@@ -9,7 +9,7 @@ class Heatmap():
         dock = QDockWidget(chart.getTitle(), window)
         widget = QWidget()
         dock.setWidget(widget)
-        heatmapLayout = QVBoxLayout(widget)
+        heatmapLayout = QGridLayout(widget) #QVBoxLayout(widget)
         plot_item = pg.PlotItem()
         imageView = pg.ImageView()
         imageView = pg.ImageView(view=plot_item)

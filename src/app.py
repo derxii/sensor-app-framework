@@ -12,4 +12,3 @@ def error_handler(etype, value, tb):
 if __name__ == "__main__":
     sys.excepthook = error_handler
     main()
-    #asyncio.run(main())

@@ -29,7 +29,7 @@ class LiveDataPlot():
             if chart.getType() == "line":
                 liveChart = LineChart(window, layout, chart)
             elif chart.getType() == "matrix":
-                liveChart = Matrix(window, chart)
+                liveChart = Matrix(window, layout, chart)
             elif chart.getType() == "heatmap":
                 liveChart = Heatmap(window, chart)
                 

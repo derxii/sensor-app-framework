@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QGridLayout
 import pyqtgraph as pg 
 from PySide6.QtCore import Qt
 import math
@@ -6,13 +6,14 @@ import numpy as np
 from backend.DockObjects import SquareDockWidget
 
 class Matrix():
-    def __init__(self, window, chart):
+    def __init__(self, window, layout, chart):
         self.chart = chart
         dock = SquareDockWidget(chart.getTitle(), window)
+        dock.setLayout(layout)
         widget = QWidget()
         dock.setWidget(widget)
         dock.resize(150,150)
-        matrixLayout = QVBoxLayout(widget)
+        matrixLayout = QGridLayout(widget) #QVBoxLayout(widget)
         imageView = pg.ImageView()
         imageView = pg.ImageView()
         matrixLayout.addWidget(imageView)
