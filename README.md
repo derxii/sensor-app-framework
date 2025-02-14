@@ -97,3 +97,14 @@ python src/play_backend.py
 ## Compatibility
 - This app has been tested on both Windows and MacOS
 - Linux should be compatible
+
+## Testing the app
+The arduino code that was used to test the app is located in the "arduinoTestCode" folder. This code can be used to test the app when additional features or fixes are added to the app.
+
+The hardware needed for the test code includes:
+- An Arduino Uno
+- A joystick sensor 
+- A temperature sensor 
+- A touch sensor
+
+The hardware pin out connections are commented at the top of the test code file
