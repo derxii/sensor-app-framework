@@ -11,6 +11,15 @@ This application is a flexible framework for wirelessly visualising sensor data 
 
 <br>
 
+## System Overview
+```mermaid
+flowchart LR
+    A[User] --> |Interacts| B[Frontend]
+    B[Frontend] <--> C[Backend]
+    C[Backend] --> D{Prototype}
+    D --> |Bluetooth Data Transmission| C
+```
+
 # Table of Contents  
 - [Data Packet Format](#Data-Format-for-Transmission-via-Bluetooth)
 - [Installation](#Installation)
